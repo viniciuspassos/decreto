@@ -30,12 +30,15 @@ Outros comandos úteis na raiz (executam em todos os pacotes via Turborepo, com 
 ```bash
 pnpm build           # build de produção de todos os pacotes/apps
 pnpm typecheck        # tsc --noEmit em todos os pacotes
-pnpm test             # Jest nos pacotes que têm testes
-pnpm lint             # placeholder até o ESLint ser configurado
+pnpm test             # Jest (com coverage) em todos os pacotes
+pnpm lint             # ESLint em todos os pacotes
+pnpm diff-coverage    # gate de cobertura diff-aware contra origin/main (o que o pre-push roda)
 ```
 
-Cada pacote (`apps/web`, `apps/api`, `packages/*`) também expõe esses scripts individualmente —
-ver `package.json` de cada um.
+Cada pacote (`apps/web`, `apps/api`, `packages/*`, `tools/diff-coverage`) também expõe esses
+scripts individualmente — ver `package.json` de cada um. Git hooks (`pre-commit`, `commit-msg`,
+`pre-push`) e o pipeline de CI já estão configurados — ver
+[`docs/INFRASTRUCTURE.md`](./docs/INFRASTRUCTURE.md).
 
 ## Rodando com Docker
 
@@ -67,8 +70,8 @@ docker compose down -v
 - [`CLAUDE.md`](./CLAUDE.md) — guia operacional para desenvolvimento assistido por IA: resumo das
   mecânicas, stack técnico escolhido, convenções de código e testes.
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — o *porquê* das decisões de arquitetura.
-- [`docs/INFRASTRUCTURE.md`](./docs/INFRASTRUCTURE.md) — CI, git hooks e pipeline de build/deploy
-  (parcialmente implementado; ver status no próprio arquivo).
+- [`docs/INFRASTRUCTURE.md`](./docs/INFRASTRUCTURE.md) — CI, git hooks, lint/testes e gate de
+  cobertura diff-aware.
 
 ## Estrutura do monorepo
 
@@ -80,6 +83,8 @@ packages/
   game-content/  # dados tipados: árvores, grupos, regimes, utopias, figuras históricas (ainda vazio)
   game-engine/   # regras puras do motor de jogo (ainda só um placeholder testável)
   shared-types/  # tipos compartilhados entre api e web
+tools/
+  diff-coverage/ # gate de cobertura diff-aware usado pelo pre-push e pelo CI
 ```
 
 ## Stack

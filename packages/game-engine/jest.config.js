@@ -9,4 +9,8 @@ export default {
   transform: {
     "^.+\\.ts$": ["ts-jest", { useESM: true }],
   },
+  collectCoverage: true,
+  coverageDirectory: "coverage",
+  coverageReporters: ["json", "text-summary"],
+  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.test.ts"],
 };
