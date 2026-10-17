@@ -13,34 +13,42 @@ function reportUncovered(uncovered: UncoveredChange[]): void {
   }
 }
 
-async function main(): Promise<void> {
-  const baseRef = process.argv[2] ?? "origin/main";
-  const repoRoot = getRepoRoot(process.cwd());
-
+/** Core orchestration, exit code only — no process access, so it's unit-testable. */
+export async function run(baseRef: string, cwd: string): Promise<number> {
+  const repoRoot = getRepoRoot(cwd);
   const changed = filterGatedChanges(parseDiff(getDiffText(baseRef, repoRoot)));
+
   if (changed.size === 0) {
     console.log("diff-coverage: nenhum arquivo de código-fonte alterado.");
-    return;
+    return 0;
   }
 
   const coverageData = await loadCoverageData(repoRoot);
   if (coverageData.length === 0) {
     console.error("diff-coverage: nenhum coverage-final.json encontrado — rode `pnpm test` antes.");
-    process.exitCode = 1;
-    return;
+    return 1;
   }
 
   const uncovered = findUncoveredChanges(changed, mergeCoverage(coverageData), repoRoot);
   if (uncovered.length > 0) {
     reportUncovered(uncovered);
-    process.exitCode = 1;
-    return;
+    return 1;
   }
 
   console.log("diff-coverage: ok — todo código alterado está exercitado por testes.");
+  return 0;
 }
 
-main().catch((error: unknown) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+const isDirectlyExecuted = process.argv[1] !== undefined && import.meta.url === `file://${process.argv[1]}`;
+
+/* istanbul ignore next -- thin process bootstrap, exercised manually via `pnpm diff-coverage` */
+if (isDirectlyExecuted) {
+  run(process.argv[2] ?? "origin/main", process.cwd())
+    .then((exitCode) => {
+      process.exitCode = exitCode;
+    })
+    .catch((error: unknown) => {
+      console.error(error);
+      process.exitCode = 1;
+    });
+}

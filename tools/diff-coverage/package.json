@@ -16,6 +16,7 @@
     "istanbul-lib-coverage": "^3.2.2"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@types/istanbul-lib-coverage": "^2.0.6",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",

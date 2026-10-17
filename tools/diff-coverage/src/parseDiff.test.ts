@@ -72,4 +72,22 @@ describe("parseDiff", () => {
   it("retorna mapa vazio para um diff sem conteúdo", () => {
     expect(parseDiff("").size).toBe(0);
   });
+
+  it("avança o cursor em linhas de contexto, para diffs com -U maior que 0", () => {
+    const diff = [
+      "diff --git a/src/ctx.ts b/src/ctx.ts",
+      "--- a/src/ctx.ts",
+      "+++ b/src/ctx.ts",
+      "@@ -8,3 +8,4 @@ export function ctx() {",
+      " context1",
+      " context2",
+      "+added",
+      " context3",
+      "",
+    ].join("\n");
+
+    const changed = parseDiff(diff);
+
+    expect(changed.get("src/ctx.ts")).toEqual(new Set([10]));
+  });
 });
