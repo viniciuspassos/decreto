@@ -53,6 +53,13 @@ o CI passam:
    `statement` (comentário, linha em branco, declaração de tipo) não são cobradas —
    `src/findUncovered.ts`.
 
+**Exceção:** um `index.ts`/`types.ts` **ausente** do coverage (barril de só `export ... from`, ou
+módulo de só tipos) não é marcado — esses arquivos compilam para zero `statement`s, então nunca
+apareceriam no `coverage-final.json` mesmo com teste. Se o mesmo arquivo *aparecer* no coverage
+(tem lógica real) e a linha tiver contagem zero, ele é cobrado normalmente — a exceção é só por
+ausência, nunca pelo nome do arquivo sozinho (`src/findUncovered.ts`, função
+`flagMissingFile`/`UNINSTRUMENTABLE_BASENAME`).
+
 Roda via `pnpm diff-coverage [baseRef]` (default `origin/main`).
 
 ## Git hooks
