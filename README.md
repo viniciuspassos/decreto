@@ -1,6 +1,6 @@
 # Decreto
 
-Jogo de política web inspirado em *Democracy 3*. O jogador governa um país fictício por mandatos
+Jogo de política web. O jogador governa um país fictício por mandatos
 de 4 anos, tentando ser reeleito e evitar queda, morte ou estagnação por 40 anos — sem partidos,
 sem pontuação, com decisões livres entre qualquer espectro político.
 

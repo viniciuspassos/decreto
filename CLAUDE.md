@@ -1,6 +1,6 @@
 # Decreto — Guia do Projeto
 
-Jogo de política web, inspirado em *Democracy 3*. O jogador é presidente de um país fictício e
+Jogo de política web. O jogador é presidente de um país fictício e
 governa por mandatos de 4 anos, tentando ser reeleito e evitar queda, morte ou estagnação por 40
 anos.
 
@@ -65,8 +65,8 @@ não implementar essas opções nem dar suporte a elas em dados de conteúdo.
 ## Stack técnico
 
 - **Monorepo:** pnpm workspaces + Turborepo.
-- **Frontend:** React + TypeScript. Interface de rede de nós (estilo *Democracy 3*), com imagens
-  exibidas após eventos marcantes.
+- **Frontend:** React + TypeScript. Interface de rede de nós, com imagens exibidas após eventos
+  marcantes.
 - **Backend:** Node.js + TypeScript. O motor de jogo (turnos, cálculo de indicadores, capital
   político, verificação de pré-requisitos de árvore, condições de fim de jogo) roda no servidor —
   o frontend não deve reimplementar essas regras, apenas consumir o resultado via API.
