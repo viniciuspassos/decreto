@@ -1,1 +1,17 @@
 roteiro-do-jogo.md
+
+# Node / pnpm
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.turbo/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log

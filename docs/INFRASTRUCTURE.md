@@ -1,8 +1,7 @@
 # Infraestrutura
 
-**Status: planejado — nada aqui está implementado ainda.** Este documento existe para registrar o
-plano combinado antes do monorepo ser criado, e deve ser atualizado para refletir a realidade (com
-comandos reais) no momento em que `apps/`, `packages/` e o CI forem de fato criados.
+**Status: monorepo e containers Docker implementados; git hooks e CI ainda planejados (seções
+abaixo).** Ver [`README.md`](../README.md) para os comandos de uso do dia a dia.
 
 ## Monorepo
 
@@ -11,20 +10,20 @@ comandos reais) no momento em que `apps/`, `packages/` e o CI forem de fato cria
 - Pacotes: `apps/web`, `apps/api`, `packages/game-engine`, `packages/game-content`,
   `packages/shared-types` (ver `CLAUDE.md` → "Estrutura de monorepo").
 
-## Scripts (a criar)
+## Scripts
 
-Cada pacote deve expor, no mínimo:
+Cada pacote expõe, no mínimo: `dev`, `build`, `typecheck`, `lint` (placeholder até o ESLint ser
+configurado), `test`. Rodar da raiz com `pnpm <script>` executa em todos os pacotes via Turborepo,
+com cache. `apps/web` vai adicionar `test:e2e` (Playwright) quando necessário — não como gate
+obrigatório de todo PR.
 
-```
-dev         # ambiente de desenvolvimento local
-build       # build de produção
-typecheck   # tsc sem emitir, apenas checagem de tipos
-lint        # ESLint
-test        # Jest
-```
+## Containers Docker
 
-`apps/web` adiciona `test:e2e` (Playwright), usado quando necessário — não como gate obrigatório
-de todo PR.
+- `apps/api/Dockerfile` e `apps/web/Dockerfile`: builds multi-stage (instala deps do workspace
+  filtradas por pacote, builda, copia só o necessário para a imagem final). `apps/web` serve o
+  build estático via Nginx; `apps/api` roda o `dist/` compilado direto com Node.
+- `docker-compose.yml` na raiz sobe `db` (Postgres), `api` e `web` juntos — ver README para os
+  comandos.
 
 ## Git hooks (a criar)
 
