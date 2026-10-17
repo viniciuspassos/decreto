@@ -38,17 +38,3 @@ export async function run(baseRef: string, cwd: string): Promise<number> {
   console.log("diff-coverage: ok — todo código alterado está exercitado por testes.");
   return 0;
 }
-
-const isDirectlyExecuted = process.argv[1] !== undefined && import.meta.url === `file://${process.argv[1]}`;
-
-/* istanbul ignore next -- thin process bootstrap, exercised manually via `pnpm diff-coverage` */
-if (isDirectlyExecuted) {
-  run(process.argv[2] ?? "origin/main", process.cwd())
-    .then((exitCode) => {
-      process.exitCode = exitCode;
-    })
-    .catch((error: unknown) => {
-      console.error(error);
-      process.exitCode = 1;
-    });
-}

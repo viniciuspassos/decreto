@@ -13,5 +13,5 @@ export default {
   collectCoverage: true,
   coverageDirectory: "coverage",
   coverageReporters: ["json", "text-summary"],
-  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.test.{ts,tsx}", "!src/main.tsx"],
+  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.test.{ts,tsx}"],
 };

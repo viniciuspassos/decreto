@@ -1,6 +1,12 @@
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import type { CoverageMap, FileCoverage } from "istanbul-lib-coverage";
 import type { ChangedLinesByFile, UncoveredChange } from "./types.js";
+
+// Barrels (`index.ts`) and pure-type modules (`types.ts`) that only re-export or
+// declare types compile to zero Istanbul statements, so they never appear in
+// coverage-final.json even when imported by a test. A *present* index.ts/types.ts
+// (one with real statements) is still gated normally — only their absence is excused.
+const UNINSTRUMENTABLE_BASENAME = /^(index|types)\.ts$/;
 
 function findFileCoverage(
   coverageMap: CoverageMap,
@@ -8,6 +14,11 @@ function findFileCoverage(
   absolutePath: string,
 ): FileCoverage | null {
   return knownFiles.has(absolutePath) ? coverageMap.fileCoverageFor(absolutePath) : null;
+}
+
+function flagMissingFile(file: string, lines: Set<number>, uncovered: UncoveredChange[]): void {
+  if (UNINSTRUMENTABLE_BASENAME.test(basename(file))) return;
+  for (const line of lines) uncovered.push({ file, line });
 }
 
 /**
@@ -28,7 +39,7 @@ export function findUncoveredChanges(
     const fileCoverage = findFileCoverage(coverageMap, knownFiles, join(repoRoot, file));
 
     if (!fileCoverage) {
-      for (const line of lines) uncovered.push({ file, line });
+      flagMissingFile(file, lines, uncovered);
       continue;
     }
 

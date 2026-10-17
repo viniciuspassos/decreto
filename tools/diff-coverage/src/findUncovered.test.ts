@@ -56,4 +56,33 @@ describe("findUncoveredChanges", () => {
       { file: "apps/api/src/app.ts", line: 2 },
     ]);
   });
+
+  it("marca um index.ts/types.ts PRESENTE na coverage com statement de contagem zero", () => {
+    const indexPath = "/repo/packages/game-engine/src/index.ts";
+    const coverageMap = createCoverageMap({
+      [indexPath]: {
+        path: indexPath,
+        statementMap: { "0": statement(1) },
+        s: { "0": 0 },
+        branchMap: {},
+        b: {},
+        fnMap: {},
+        f: {},
+      },
+    } as unknown as CoverageMapData);
+    const changed: ChangedLinesByFile = new Map([["packages/game-engine/src/index.ts", new Set([1])]]);
+
+    const uncovered = findUncoveredChanges(changed, coverageMap, REPO_ROOT);
+
+    expect(uncovered).toEqual([{ file: "packages/game-engine/src/index.ts", line: 1 }]);
+  });
+
+  it("não marca um index.ts/types.ts AUSENTE da coverage (barril sem statements)", () => {
+    const coverageMap = createCoverageMap({});
+    const changed: ChangedLinesByFile = new Map([["packages/game-engine/src/index.ts", new Set([1])]]);
+
+    const uncovered = findUncoveredChanges(changed, coverageMap, REPO_ROOT);
+
+    expect(uncovered).toEqual([]);
+  });
 });
