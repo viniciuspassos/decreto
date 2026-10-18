@@ -170,6 +170,9 @@ importers:
 
   packages/game-engine:
     dependencies:
+      '@decreto/game-content':
+        specifier: workspace:*
+        version: link:../game-content
       '@decreto/shared-types':
         specifier: workspace:*
         version: link:../shared-types
