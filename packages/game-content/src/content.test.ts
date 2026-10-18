@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { events, systemEvents } from "./events";
 import { historicalFigures } from "./historical-figures";
+import { BASE_INDICATORS, INITIAL_TAX_RATE, SITUATIONS } from "./initial-state";
 import { nodeEffects, taxRateEffects } from "./node-effects";
 import { EXCLUSIVE_NODE_PAIRS, EXTRA_PREREQS, nodeFigures, policyTrees } from "./policy-trees";
 import { TAX_RATES } from "./rules";
@@ -41,6 +42,16 @@ describe("conteúdo de jogo", () => {
     expect(voterGroups).toHaveLength(17);
     voterGroups.flatMap((g) => [...g.likes, ...g.dislikes]).forEach((id) => expect(treeIds.has(id)).toBe(true));
     utopias.flatMap((u) => u.trees).forEach((r) => expect(treeIds.has(r.treeId)).toBe(true));
+  });
+
+  it("estado inicial: indicadores dentro da faixa 0-100 (exceto gdp/inflation/debt) e alíquota herdada é 30%", () => {
+    expect(TAX_RATES).toContain(INITIAL_TAX_RATE);
+    expect(INITIAL_TAX_RATE).toBe(30);
+    (["crime", "health", "education", "pollution", "pressFreedom", "corruption"] as const).forEach((id) => {
+      expect(BASE_INDICATORS[id]).toBeGreaterThanOrEqual(0);
+      expect(BASE_INDICATORS[id]).toBeLessThanOrEqual(100);
+    });
+    expect(Object.keys(SITUATIONS).sort()).toEqual(["crisis", "stable", "unstable"]);
   });
 
   it("tamanhos iniciais cobrem todos os grupos", () => {
