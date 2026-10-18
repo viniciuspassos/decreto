@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createDb, type Db } from "./client.js";
 import { eventImages } from "./schema.js";
 
@@ -8,14 +8,19 @@ const initialEventImages = [
 
 export async function seedEventImages(db: ReturnType<typeof createDb>): Promise<void> {
   for (const row of initialEventImages) {
-    const existing = await db
-      .select({ id: eventImages.id })
+    const [existing] = await db
+      .select({ id: eventImages.id, fileLocation: eventImages.fileLocation })
       .from(eventImages)
-      .where(and(eq(eventImages.eventName, row.eventName), eq(eventImages.fileLocation, row.fileLocation)))
+      .where(eq(eventImages.eventName, row.eventName))
       .limit(1);
 
-    if (existing.length === 0) {
+    if (!existing) {
       await db.insert(eventImages).values(row);
+    } else if (existing.fileLocation !== row.fileLocation) {
+      await db
+        .update(eventImages)
+        .set({ fileLocation: row.fileLocation })
+        .where(eq(eventImages.id, existing.id));
     }
   }
 }

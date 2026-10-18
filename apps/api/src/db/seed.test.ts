@@ -2,11 +2,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { jest } from "@jest/globals";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { eq } from "drizzle-orm";
 import { createDb, type Db } from "./client.js";
 import { main, handleCliError } from "./seed.js";
 import { eventImages } from "./schema.js";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+const seededEventName = "prisao-oposicao";
 let db: Db;
 
 beforeAll(async () => {
@@ -18,21 +20,39 @@ afterAll(async () => {
   await db.$client.end();
 });
 
+// Cada teste reparte o fixture seedado por nome de evento, nunca a tabela inteira
+// — outros arquivos de teste rodam contra o mesmo Postgres e têm suas próprias linhas.
+async function clearSeededFixture(): Promise<void> {
+  await db.delete(eventImages).where(eq(eventImages.eventName, seededEventName));
+}
+
 describe("main", () => {
-  it("insere o seed inicial quando a tabela está vazia", async () => {
-    await db.delete(eventImages);
+  it("insere o seed inicial quando a linha não existe", async () => {
+    await clearSeededFixture();
 
     await expect(main(db)).resolves.toBeUndefined();
 
-    const rows = await db.select().from(eventImages);
+    const rows = await db.select().from(eventImages).where(eq(eventImages.eventName, seededEventName));
+    expect(rows).toEqual([expect.objectContaining({ fileLocation: "eventos/prisao-oposicao.png" })]);
+  });
+
+  it("não duplica a linha quando ela já existe com o mesmo fileLocation", async () => {
+    await expect(main(db)).resolves.toBeUndefined();
+
+    const rows = await db.select().from(eventImages).where(eq(eventImages.eventName, seededEventName));
     expect(rows).toHaveLength(1);
   });
 
-  it("não duplica o seed quando a linha já existe", async () => {
+  it("atualiza o fileLocation em vez de duplicar quando ele mudou", async () => {
+    await clearSeededFixture();
+    await db
+      .insert(eventImages)
+      .values({ eventName: seededEventName, fileLocation: "eventos/caminho-antigo.png" });
+
     await expect(main(db)).resolves.toBeUndefined();
 
-    const rows = await db.select().from(eventImages);
-    expect(rows).toHaveLength(1);
+    const rows = await db.select().from(eventImages).where(eq(eventImages.eventName, seededEventName));
+    expect(rows).toEqual([expect.objectContaining({ fileLocation: "eventos/prisao-oposicao.png" })]);
   });
 });
 

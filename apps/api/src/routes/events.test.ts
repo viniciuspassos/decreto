@@ -60,4 +60,14 @@ describe("GET /events/:eventName/image", () => {
 
     expect(response.status).toBe(404);
   });
+
+  it("retorna 500 (em vez de derrubar o processo) quando a consulta ao banco falha", async () => {
+    const brokenDb = createDb();
+    await brokenDb.$client.end();
+    const app = createApp({ db: brokenDb, assetsDir });
+
+    const response = await request(app).get("/events/prisao-oposicao/image");
+
+    expect(response.status).toBe(500);
+  });
 });

@@ -27,8 +27,6 @@ services:
       ASSETS_DIR: /repo/assets/images
     ports:
       - "${API_PORT:-3001}:3001"
-    volumes:
-      - ./assets/images:/repo/assets/images:ro
     depends_on:
       db:
         condition: service_healthy
