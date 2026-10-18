@@ -53,6 +53,22 @@ describe("runBatch", () => {
     expect(queuePromptMock).toHaveBeenCalledTimes(1);
   });
 
+  it("usa a extensão e o timeout informados e avisa cada entrada concluída", async () => {
+    const onResult = jest.fn();
+
+    const results = await runBatch(
+      BASE_WORKFLOW,
+      [{ category: "trailer", name: "a2", prompt: "hands" }],
+      { comfyUrl: "http://localhost:8188", imagesDir, extension: "mp4", timeoutMs: 60_000, onResult },
+    );
+
+    expect(results[0]?.destination).toBe(join(imagesDir, "trailer", "a2.mp4"));
+    expect(pollForOutputImagesMock).toHaveBeenCalledWith("http://localhost:8188", "prompt-1", {
+      timeoutMs: 60_000,
+    });
+    expect(onResult).toHaveBeenCalledWith(results[0]);
+  });
+
   it("pula entradas já geradas quando force não é passado", async () => {
     const { mkdirSync } = await import("node:fs");
     const destination = join(imagesDir, "eventos", "golpe-militar.png");

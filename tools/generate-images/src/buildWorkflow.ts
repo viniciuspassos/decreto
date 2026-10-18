@@ -10,7 +10,9 @@ export function buildWorkflowForEntry(base: ApiWorkflow, entry: ManifestEntry): 
 
   requireNode(workflow, POSITIVE_PROMPT_NODE).inputs.text = entry.prompt;
   if (entry.seed !== undefined) {
-    requireNode(workflow, SEED_NODE).inputs.seed = entry.seed;
+    const sampler = requireNode(workflow, SEED_NODE);
+    // KSampler usa "seed"; KSamplerAdvanced (workflows de vídeo em duas fases) usa "noise_seed".
+    sampler.inputs["noise_seed" in sampler.inputs ? "noise_seed" : "seed"] = entry.seed;
   }
   requireNode(workflow, SAVE_IMAGE_NODE).inputs.filename_prefix = `decreto/${entry.category}/${entry.name}`;
 

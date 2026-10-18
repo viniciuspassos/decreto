@@ -9,6 +9,12 @@ export interface RunBatchOptions {
   imagesDir: string;
   force?: boolean;
   only?: string;
+  /** Extensão do arquivo salvo (padrão "png"; "mp4" para clipes de vídeo). */
+  extension?: string;
+  /** Tempo máximo de espera por entrada (padrão do comfyClient: 5 min). */
+  timeoutMs?: number;
+  /** Chamado a cada entrada concluída, para acompanhar lotes longos. */
+  onResult?: (result: RunBatchResult) => void;
 }
 
 export interface RunBatchResult {
@@ -32,7 +38,9 @@ export async function runBatch(
 
   const results: RunBatchResult[] = [];
   for (const entry of selected) {
-    results.push(await runEntry(base, entry, options));
+    const result = await runEntry(base, entry, options);
+    options.onResult?.(result);
+    results.push(result);
   }
   return results;
 }
@@ -42,7 +50,7 @@ async function runEntry(
   entry: ManifestEntry,
   options: RunBatchOptions,
 ): Promise<RunBatchResult> {
-  const destination = join(options.imagesDir, entry.category, `${entry.name}.png`);
+  const destination = join(options.imagesDir, entry.category, `${entry.name}.${options.extension ?? "png"}`);
 
   if (!options.force && existsSync(destination)) {
     return { name: entry.name, category: entry.category, status: "skipped", destination };
@@ -50,7 +58,9 @@ async function runEntry(
 
   const workflow = buildWorkflowForEntry(base, entry);
   const promptId = await queuePrompt(options.comfyUrl, workflow);
-  const [image] = await pollForOutputImages(options.comfyUrl, promptId);
+  const [image] = await pollForOutputImages(options.comfyUrl, promptId, {
+    timeoutMs: options.timeoutMs,
+  });
   if (!image) {
     throw new Error(`ComfyUI não retornou imagem para "${entry.name}"`);
   }
