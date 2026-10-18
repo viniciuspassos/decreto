@@ -1,3 +1,4 @@
+import type { ActorMood } from "@decreto/shared-types";
 import { TAX_RATES } from "./rules.js";
 
 /** Efeito de tamanho de grupo aplicado uma vez, no semestre de ativação do nó. */
@@ -17,10 +18,7 @@ export interface GroupSizePerSemesterEffect {
 
 /**
  * Efeito de um nó (ou alíquota de imposto) sobre indicadores e modificadores (game-design §1.6, §2).
- * Todos os campos são incrementais e somam-se aos de outros nós ativos. Dois mecanismos citados no
- * catálogo (`ate×0,7` em `secret-police`/`mass-surveillance`, `rebeldes×0,5` em
- * `military-on-streets`/`mass-surveillance`, redução de letalidade de atentado nesses três nós) são
- * hardcoded no motor por id (game-design §3.7–§3.8), não dados aqui.
+ * Campos numéricos são incrementais e somam-se aos de outros nós ativos; os multiplicadores empilham.
  */
 export interface NodeEffect {
   gdp?: number;
@@ -50,6 +48,14 @@ export interface NodeEffect {
   revolutionaryGrowth?: number;
   /** Pontos somados à âncora de apoio de todos os grupos. */
   supportAnchor?: number;
+  /** Multiplica o risco de atentado (`ate×0,7`, empilha). */
+  attackRiskMultiplier?: number;
+  /** pp somados à chance de um atentado ser fatal (§3.7). */
+  fatalAttackChance?: number;
+  /** Multiplica o crescimento de rebeldes quando positivo (§3.8). */
+  rebelGrowthMultiplier?: number;
+  /** Humor mínimo da mídia enquanto o nó está ativo (mídia cativa/leal, §3.6). */
+  mediaFloor?: ActorMood;
   groupSizeOnce?: GroupSizeOnceEffect[];
   groupSizePerSemester?: GroupSizePerSemesterEffect[];
 }
@@ -69,10 +75,10 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "free-carry": { crime: 3, attackRisk: 1 },
   "legal-militias": { crime: 4, pressFreedom: -2, corruption: 3, military: -15, coupRisk: -5, revolutionRisk: -4, attackRisk: 2 },
   "harsher-sentences": { crime: -2, debtPerSemester: 0.3, military: 5 },
-  "military-on-streets": { crime: -5, pressFreedom: -2, corruption: 1, debtPerSemester: 0.5, military: 10, revolutionRisk: -2 },
+  "military-on-streets": { crime: -5, pressFreedom: -2, corruption: 1, debtPerSemester: 0.5, military: 10, revolutionRisk: -2, rebelGrowthMultiplier: 0.5, fatalAttackChance: -10 },
   "life-sentence": { crime: -2, debtPerSemester: 0.3 },
   "death-penalty": { crime: -3, pressFreedom: -2, military: 5, media: -10, revolutionaryGrowth: 0.1 },
-  "secret-police": { pressFreedom: -4, corruption: 2, debtPerSemester: 0.2, military: 5, coupRisk: -2, revolutionRisk: -2 },
+  "secret-police": { pressFreedom: -4, corruption: 2, debtPerSemester: 0.2, military: 5, coupRisk: -2, revolutionRisk: -2, attackRiskMultiplier: 0.7, fatalAttackChance: -10 },
   "opposition-surveillance": { pressFreedom: -6, corruption: 1, media: -10, revolutionRisk: -3, attackRisk: -1, revolutionaryGrowth: 0.1 },
   "arrest-opponents": { pressFreedom: -10, corruption: 2, media: -15, revolutionRisk: -5, coupRisk: -1, revolutionaryGrowth: 0.2 },
   torture: { crime: -1, pressFreedom: -6, corruption: 3, media: -15, revolutionRisk: -3, attackRisk: 2, revolutionaryGrowth: 0.3 },
@@ -168,11 +174,11 @@ export const nodeEffects: Record<string, NodeEffect> = {
   // Imprensa e liberdades
   "media-regulation": { pressFreedom: -5, media: -10 },
   "strong-state-media": { pressFreedom: -4, debtPerSemester: 0.3, media: 10, supportAnchor: 1 },
-  censorship: { pressFreedom: -15, corruption: 3, supportAnchor: 1, revolutionaryGrowth: 0.1 },
-  "state-information-monopoly": { pressFreedom: -20, corruption: 3, supportAnchor: 2, revolutionaryGrowth: 0.1 },
+  censorship: { pressFreedom: -15, corruption: 3, supportAnchor: 1, revolutionaryGrowth: 0.1, mediaFloor: "neutral" },
+  "state-information-monopoly": { pressFreedom: -20, corruption: 3, supportAnchor: 2, revolutionaryGrowth: 0.1, mediaFloor: "loyal" },
   "public-cameras": { crime: -2, pressFreedom: -1, debtPerSemester: 0.1 },
   "internet-monitoring": { crime: -1, pressFreedom: -4, revolutionRisk: -2 },
-  "mass-surveillance": { crime: -2, pressFreedom: -7, revolutionRisk: -3, revolutionaryGrowth: -0.3 },
+  "mass-surveillance": { crime: -2, pressFreedom: -7, revolutionRisk: -3, revolutionaryGrowth: -0.3, attackRiskMultiplier: 0.7, rebelGrowthMultiplier: 0.5, fatalAttackChance: -10 },
   "thought-police": { education: -1, pressFreedom: -10, revolutionRisk: -5, military: -5, revolutionaryGrowth: -1.0 },
 
   // Poder e regime

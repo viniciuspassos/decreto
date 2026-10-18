@@ -11,3 +11,4 @@ export * from "./rules.js";
 export * from "./initial-state.js";
 export * from "./node-effects.js";
 export * from "./events.js";
+export * from "./movement.js";

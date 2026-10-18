@@ -76,6 +76,18 @@ export interface SemesterReport {
   indicatorsBefore: Indicators;
   groupChanges: { id: string; delta: number }[];
   risks: Record<RiskId, number>;
+  /** Eventos do semestre (sorteados e de sistema), com as manchetes via `event.<id>.*` (game-design §4.6). */
+  events: CountryEvent[];
+}
+
+export interface CountryEvent {
+  id: string;
+  turn: number;
+  option?: "a" | "b";
+  /** Evento com escolha ainda não resolvida pelo jogador (§4.4). */
+  pending: boolean;
+  /** Mostra a imagem de `assets/events/<id>` (no máximo 1 evento sorteado por semestre, §4.1). */
+  image?: boolean;
 }
 
 export interface GameEvent {
