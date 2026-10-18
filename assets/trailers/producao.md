@@ -203,42 +203,34 @@ O comando roda no seu terminal e conversa direto com o ComfyUI. **Não usa Claud
 nenhum token é gasto durante a geração. Use o agente só para escrever prompts e avaliar os
 resultados.
 
-> **Hoje** o comando lê [`clips.json`](clips.json), uma bancada para testar prompts plano a plano.
-> O script que lê o manifest de um trailer, gera todos os clipes que faltam e monta o vídeo ainda
-> será implementado. Ele vai usar o formato descrito acima.
+### 1. Gerar os clipes de um trailer a partir do manifest
 
-### 1. Adicionar os planos em `clips.json`
-
-Cada entrada de [`clips.json`](clips.json) gera
-`assets/trailers/clips/<category>/<name>.mp4`:
-
-```json
-{
-  "category": "mandato",
-  "name": "1-03-eleicao-take1",
-  "prompt": "First-person point of view. ...",
-  "seed": 42
-}
+```sh
+pnpm generate:trailer-clips --trailer assets/trailers/1-mandato.manifest.json
 ```
 
-- `category`: a parte do trailer (`abertura`, `mandato`, `ordem-e-futuro`, `decreto`).
-- `name`: o número do plano no roteiro, mais um sufixo. Use só letras minúsculas, números e hífen.
-- `seed`: opcional, o padrão é 42. **Para gerar mais de uma tentativa do mesmo plano, repita a
-  entrada com outro `name` (`-take2`) e outra `seed`.**
+O script lê `<trailer>.manifest.json`, resolve os planos `shared: true` em
+`comum.manifest.json` (ao lado do manifest do trailer; outro caminho pode ser indicado com
+`--comum-manifest`) e gera só os planos `kind: "clip"` com prompt preenchido — planos pendentes
+(`prompt: ""`) e os tipos `screen`/`image`/`black` (fora do escopo do Wan) são ignorados sem erro.
+Um plano `shared` sem correspondente em `comum.manifest.json` interrompe o lote com erro.
 
 ### 2. Testar um plano antes do lote
 
+Cada clipe gerado vira `assets/trailers/clips/<trailer>/<id>-s<seed>.mp4` (os planos
+`shared` vão para `clips/comum/<id>-s<seed>.mp4`). Use esse nome com `--only`:
+
 ```sh
-pnpm generate:trailer-clips --only 1-03-eleicao-take1
+pnpm generate:trailer-clips --trailer assets/trailers/1-mandato.manifest.json --only 1-01-s42
 ```
 
-Leva ~15 min. Abra o `.mp4` gerado e ajuste o prompt se for preciso.
+Leva ~15 min. Abra o `.mp4` gerado e ajuste o prompt no manifest se for preciso.
 
 ### 3. Rodar o lote (à noite)
 
 ```sh
 mkdir -p assets/trailers/clips
-caffeinate -i pnpm generate:trailer-clips 2>&1 | tee -a assets/trailers/clips/lote.log
+caffeinate -i pnpm generate:trailer-clips --trailer assets/trailers/1-mandato.manifest.json 2>&1 | tee -a assets/trailers/clips/lote.log
 ```
 
 - `caffeinate -i` impede o Mac de dormir durante o lote.
@@ -246,7 +238,7 @@ caffeinate -i pnpm generate:trailer-clips 2>&1 | tee -a assets/trailers/clips/lo
   `lote.log`.
 - **Clipes já gerados são pulados.** Se o lote parar (erro, Mac reiniciado, app fechado), basta
   rodar o mesmo comando de novo: ele continua de onde parou. Para refazer um clipe, apague o `.mp4`
-  ou use `--force --only <name>`.
+  ou use `--force --only <id>-s<seed>`.
 - **Um erro interrompe o lote** assim que o ComfyUI o informa, com a mensagem do ComfyUI. Corrija a
   entrada e rode de novo.
 - Para estimar a duração de um lote, conte ~15 min por entrada. Com 20 entradas, são ~5 h.
@@ -257,6 +249,9 @@ caffeinate -i pnpm generate:trailer-clips 2>&1 | tee -a assets/trailers/clips/lo
 
 Os clipes ficam em `assets/trailers/clips/`, pasta que está no `.gitignore` (material bruto). Uma
 cópia também fica em `~/ComfyUI-Shared/output/decreto/<category>/`.
+
+`clips.json` continua disponível como bancada avulsa para testar um prompt solto, fora da ordem de
+um trailer: sem `--trailer`, `pnpm generate:trailer-clips` volta a ler `clips.json`.
 
 ## Acompanhar pela UI do ComfyUI
 
