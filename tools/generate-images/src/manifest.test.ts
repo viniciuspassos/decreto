@@ -1,5 +1,8 @@
-import { describe, expect, it } from "@jest/globals";
-import { parseManifest } from "./manifest.js";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
+import { loadManifest, parseManifest } from "./manifest.js";
 
 describe("parseManifest", () => {
   it("aceita um array de entradas válidas", () => {
@@ -49,5 +52,26 @@ describe("parseManifest", () => {
   it("rejeita seed que não é número", () => {
     const raw = JSON.stringify([{ category: "eventos", name: "x", prompt: "y", seed: "7" }]);
     expect(() => parseManifest(raw)).toThrow('"seed" deve ser número');
+  });
+});
+
+describe("loadManifest", () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), "decreto-manifest-"));
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("lê e parseia o manifest do disco", () => {
+    const path = join(dir, "manifest.json");
+    writeFileSync(path, JSON.stringify([{ category: "eventos", name: "x", prompt: "y" }]));
+
+    expect(loadManifest(path)).toEqual([
+      { category: "eventos", name: "x", prompt: "y", seed: undefined },
+    ]);
   });
 });
