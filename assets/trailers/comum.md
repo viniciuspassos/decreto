@@ -28,6 +28,10 @@ Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame fina
   legível, então telas e placas dentro das cenas (TV, telão, cartazes) não têm texto legível. Os
   nós, utopias e textos mostrados **não precisam existir no jogo**: o trailer serve à narrativa, não
   aos dados de `game-content`.
+- **Um gesto simples por clipe.** Cada plano é uma única ação contínua (sem transição animada
+  dentro do clipe — preenchimentos, texto surgindo, formas se transformando — e sem movimento de
+  câmera composto). O Wan 2.2 TI2V 5B anima bem um gesto só; qualquer transição complexa deve ser
+  resolvida na edição, com um corte entre dois keyframes.
 - **Sem violência gráfica (roteiro §S6).** Repressão e morte aparecem por som fora de quadro,
   sombras, objetos e reação das pessoas — nunca sangue, ferimento ou corpo.
 - **Mesmo começo, mesmo fim.** A abertura (A1–A3) e o encerramento (E1) são idênticos nos três
