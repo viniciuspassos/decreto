@@ -3,7 +3,7 @@ import "./i18n/index.js";
 import { App } from "./App.js";
 import { newGame } from "./api/mockApi.js";
 import { Election } from "./screens/Election.js";
-import { polar, ringRadius, spokeAngle } from "./components/RadialMap.js";
+import { TREE_ANGLES, polar, ringRadius } from "./components/RadialMap.js";
 import { semesterOf, turnInTerm, yearOf } from "./components/TopBar.js";
 import { formatIndicator, signed } from "./components/format.js";
 
@@ -79,9 +79,9 @@ describe("Election", () => {
 describe("helpers de UI", () => {
   it("geometria radial: anel cresce com a profundidade e o 1º raio aponta para cima", () => {
     expect(ringRadius(2)).toBeGreaterThan(ringRadius(1));
-    const top = polar(spokeAngle(0, 25), 100);
-    expect(top.x).toBeCloseTo(500);
-    expect(top.y).toBeCloseTo(400);
+    const top = polar(TREE_ANGLES[0] ?? 0, 100);
+    expect(top.x).toBeCloseTo(700);
+    expect(top.y).toBeCloseTo(600);
   });
 
   it("calendário: turno 3 = ano 2, 1º semestre, turno 3 de 8", () => {

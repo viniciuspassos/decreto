@@ -59,7 +59,12 @@
     "precedents": "Historical precedents",
     "precedentsHidden": "Leaders have done something similar before. Names appear once the policy is enacted.",
     "queue": "Add to turn · {{cost}}",
-    "unqueue": "Remove from queue"
+    "unqueue": "Remove from queue",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomReset": "Recenter",
+    "zoomHint": "Zoom out to group actions by field · drag to pan · scroll to zoom",
+    "clusterCounts": "{{active}} active · {{available}} available"
   },
   "actor": { "media": "Media", "military": "Armed Forces" },
   "mood": { "loyal": "Loyal", "neutral": "Neutral", "critical": "Critical", "hostile": "Hostile" },

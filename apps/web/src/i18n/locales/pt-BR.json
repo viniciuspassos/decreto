@@ -59,7 +59,12 @@
     "precedents": "Precedentes históricos",
     "precedentsHidden": "Governantes já fizeram algo parecido. Os nomes aparecem quando a política for ativada.",
     "queue": "Adicionar ao turno · {{cost}}",
-    "unqueue": "Remover da fila"
+    "unqueue": "Remover da fila",
+    "zoomIn": "Aproximar",
+    "zoomOut": "Afastar",
+    "zoomReset": "Recentralizar",
+    "zoomHint": "Afaste para agrupar as ações por campo · arraste para mover · role para dar zoom",
+    "clusterCounts": "{{active}} ativas · {{available}} disponíveis"
   },
   "actor": { "media": "Mídia", "military": "Forças Armadas" },
   "mood": { "loyal": "Leais", "neutral": "Neutra", "critical": "Crítica", "hostile": "Hostil" },
