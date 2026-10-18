@@ -4,7 +4,9 @@ Jogo de política web. O jogador é presidente de um país fictício e
 governa por mandatos de 4 anos, tentando ser reeleito e evitar queda, morte ou estagnação por 40
 anos.
 
-**Fonte da verdade do design é `roteiro-do-jogo.md`** (raiz do repo). Este arquivo não duplica o
+**Fonte da verdade do design é `roteiro-do-jogo.md`** (raiz do repo). Os números de efeitos das
+políticas, da camada de movimento (tendência, recessão, riscos) e o catálogo de eventos estão em
+`docs/game-design/efeitos-movimento-eventos.md`. Este arquivo não duplica o
 roteiro — resume o que todo código precisa respeitar e aponta de volta para as seções relevantes.
 Qualquer dúvida sobre regra de negócio deve ser resolvida lendo o roteiro primeiro; segundo ele, não
 há dúvidas de negócio em aberto nesta versão (0.4).
