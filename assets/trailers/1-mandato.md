@@ -1,6 +1,6 @@
 # Trailer 1: "Mandato"
 
-Roteiro do miolo (6–37 s). Linguagem comum, abertura (A1–A3), encerramento (E1) e produção em
+Roteiro do miolo (6–37 s). Linguagem comum, abertura (A1–A3), encerramento (e1a–e1b) e produção em
 [comum.md](comum.md). Trilha e som em [1-mandato.trilha.md](1-mandato.trilha.md).
 
 Final democrático. O poder cresce pela **aprovação**: as multidões aumentam a cada eleição e o

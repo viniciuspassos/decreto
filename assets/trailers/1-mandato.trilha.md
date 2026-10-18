@@ -45,11 +45,11 @@ sumir.
 |---|---|
 | Modelo | **Stable Audio 3.0 Medium** no ComfyUI local, para música e efeitos (ver [geração](#geração)). |
 | Andamento | **120 BPM**, 4/4. Uma batida = 0,5 s; um compasso = 2 s = **um clipe**. |
-| Grade | Começa em **0,0 s**. O trailer tem 84 batidas = 21 compassos. Todo corte cai no tempo 1 do compasso, menos 1-08b (27 s) e 1-09 (29 s), que caem no tempo 3. |
+| Grade | Começa em **0,0 s**. O trailer tem 84 batidas = 21 compassos. Até 1-08a (26 s), todo corte cai no tempo 1 do compasso. A montagem de 1 s desloca a grade em meio compasso: de 1-08b em diante (27, 29, 31, 33, 35 e 37 s) os cortes caem no tempo 3; o frame final (40 s) volta ao tempo 1. |
 | Tom | **Ré menor**. As subidas de "vitória" usam Fá e Si♭ maior, nunca uma cadência que resolve em Ré maior. |
 | Paleta | Piano de feltro (o presidente), cordas, violoncelos, metais graves, tímpano e tambores. Sem coro (é voz), sem guitarra, sem batida eletrônica. |
 | Motivo | 4 notas, uma por segundo: **Ré – Lá – Sol – Fá**. Sobe com esperança e desce sem voltar à tônica. Ocupa 1-01 e 1-02a (6–10 s). |
-| Envelhecimento | O motivo envelhece com as mãos: limpo em 1-01; uma nota desafinada em 1-04; afinação baixa e *wow/flutter* de fita em 1-09. É sempre o **mesmo** arquivo de piano, processado na edição. |
+| Envelhecimento | O motivo envelhece com as mãos: limpo em 1-01; desafinado em 1-04; afinação baixa e *wow/flutter* de fita em 1-09. É sempre o **mesmo** arquivo de piano, processado na edição. |
 
 **Por que 120 BPM.** Os planos têm 2 s e 1 s. A 120 BPM, 2 s = 4 batidas (1 compasso) e 1 s =
 2 batidas: todo corte cai numa batida inteira. A 90 BPM, 2 s = 3 batidas e 1 s = 1,5 (não fecha);
@@ -65,8 +65,8 @@ inteiro (piano → cordas → pulso → metais e tambores → clímax). Os contr
 avulsas só onde a separação ajuda: o motivo de piano, o violoncelo, os *hits* e o *riser*.
 
 O modelo não recebe marcações de tempo. Geram-se algumas seeds do leito e escolhe-se a que tem o
-arco mais perto da linha do tempo; na edição, compassos inteiros (2 s) podem ser cortados ou
-repetidos para alinhar a entrada dos metais a 24 s e o clímax a 29 s.
+arco mais perto da linha do tempo; na edição, compassos (2 s) ou meios compassos (1 s) podem ser
+cortados ou repetidos para alinhar a entrada dos metais a 24 s e o clímax a 29 s.
 
 ## Tabela por plano
 
@@ -80,7 +80,7 @@ repetidos para alinhar a entrada dos metais a 24 s e o clímax a 29 s.
 | 1-02b | 10–12 s | Cordas entram, Si♭ maior. | Sala de aula cheia: murmúrio indistinto, cadeiras. | Cordas em 10,0 s. | 3 |
 | 1-03a | 12–14 s | Pulso grave de tambor; `1-riser` de 2 s. | Bar lotado: murmúrio, copos, TV abafada (só tom). | *Riser* chega ao pico em 14,0 s. | 5 |
 | 1-03b | 14–16 s | `1-hit-vitoria` + leito cheio em Fá maior: primeira vitória. | Confete, comemoração indistinta, aplausos. | *Hit* em 14,0 s, junto com o corte. | 6 |
-| 1-04 | 16–18 s | Leito abafado (passa-baixa, −18 dB); por cima, o motivo com **uma nota desafinada**. | Bipe de alerta da interface; tique do relógio. | Queda em 16,0 s; bipe a cada 2 batidas. | 4 |
+| 1-04 | 16–18 s | Leito abafado (passa-baixa, −18 dB); por cima, o início do motivo **desafinado**. | Bipe de alerta da interface; tique do relógio. | Queda em 16,0 s; bipe a cada 2 batidas. | 4 |
 | 1-05a | 18–20 s | Leito volta inteiro, ostinato de cordas. | Clique; turbinas girando; pássaros longe. | Clique e leito em 18,0 s. | 5 |
 | 1-05b | 20–22 s | **Leito mudo** (corte seco); só `1-m-celo` grave, bem baixo. | Portão de fábrica rolando e batendo; vento. | Corte em 20,0 s; batida do portão no fim do gesto. | 4 |
 | 1-06 | 22–24 s | Leito volta, no ponto em que estaria (a peça corre por baixo, muda). | Chuva na janela; protesto pacífico abafado pelo vidro: palmas e vozes indistintas. | Volta em 22,0 s; palmas realinhadas às batidas. | 5 |
@@ -129,7 +129,7 @@ São atonais ou ambientes, sem tom nem andamento, para servirem a qualquer trilh
 |---|---|---|---|---|
 | `c-caneta` | Efeito | 6 s / 2 s | a1, e1a | `Close-up foley of a fountain pen signing a signature on thick paper on a wooden desk, slow deliberate strokes, scratch of the nib, quiet office room, dry, intimate, no music. Length: 6 seconds` |
 | `c-chuva` | Ambiente | 30 s / em loop | a2, a3, 1-06, 1-10a–c | `Interior ambience of steady rain against a large office window at night, droplets on glass, soft gutter trickle, distant low city hush, no thunder, no music, calm and heavy. Length: 30 seconds` |
-| `c-gabinete` | Ambiente | 20 s / em loop | a2, a3, 1-04, 1-09, 1-10a–c | `Quiet room tone of an old wood-paneled office at night with the faint high-pitched hum of an old CRT monitor, subtle electrical buzz, no music, no voices. Length: 20 seconds` |
+| `c-gabinete` | Ambiente | 20 s / em loop | a2, a3, 1-04, 1-09, 1-10b–c | `Quiet room tone of an old wood-paneled office at night with the faint high-pitched hum of an old CRT monitor, subtle electrical buzz, no music, no voices. Length: 20 seconds` |
 | `c-maos-mesa` | Efeito | 2 s / 1 s | a2 | `Foley of two hands gently placed flat on a solid wooden desk, soft thud and fabric rustle of suit sleeves, close and dry. Length: 2 seconds` |
 | `c-crt-liga` | Efeito | 3 s / 2 s | a2 | `An old CRT computer monitor powering on: a deep electrical thunk, a short degauss buzz, then a rising high-pitched whine settling into a hum. Length: 3 seconds` |
 | `c-mouse-clique` | Efeito | 2 s / 0,2 s | 1-02a, 1-05a | `Single close-up click of an old computer mouse button on a wooden desk, crisp plastic click, dry, no room reverb, then silence. Length: 2 seconds` |
@@ -167,7 +167,7 @@ São atonais ou ambientes, sem tom nem andamento, para servirem a qualquer trilh
 | `1-a-portao` | Efeito | 4 s / 2 s | 1-05b | `Heavy metal factory gate rolling shut on old rails, grinding metal, ending in a loud final clang, empty industrial yard, light wind. Length: 4 seconds` |
 | `1-a-protesto` | Ambiente | 4 s / 2 s | 1-06 (por baixo de `c-chuva`, filtrado) | `Peaceful protest crowd in the rain heard from inside a building through a closed window, rhythmic hand clapping and indistinct chanting, muffled, no intelligible words. Length: 4 seconds` |
 | `1-a-praca` | Ambiente | 8 s / 5 s | 1-07, 1-08a–c | `Huge outdoor crowd at a night rally in a city square, roaring applause and indistinct cheering, wide and open, echo off buildings, no intelligible words. Length: 8 seconds` |
-| `1-a-tremor` | Efeito | 4 s / 2–6 s | 1-09, 1-10b, 1-10c | `Very subtle foley of a trembling elderly hand resting on a computer mouse on a wooden desk, tiny plastic rattle and fabric rustle, close and quiet. Length: 4 seconds` |
+| `1-a-tremor` | Efeito | 4 s / 2 s por plano | 1-09, 1-10b, 1-10c | `Very subtle foley of a trembling elderly hand resting on a computer mouse on a wooden desk, tiny plastic rattle and fabric rustle, close and quiet. Length: 4 seconds` |
 
 Total: 9 peças comuns + 17 do trailer 1.
 
@@ -199,13 +199,13 @@ ajustar o tempo antes de alinhar o primeiro tempo forte a 6,0 s.
 - **37,0 s:** **todo** o som corta, inclusive a chuva, junto com o corte para preto. Meio segundo
   de silêncio antes da caneta.
 
-**Envelhecimento do motivo** (sempre o mesmo trecho de 4 s de `1-m-piano`):
+**Envelhecimento do motivo** (sempre o mesmo arquivo `1-m-piano`; nos planos de 2 s, só as 2 primeiras notas, Ré–Lá):
 
 | Onde | Processamento |
 |---|---|
-| 1-01 – 1-02a | Limpo, sobre o leito (se o leito já tiver um piano que funcione, ele pode substituir). |
-| 1-04 | Uma nota desafinada (−30 cents), menos agudos. |
-| 1-09 | Afinação −20 cents, *wow/flutter* de fita, passa-baixa leve: um piano velho no meio da orquestra. |
+| 1-01 – 1-02a | As 4 notas (4 s), limpo, sobre o leito (se o leito já tiver um piano que funcione, ele pode substituir). |
+| 1-04 | Ré–Lá (2 s), desafinado −30 cents, menos agudos. |
+| 1-09 | Ré–Lá (2 s), afinação −20 cents, *wow/flutter* de fita, passa-baixa leve: um piano velho no meio da orquestra. |
 
 **Montagem 1-08:** um `1-hit-montagem` em cada corte (26, 27, 28 e 29 s), cada um 2 dB acima do
 anterior. `1-a-praca` e `1-a-confete` também sobem a cada corte e abrem no estéreo.

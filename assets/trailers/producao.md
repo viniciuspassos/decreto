@@ -12,7 +12,7 @@ Referência para gerar os clipes de vídeo dos trailers ([roteiros](comum.md)) n
 | Modelo | **Wan 2.2 T2V A14B em GGUF Q4_K_M** + LoRA lightx2v de 4 passos (texto → vídeo) |
 | Clipe | **2 s**: 33 quadros, 832×480, 16 fps |
 | Tempo | **~14–15 min por clipe**, ou ~4 clipes por hora |
-| Pós-produção | ffmpeg: interpolação para 24 fps, câmera lenta 1,5× (2 s viram 3 s), ampliação para 1080p |
+| Pós-produção | ffmpeg: interpolação para 24 fps e ampliação para 1080p; câmera lenta 1,5× (2 s viram 3 s) só nos clipes de 3 s na tela |
 | Montagem | Editor de vídeo (DaVinci Resolve) ou ffmpeg |
 | Roteiro | Um `.md` (narrativa) e um `.manifest.json` (planos e prompts) por trailer: ver [Roteiro e manifest](#roteiro-e-manifest-de-cada-trailer) |
 | Geração | `pnpm generate:trailer-clips`, rodado pela CLI, à noite |
@@ -141,7 +141,8 @@ são modelos e nunca são lidos como trailer.
     { "id": "1-01", "kind": "clip", "prompt": "First-person point of view. ...", "seed": 42 },
     { "id": "1-02", "kind": "clip", "prompt": "", "transition": "fade" },
     { "id": "1-03", "kind": "screen", "file": "gravacoes/1-03.mov", "seconds": 3 },
-    { "id": "e1", "shared": true }
+    { "id": "e1a", "shared": true },
+    { "id": "e1b", "shared": true }
   ]
 }
 ```
@@ -152,13 +153,13 @@ são modelos e nunca são lidos como trailer.
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
-| `id` | sim | O mesmo valor da coluna `#` do roteiro. Use só letras minúsculas, números e hífen: `a1`–`a3` e `e1` para os planos compartilhados; `<n>-<nn>` para os do trailer, onde `<n>` é o número do trailer (`1-01`, `2-07`). Para um plano dividido em vários clipes, acrescente uma letra (`1-10a`, `1-10b`). |
+| `id` | sim | O mesmo valor da coluna `#` do roteiro. Use só letras minúsculas, números e hífen: `a1`–`a3`, `e1a` e `e1b` para os planos compartilhados; `<n>-<nn>` para os do trailer, onde `<n>` é o número do trailer (`1-01`, `2-07`). Para um plano dividido em vários clipes, acrescente uma letra (`1-10a`, `1-10b`). |
 | `shared` | — | `true` para usar o plano de mesmo `id` de `comum.manifest.json`. Nesse caso, nenhum outro campo é usado. |
 | `kind` | sim, se não for `shared` | `clip`: gerado pelo Wan. `screen`: gravação de tela do jogo. `image`: imagem parada, como o frame final. `black`: tela preta. |
 | `prompt` | sim, em `clip` | O prompt em inglês (ver [Como escrever os prompts](#como-escrever-os-prompts)). **Pode ficar `""`** enquanto o prompt não estiver escrito; o plano fica pendente. |
 | `seed` | — | Em `clip`. O padrão é 42. Troque para buscar outra tentativa do mesmo plano: cada seed gera um arquivo próprio (ver [Onde ficam os clipes](#onde-ficam-os-clipes)), então as tentativas anteriores não se perdem. |
 | `file` | sim, em `screen` e `image` | O caminho do arquivo, relativo a `assets/trailers/` (ex.: `gravacoes/1-03.mov`). Para um arquivo que tem versão por idioma, use `{lang}` no caminho (ex.: `cartelas/final-{lang}.png`): cada manifest gera um vídeo em `pt-BR` e outro em `en`. |
-| `seconds` | sim, em `black`, `screen` e `image` | A duração na tela. Em `clip` é opcional: o padrão é 3 s, a duração do clipe depois da câmera lenta, e um valor menor corta o clipe, mantendo o começo (ex.: `1` numa montagem rápida). **Nunca passa de 3 em `clip`.** |
+| `seconds` | sim, em `black`, `screen` e `image` | A duração na tela. Em `clip` é opcional: o padrão é 3 s, a duração do clipe depois da câmera lenta, e um valor menor corta o clipe, mantendo o começo (ex.: `1` numa montagem rápida). Com `2`, o clipe entra **sem câmera lenta**: os 2 s gerados inteiros, só interpolados para 24 fps, para não cortar o fim do gesto. **Nunca passa de 3 em `clip`.** |
 | `transition` | — | Como este plano **entra**: `cut` (padrão, corte seco) ou `fade` (crossfade de 0,5 s, que acontece dentro do tempo deste plano, sem encurtar o total). |
 
 ### Regras para escrever o roteiro
@@ -167,7 +168,8 @@ O script monta o trailer a partir do manifest. Para que roteiro e manifest não 
 
 1. **Cada linha da tabela do roteiro é uma entrada do manifest**, na mesma ordem e com o mesmo `id`
    na coluna `#`. Não use numerações livres como "1.10 (a)".
-2. **Um clipe tem no máximo 3 s na tela.** São 2 s gerados, que viram 3 s com a câmera lenta. Um
+2. **Um clipe tem no máximo 3 s na tela.** São 2 s gerados, que viram 3 s com a câmera lenta, ou
+   ficam 2 s sem ela (`seconds: 2`). Um
    plano mais longo vira várias linhas (`1-10a`, `1-10b`), cada uma com um gesto só.
 3. **A coluna `Tempo` é a duração na tela** (`seconds`, ou 3 s para um `clip` sem `seconds`). A
    soma do trailer inteiro, contando a abertura e o encerramento compartilhados, é de **no máximo
@@ -283,6 +285,8 @@ Instale com `brew install ffmpeg`. Para tratar cada clipe (interpolação para 2
 ffmpeg -i entrada.mp4 -vf "setpts=1.5*PTS,minterpolate=fps=24:mi_mode=mci:mc_mode=aobmc:vsbmc=1,scale=1920:1080:flags=lanczos,format=yuv420p" -c:v libx264 -crf 16 -preset slow saida.mp4
 ```
 
+Para um clipe de 2 s na tela (`seconds: 2`, como no trailer 1), o mesmo comando sem `setpts=1.5*PTS,`.
+
 Para juntar dois clipes já tratados com um crossfade de 0,5 s (`offset` é a duração do primeiro
 clipe menos 0,5):
 
@@ -293,5 +297,5 @@ ffmpeg -i a.mp4 -i b.mp4 -filter_complex "[0:v][1:v]xfade=transition=fade:durati
 A montagem final, com gravação de tela do jogo sobre o monitor, frame final, trilha e som, é feita
 num editor de vídeo como o DaVinci Resolve. O Wan não gera áudio.
 
-**Durações no roteiro:** cada clipe gerado tem 2 s, ou 3 s depois da câmera lenta. Planos maiores no
+**Durações no roteiro:** cada clipe gerado tem 2 s na tela, ou 3 s com a câmera lenta. Planos maiores no
 roteiro viram 2 ou 3 clipes encadeados por cortes.
