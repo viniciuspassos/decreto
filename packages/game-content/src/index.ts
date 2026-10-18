@@ -3,7 +3,7 @@
  * utopias, figuras históricas — S1 a S7 do roteiro-do-jogo.md).
  */
 
-export * from "./historical-figures";
-export * from "./policy-trees";
-export * from "./voter-groups";
-export * from "./utopias";
+export * from "./historical-figures.js";
+export * from "./policy-trees.js";
+export * from "./voter-groups.js";
+export * from "./utopias.js";
