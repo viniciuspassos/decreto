@@ -14,6 +14,7 @@ Referência para gerar os clipes de vídeo dos trailers ([roteiros](comum.md)) n
 | Tempo | **~14–15 min por clipe**, ou ~4 clipes por hora |
 | Pós-produção | ffmpeg: interpolação para 24 fps, câmera lenta 1,5× (2 s viram 3 s), ampliação para 1080p |
 | Montagem | Editor de vídeo (DaVinci Resolve) ou ffmpeg |
+| Roteiro | Um `.md` (narrativa) e um `.manifest.json` (planos e prompts) por trailer: ver [Roteiro e manifest](#roteiro-e-manifest-de-cada-trailer) |
 | Geração | `pnpm generate:trailer-clips`, rodado pela CLI, à noite |
 | Acompanhamento | Painel de fila da UI do ComfyUI e saída do terminal |
 
@@ -108,11 +109,103 @@ Regras tiradas dos testes:
 - Feche com o estilo comum: *"Cinematic, shallow depth of field, slow push-in, moody low-key
   lighting, film grain."*
 
+## Roteiro e manifest de cada trailer
+
+Cada trailer tem **dois arquivos**, que se correspondem plano a plano:
+
+| Arquivo | Para quem | Conteúdo |
+|---|---|---|
+| `<n>-<slug>.md` (ex.: `1-mandato.md`) | Pessoas | A narrativa: o que cada plano mostra, a duração e a interface no monitor. **Sem prompts.** |
+| `<n>-<slug>.manifest.json` (ex.: `1-mandato.manifest.json`) | Script | A lista **ordenada** dos planos, com o prompt de cada clipe. É dela que sai a **montagem bruta** do trailer: imagem e ritmo. |
+
+A abertura e o encerramento compartilhados ficam em `comum.md` e em **`comum.manifest.json`**. Os
+manifests dos trailers só apontam para eles, então esses planos são gerados uma vez só.
+
+O que **não** está no manifest fica para o editor de vídeo: a gravação do jogo aplicada **dentro do
+monitor** de um clipe (descrita na coluna `Interface` do roteiro), a trilha e o som.
+
+Exemplo completo: [`_exemplo.manifest.json`](_exemplo.manifest.json). Arquivos que começam com `_`
+são modelos e nunca são lidos como trailer.
+
+> **Os roteiros atuais ainda estão no formato antigo,** inclusive a abertura e o encerramento em
+> `comum.md`. Eles usam ids como `A1` e `1.10 (a)`, não têm a coluna `Tipo` e têm clipes de 4–8 s.
+> Ao reescrevê-los, migre tudo para as regras abaixo.
+
+### Formato do manifest
+
+```json
+{
+  "trailer": "1-mandato",
+  "plans": [
+    { "id": "a1", "shared": true },
+    { "id": "1-01", "kind": "clip", "prompt": "First-person point of view. ...", "seed": 42 },
+    { "id": "1-02", "kind": "clip", "prompt": "", "transition": "fade" },
+    { "id": "1-03", "kind": "screen", "file": "gravacoes/1-03.mov", "seconds": 3 },
+    { "id": "e1", "shared": true }
+  ]
+}
+```
+
+- `trailer`: igual ao nome do arquivo do roteiro, sem `.md` (ex.: `1-mandato`). Em
+  `comum.manifest.json`, o valor é `comum`.
+- `plans`: os planos **na ordem em que aparecem no trailer**. Cada plano tem:
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `id` | sim | O mesmo valor da coluna `#` do roteiro. Use só letras minúsculas, números e hífen: `a1`–`a3` e `e1` para os planos compartilhados; `<n>-<nn>` para os do trailer, onde `<n>` é o número do trailer (`1-01`, `2-07`). Para um plano dividido em vários clipes, acrescente uma letra (`1-10a`, `1-10b`). |
+| `shared` | — | `true` para usar o plano de mesmo `id` de `comum.manifest.json`. Nesse caso, nenhum outro campo é usado. |
+| `kind` | sim, se não for `shared` | `clip`: gerado pelo Wan. `screen`: gravação de tela do jogo. `image`: imagem parada, como o frame final. `black`: tela preta. |
+| `prompt` | sim, em `clip` | O prompt em inglês (ver [Como escrever os prompts](#como-escrever-os-prompts)). **Pode ficar `""`** enquanto o prompt não estiver escrito; o plano fica pendente. |
+| `seed` | — | Em `clip`. O padrão é 42. Troque para buscar outra tentativa do mesmo plano: cada seed gera um arquivo próprio (ver [Onde ficam os clipes](#onde-ficam-os-clipes)), então as tentativas anteriores não se perdem. |
+| `file` | sim, em `screen` e `image` | O caminho do arquivo, relativo a `assets/trailers/` (ex.: `gravacoes/1-03.mov`). Para um arquivo que tem versão por idioma, use `{lang}` no caminho (ex.: `cartelas/final-{lang}.png`): cada manifest gera um vídeo em `pt-BR` e outro em `en`. |
+| `seconds` | sim, em `black`, `screen` e `image` | A duração na tela. Em `clip` é opcional: o padrão é 3 s, a duração do clipe depois da câmera lenta, e um valor menor corta o clipe, mantendo o começo (ex.: `1` numa montagem rápida). **Nunca passa de 3 em `clip`.** |
+| `transition` | — | Como este plano **entra**: `cut` (padrão, corte seco) ou `fade` (crossfade de 0,5 s, que acontece dentro do tempo deste plano, sem encurtar o total). |
+
+### Regras para escrever o roteiro
+
+O script monta o trailer a partir do manifest. Para que roteiro e manifest não se desencontrem:
+
+1. **Cada linha da tabela do roteiro é uma entrada do manifest**, na mesma ordem e com o mesmo `id`
+   na coluna `#`. Não use numerações livres como "1.10 (a)".
+2. **Um clipe tem no máximo 3 s na tela.** São 2 s gerados, que viram 3 s com a câmera lenta. Um
+   plano mais longo vira várias linhas (`1-10a`, `1-10b`), cada uma com um gesto só.
+3. **A coluna `Tempo` é a duração na tela** (`seconds`, ou 3 s para um `clip` sem `seconds`). A
+   soma do trailer inteiro, contando a abertura e o encerramento compartilhados, é **60 s**.
+4. **Cada linha diz o tipo** (`clip`, `screen`, `image` ou `black`). Assim fica claro o que é
+   gerado pelo Wan, o que é gravado no jogo e o que é arte parada.
+5. **Os prompts ficam só no manifest.** O roteiro descreve a cena em português, para pessoas.
+
+Formato da tabela do roteiro:
+
+```markdown
+| # | Tipo | Tempo | Plano | Interface |
+|---|---|---|---|---|
+| 1-01 | clip | 3 s | Clique. Luzes de um corredor de hospital se acendem. | Nó **Ampliação da rede pública** acende |
+| 1-02 | screen | 3 s | Gravação do grafo com o nó acendendo. | Grafo com 3 nós ativos |
+```
+
+### Arquivos de apoio
+
+- `gravacoes/`: gravações de tela do jogo (`pnpm dev:mocked`).
+- `cartelas/`: imagens paradas. Hoje, só o frame final, a única exceção à regra "sem cartelas de
+  texto" do `comum.md`. O encerramento (preto com o som da caneta e depois o frame final) vira duas
+  linhas: uma `black` e uma `image`.
+
+### Onde ficam os clipes
+
+Cada `clip` gerado é salvo em `clips/<trailer>/<id>-s<seed>.mp4`; os planos de `comum.manifest.json`
+vão para `clips/comum/`. Esse arquivo é o que conta como "já gerado". Trocar a `seed` gera um
+arquivo novo, e a montagem usa sempre o da `seed` atual do manifest.
+
 ## Gerar os clipes pela CLI
 
 O comando roda no seu terminal e conversa direto com o ComfyUI. **Não usa Claude nem Codex**:
 nenhum token é gasto durante a geração. Use o agente só para escrever prompts e avaliar os
 resultados.
+
+> **Hoje** o comando lê [`clips.json`](clips.json), uma bancada para testar prompts plano a plano.
+> O script que lê o manifest de um trailer, gera todos os clipes que faltam e monta o vídeo ainda
+> será implementado. Ele vai usar o formato descrito acima.
 
 ### 1. Adicionar os planos em `clips.json`
 
