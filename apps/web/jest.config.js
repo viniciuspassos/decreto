@@ -6,6 +6,7 @@ export default {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    "\\.css$": "<rootDir>/jest.style-stub.js",
   },
   transform: {
     "^.+\\.tsx?$": ["ts-jest", { useESM: true }],

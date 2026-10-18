@@ -15,6 +15,7 @@ RUN pnpm install --frozen-lockfile --filter "@decreto/web..."
 FROM deps AS build
 COPY tsconfig.base.json ./
 COPY packages/shared-types packages/shared-types
+COPY packages/game-content packages/game-content
 COPY apps/web apps/web
 RUN pnpm --filter "@decreto/web..." run build
 
