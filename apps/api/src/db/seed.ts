@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { createDb } from "./client.js";
+import { createDb, type Db } from "./client.js";
 import { eventImages } from "./schema.js";
 
 const initialEventImages = [
@@ -20,15 +20,16 @@ export async function seedEventImages(db: ReturnType<typeof createDb>): Promise<
   }
 }
 
-async function main(): Promise<void> {
-  const db = createDb();
+export async function main(db: Db = createDb()): Promise<void> {
   await seedEventImages(db);
   console.log("[db] seed de event_images aplicado");
 }
 
+export function handleCliError(error: unknown): void {
+  console.error("[db] falha ao aplicar seed", error);
+  process.exitCode = 1;
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error: unknown) => {
-    console.error("[db] falha ao aplicar seed", error);
-    process.exitCode = 1;
-  });
+  main().catch(handleCliError);
 }

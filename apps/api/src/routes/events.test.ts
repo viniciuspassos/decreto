@@ -49,4 +49,15 @@ describe("GET /events/:eventName/image", () => {
 
     expect(response.status).toBe(404);
   });
+
+  it("retorna 404 quando o arquivo cadastrado não existe em disco", async () => {
+    await db
+      .insert(eventImages)
+      .values({ eventName: "arquivo-ausente", fileLocation: "eventos/nao-existe.png" });
+    const app = createApp({ db, assetsDir });
+
+    const response = await request(app).get("/events/arquivo-ausente/image");
+
+    expect(response.status).toBe(404);
+  });
 });
