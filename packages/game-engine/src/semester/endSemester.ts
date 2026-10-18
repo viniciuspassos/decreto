@@ -68,15 +68,17 @@ function buildReport(before: EngineState, after: EngineState, { applied, risks, 
 
 /**
  * Fecha o semestre na ordem do game-design §3 (função pura: o estado de entrada não é alterado).
+ * Escolhas de evento em aberto valem como resolvidas no início do turno (§4.4), antes da fila.
  * Lança `InvalidQueueError` se a fila não for válida. Mesma seed + mesmo estado ⇒ mesmo resultado.
  */
 export function endSemester(input: EngineState, content: SemesterContent): { state: EngineState; report: SemesterReport } {
-  const errors = validateQueue({ state: input, content });
-  if (errors.length > 0) throw new InvalidQueueError(errors);
+  if (input.defeat) throw new Error(`game over: ${input.defeat}`);
   const state = cloneState(input);
   const ctx: SemesterCtx = { state, content, rng: createRng(state.seed) };
-  const applied = applyQueue(ctx);
   resolveDefaultChoices(ctx);
+  const errors = validateQueue(ctx);
+  if (errors.length > 0) throw new InvalidQueueError(errors);
+  const applied = applyQueue(ctx);
   updateBase(ctx);
   updateDebt(ctx, applied);
   const events = updateRecession(ctx);

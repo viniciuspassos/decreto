@@ -256,6 +256,9 @@ describe("fila", () => {
     const seven = ["harsher-sentences", "secret-police", "privatizations", "outsourcing", "emission-targets", "easier-visas", "state-lottery"];
     expect(codes(seven)).toEqual(["tooManyActions"]);
     expect(codes(["harsher-sentences"], 10)).toEqual(["insufficientCapital"]);
+    const sameRate = game();
+    sameRate.queuedTaxRate = 30;
+    expect(validateQueue(ctxOf(sameRate))).toEqual([{ code: "unavailable", nodeId: "taxes" }]);
   });
 
   it("ajuste de alíquota custa capital, conta como ação e mexe com quem não gosta de imposto", () => {
@@ -300,6 +303,14 @@ describe("efeitos de evento", () => {
     expect(ctx.state.eventRisks.coup).toBe(2);
     expect(ctx.state.capital).toBe(0);
     expect(ctx.state.lastCrisisTurn).toBe(1);
+  });
+
+  it("`rev` nos eventos é tamanho de revolucionários, não risco", () => {
+    const ctx = ctxOf();
+    const wrongful = defaultContent.events.find((e) => e.id === "wrongful-execution");
+    if (wrongful) applyEventEffects(ctx.state, wrongful.effects);
+    expect(groupOf(ctx.state, "revolutionaries")?.size).toBe(0.5);
+    expect(ctx.state.eventRisks.revolution).toBeUndefined();
   });
 });
 

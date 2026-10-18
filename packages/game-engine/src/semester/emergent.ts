@@ -1,9 +1,7 @@
 import type { CountryEvent } from "@decreto/shared-types";
-import { addSize, countActive, effectTotal, sizeOf, type StepCtx } from "./common.js";
+import { addSize, effectProduct, effectTotal, sizeOf, type StepCtx } from "./common.js";
 import { systemEvent } from "./system-events.js";
 
-/** Nós que fazem os rebeldes crescerem pela metade (§3.8). */
-const REBEL_SLOWDOWN_NODES = ["military-on-streets", "mass-surveillance"];
 /** Crescimento de rebeldes por nível de recessão (0 a 3). */
 const REBEL_GROWTH = [-0.5, -0.5, 0.5, 1.0];
 
@@ -17,8 +15,7 @@ export function revolutionaryGrowth(ctx: StepCtx): number {
 
 export function rebelGrowth(ctx: StepCtx): number {
   const growth = REBEL_GROWTH[ctx.state.recessionLevel] ?? 0;
-  const slowed = growth > 0 && countActive(ctx.state, REBEL_SLOWDOWN_NODES) > 0;
-  return slowed ? growth * 0.5 : growth;
+  return growth > 0 ? growth * effectProduct(ctx, "rebelGrowthMultiplier") : growth;
 }
 
 /** §3.8: revolucionários e rebeldes; a primeira vez que surgem rebeldes gera `rebels-emerge`. */

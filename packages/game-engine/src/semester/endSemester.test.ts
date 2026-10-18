@@ -70,6 +70,18 @@ describe("endSemester", () => {
     expect(state.capital).toBe(60 - 24 + capitalGain(state.approval));
   });
 
+  it("não avança partida já perdida", () => {
+    expect(() => endSemester({ ...game(), defeat: "coup" }, defaultContent)).toThrow("game over");
+  });
+
+  it("escolha em aberto vale a opção A antes da fila, com o capital do início do turno", () => {
+    const start = { ...game(), capital: 34, queue: ["harsher-sentences"], pendingChoices: [{ eventId: "general-strike", turn: 0 }] };
+    const { state } = endSemester(start, defaultContent);
+    expect(state.capital).toBe(34 - 10 - 24 + capitalGain(state.approval));
+    expect(state.pendingChoices).toEqual([]);
+    expect(() => endSemester({ ...start, capital: 30 }, defaultContent)).toThrow(InvalidQueueError);
+  });
+
   it("rejeita fila inválida", () => {
     const invalid = { ...game(), queue: ["mandatory-registration", "easier-registration"] };
     expect(() => endSemester(invalid, defaultContent)).toThrow(InvalidQueueError);

@@ -1,12 +1,8 @@
 import { COUP_MOOD_BASE, REVOLUTION_MOOD_MULTIPLIER } from "@decreto/game-content";
 import type { CountryEvent, RiskId } from "@decreto/shared-types";
 import type { Defeat } from "../types.js";
-import { clamp, countActive, effectTotal, over, sizeOf, type SemesterCtx, type StepCtx } from "./common.js";
+import { clamp, effectProduct, effectTotal, over, sizeOf, type SemesterCtx, type StepCtx } from "./common.js";
 import { systemEvent } from "./system-events.js";
-
-/** `ate×0,7` (empilha) e redução da chance fatal (−10 pp cada), por id de nó (§3.7). */
-const ATTACK_SHIELD_NODES = ["secret-police", "mass-surveillance"];
-const FATAL_SHIELD_NODES = ["military-on-streets", "secret-police", "mass-surveillance"];
 
 const eventRisk = (ctx: StepCtx, id: RiskId) => ctx.state.eventRisks[id] ?? 0;
 
@@ -15,12 +11,12 @@ export function attackRisk(ctx: StepCtx): number {
   const { state } = ctx;
   const desperate = state.groups.filter((g) => g.support !== null && g.support < 15 && g.size >= 5).length;
   const raw = 0.8 * sizeOf(state, "revolutionaries") + desperate + effectTotal(ctx, "attackRisk") + eventRisk(ctx, "attack");
-  return clamp(raw * 0.7 ** countActive(state, ATTACK_SHIELD_NODES), 0, 25);
+  return clamp(raw * effectProduct(ctx, "attackRiskMultiplier"), 0, 25);
 }
 
 /** Chance de uma tentativa de atentado ser fatal, %. */
 export function fatalChance(ctx: StepCtx): number {
-  return Math.max(10, 35 - 10 * countActive(ctx.state, FATAL_SHIELD_NODES));
+  return Math.max(10, 35 + effectTotal(ctx, "fatalAttackChance"));
 }
 
 export function revolutionRisk(ctx: StepCtx): number {

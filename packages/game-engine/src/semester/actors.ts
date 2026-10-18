@@ -1,10 +1,9 @@
 import { MOOD_THRESHOLDS } from "@decreto/game-content";
 import type { ActorMood } from "@decreto/shared-types";
-import { effectTotal, groupOf, isActive, over, type StepCtx } from "./common.js";
+import { activeEffects, effectTotal, groupOf, over, type StepCtx } from "./common.js";
 
-/** Nós com regra própria de humor da mídia (§3.6). */
-const CAPTIVE_MEDIA_NODE = "censorship";
-const LOYAL_MEDIA_NODE = "state-information-monopoly";
+/** Do pior ao melhor humor, para aplicar o piso `mediaFloor`. */
+const MOOD_ORDER: ActorMood[] = ["hostile", "critical", "neutral", "loyal"];
 
 export function moodOf(score: number): ActorMood {
   if (score >= MOOD_THRESHOLDS.loyal) return "loyal";
@@ -25,11 +24,11 @@ export function mediaScore(ctx: StepCtx): number {
     + effectTotal(ctx, "media") + state.moodMods.media;
 }
 
+/** Humor pelo escore, nunca abaixo do maior `mediaFloor` dos nós ativos (mídia cativa/leal). */
 function mediaMood(ctx: StepCtx): ActorMood {
-  if (isActive(ctx.state, LOYAL_MEDIA_NODE)) return "loyal";
-  const mood = moodOf(mediaScore(ctx));
-  const captive = isActive(ctx.state, CAPTIVE_MEDIA_NODE) && (mood === "critical" || mood === "hostile");
-  return captive ? "neutral" : mood;
+  const floors = activeEffects(ctx).flatMap((e) => e.mediaFloor ?? []);
+  const rank = Math.max(...[moodOf(mediaScore(ctx)), ...floors].map((m) => MOOD_ORDER.indexOf(m)));
+  return MOOD_ORDER[rank] ?? "neutral";
 }
 
 /** §3.6: humores da mídia e das Forças Armadas a partir dos escores. */

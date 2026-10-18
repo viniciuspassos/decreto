@@ -33,6 +33,7 @@ function nodeErrors({ state, content }: StepCtx): QueueError[] {
 /** Pré-requisitos, opostas, máximo de ações e capital suficiente; lista vazia = fila válida. */
 export function validateQueue(ctx: StepCtx): QueueError[] {
   const errors = nodeErrors(ctx);
+  if (ctx.state.queuedTaxRate === ctx.state.taxRate) errors.push({ code: "unavailable", nodeId: "taxes" });
   if (queuedActions(ctx.state) > MAX_ACTIONS) errors.push({ code: "tooManyActions" });
   if (queueTotalCost(ctx) > ctx.state.capital) errors.push({ code: "insufficientCapital" });
   return errors;

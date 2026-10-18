@@ -126,12 +126,12 @@ export const events: GameEventDefinition[] = [
   {
     id: "wrongful-execution", field: "security", tone: "negative", cooldown: 10, milestone: true,
     triggers: [node("death-penalty", 4)],
-    effects: { allGroups: -1, groups: [{ groupId: "progressives", delta: -6 }, { groupId: "religious", delta: -4 }], media: -15, risks: { revolution: 0.5 } },
+    effects: { allGroups: -1, groups: [{ groupId: "progressives", delta: -6 }, { groupId: "religious", delta: -4 }], media: -15, sizes: [{ groupId: "revolutionaries", delta: 0.5 }] },
   },
   {
     id: "journalist-disappears", field: "security", tone: "negative", cooldown: 6,
     triggers: [node("opposition-surveillance", 5), node("arrest-opponents", 7)],
-    effects: { indicators: { pressFreedom: -2 }, groups: [{ groupId: "progressives", delta: -5 }, { groupId: "youth", delta: -3 }], media: -15, risks: { revolution: 0.5 } },
+    effects: { indicators: { pressFreedom: -2 }, groups: [{ groupId: "progressives", delta: -5 }, { groupId: "youth", delta: -3 }], media: -15, sizes: [{ groupId: "revolutionaries", delta: 0.5 }] },
   },
   {
     id: "organized-crime-wave", field: "security", tone: "negative", cooldown: 4,
@@ -211,7 +211,7 @@ export const events: GameEventDefinition[] = [
     effects: { indicators: { gdp: -0.5 }, groups: [{ groupId: "business", delta: -3 }, { groupId: "middle-class", delta: -2 }] },
     options: {
       a: { effects: { capital: -10, indicators: { inflation: 0.5 }, groups: [{ groupId: "workers", delta: 6 }, { groupId: "retirees", delta: 2 }, { groupId: "business", delta: -4 }] } },
-      b: { effects: { indicators: { pressFreedom: -2 }, groups: [{ groupId: "workers", delta: -8 }, { groupId: "youth", delta: -4 }, { groupId: "security-forces", delta: 3 }], military: 5, risks: { revolution: 0.5 } } },
+      b: { effects: { indicators: { pressFreedom: -2 }, groups: [{ groupId: "workers", delta: -8 }, { groupId: "youth", delta: -4 }, { groupId: "security-forces", delta: 3 }], military: 5, sizes: [{ groupId: "revolutionaries", delta: 0.5 }] } },
     },
   },
   {
@@ -256,7 +256,7 @@ export const events: GameEventDefinition[] = [
     effects: { groups: [{ groupId: "youth", delta: -5 }, { groupId: "progressives", delta: -3 }] },
     options: {
       a: { effects: { capital: -10, groups: [{ groupId: "youth", delta: 4 }] } },
-      b: { effects: { indicators: { pressFreedom: -2 }, groups: [{ groupId: "youth", delta: -6 }, { groupId: "security-forces", delta: 3 }], risks: { revolution: 1 }, media: -10 } },
+      b: { effects: { indicators: { pressFreedom: -2 }, groups: [{ groupId: "youth", delta: -6 }, { groupId: "security-forces", delta: 3 }], sizes: [{ groupId: "revolutionaries", delta: 1 }], media: -10 } },
     },
   },
 
@@ -274,7 +274,7 @@ export const events: GameEventDefinition[] = [
   {
     id: "morality-police-incident", field: "customs", tone: "negative", cooldown: 6, milestone: true,
     triggers: [node("official-religion", 2), node("religious-law", 6)],
-    effects: { indicators: { pressFreedom: -2 }, groups: [{ groupId: "youth", delta: -6 }, { groupId: "progressives", delta: -8 }, { groupId: "religious", delta: 3 }], risks: { revolution: 0.5 }, media: -10 },
+    effects: { indicators: { pressFreedom: -2 }, groups: [{ groupId: "youth", delta: -6 }, { groupId: "progressives", delta: -8 }, { groupId: "religious", delta: 3 }], sizes: [{ groupId: "revolutionaries", delta: 0.5 }], media: -10 },
   },
   {
     id: "casino-laundering-scandal", field: "customs", tone: "negative", cooldown: 6,
@@ -349,7 +349,7 @@ export const events: GameEventDefinition[] = [
   {
     id: "leader-statue-toppled", field: "power", tone: "negative", cooldown: 6, milestone: true,
     triggers: [{ conditions: [{ type: "nodeActive", nodeId: "mandatory-portraits" }, { type: "approvalBelow", threshold: 40 }], weight: 6 }],
-    effects: { allGroups: -1, groups: [{ groupId: "nationalists", delta: -3 }], risks: { revolution: 1, coup: 2 }, media: -5 },
+    effects: { allGroups: -1, groups: [{ groupId: "nationalists", delta: -3 }], sizes: [{ groupId: "revolutionaries", delta: 1 }], risks: { coup: 2 }, media: -5 },
   },
   {
     id: "mass-rally", field: "power", tone: "positive", cooldown: 4,
@@ -370,7 +370,7 @@ export const events: GameEventDefinition[] = [
     effects: { indicators: { gdp: -0.6, inflation: 0.5, debt: 1 }, groups: [{ groupId: "business", delta: -4 }, { groupId: "rich", delta: -3 }, { groupId: "nationalists", delta: 3 }] },
     options: {
       a: { effects: { indicators: { gdp: -0.3 }, groups: [{ groupId: "nationalists", delta: 4 }, { groupId: "progressives", delta: -3 }] } },
-      b: { effects: { indicators: { gdp: 0.4 }, groups: [{ groupId: "nationalists", delta: -3 }, { groupId: "security-forces", delta: -4 }], risks: { revolution: 1 }, media: 5 } },
+      b: { effects: { indicators: { gdp: 0.4 }, groups: [{ groupId: "nationalists", delta: -3 }, { groupId: "security-forces", delta: -4 }], sizes: [{ groupId: "revolutionaries", delta: 1 }], media: 5 } },
     },
   },
   {
@@ -379,10 +379,10 @@ export const events: GameEventDefinition[] = [
       { conditions: [{ type: "approvalBelow", threshold: 30 }], weight: 4 },
       { conditions: [{ type: "nodeActive", nodeId: "rule-by-decree" }, { type: "approvalBelow", threshold: 45 }], weight: 4, conditionalMultiplier: { condition: { type: "nodeActive", nodeId: "state-of-emergency" }, factor: 1.5 } },
     ],
-    effects: { indicators: { crime: 2 }, allGroups: -1, risks: { revolution: 1 } },
+    effects: { indicators: { crime: 2 }, allGroups: -1, sizes: [{ groupId: "revolutionaries", delta: 1 }] },
     options: {
       a: { effects: { capital: -15, allGroups: 2 } },
-      b: { effects: { indicators: { pressFreedom: -3 }, groups: [{ groupId: "security-forces", delta: 4 }], military: 5, risks: { revolution: 1.5 }, media: -10 } },
+      b: { effects: { indicators: { pressFreedom: -3 }, groups: [{ groupId: "security-forces", delta: 4 }], military: 5, sizes: [{ groupId: "revolutionaries", delta: 1.5 }], media: -10 } },
     },
   },
 

@@ -19,7 +19,7 @@ export interface SemesterCtx extends StepCtx {
   rng: Rng;
 }
 
-type NumericEffect = Exclude<keyof NodeEffect, "groupSizeOnce" | "groupSizePerSemester">;
+type NumericEffect = Exclude<keyof NodeEffect, "groupSizeOnce" | "groupSizePerSemester" | "mediaFloor">;
 
 /** O estado é JSON por contrato (vai para `jsonb`), então a cópia profunda por JSON é exata. */
 export const cloneState = (state: EngineState) => JSON.parse(JSON.stringify(state)) as EngineState;
@@ -51,6 +51,11 @@ export function activeEffects({ state, content }: StepCtx): NodeEffect[] {
 
 export function effectTotal(ctx: StepCtx, key: NumericEffect): number {
   return activeEffects(ctx).reduce((sum, effect) => sum + (effect[key] ?? 0), 0);
+}
+
+/** Produto de um multiplicador dos nós ativos (ausente = 1). */
+export function effectProduct(ctx: StepCtx, key: "attackRiskMultiplier" | "rebelGrowthMultiplier"): number {
+  return activeEffects(ctx).reduce((product, effect) => product * (effect[key] ?? 1), 1);
 }
 
 export function clampIndicator(id: IndicatorId, value: number): number {
