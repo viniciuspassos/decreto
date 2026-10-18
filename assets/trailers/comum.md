@@ -60,6 +60,14 @@ plano.
 
 Método, modelos, regras de prompt, script de geração e acompanhamento: **[producao.md](producao.md)**.
 
+**Ao criar ou alterar um roteiro,** siga a
+[estrutura de roteiro e manifest](producao.md#roteiro-e-manifest-de-cada-trailer):
+- cada trailer tem um `.md` (narrativa) e um `.manifest.json` (planos em ordem, com os prompts);
+- a abertura e o encerramento ficam em `comum.manifest.json`;
+- as linhas da tabela do roteiro e os planos do manifest têm o mesmo `id`;
+- um clipe gerado tem no máximo 3 s na tela;
+- o total do trailer é 60 s.
+
 1. **Clipes** com Wan 2.2 T2V A14B (texto → vídeo), 832×480, 2 s por clipe, ~15 min cada, gerados
    em lote pela CLI (`pnpm generate:trailer-clips`).
 2. **Pós-produção** com ffmpeg: 24 fps, câmera lenta 1,5× (cada clipe vira 3 s) e 1080p. Planos
