@@ -36,25 +36,26 @@ Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame fina
   sombras, objetos e reação das pessoas — nunca sangue, ferimento ou corpo.
 - **Mesmo começo, mesmo fim.** A abertura (A1–A3) e o encerramento (E1) são idênticos nos três
   trailers: o primeiro e o último frame são os mesmos. São gerados uma vez só.
-- **Orçamento de tempo.** Abertura 10 s + miolo 45 s + encerramento 5 s = **60 s**. Os tempos do
-  miolo de cada trailer somam exatamente 45 s.
+- **Orçamento de tempo.** Abertura 6 s + miolo + encerramento 5 s, no máximo **60 s**. Cada clipe
+  fica 2 s na tela. O trailer 1 tem 42 s (miolo de 31 s).
 
 A coluna **Interface** só descreve o que aparece na tela do jogo, no monitor. "—" = sem monitor no
 plano.
 
-### Abertura compartilhada (0–10 s)
+### Abertura compartilhada (0–6 s)
 
 | # | Tempo | Plano (IA) | Interface |
 |---|---|---|---|
 | A1 | 2 s | Preto. Som de caneta assinando papel. | — |
-| A2 | 4 s | 1ª pessoa: mãos pousam numa mesa de madeira vazia, gabinete escuro, chuva na janela. Um monitor antigo acende e ilumina as mãos. | Tela inicial do jogo: **DECRETO** |
-| A3 | 4 s | Close no monitor; o cursor para sobre o primeiro nó. | Grafo de nós todo cinza |
+| A2 | 2 s | 1ª pessoa: mãos pousam numa mesa de madeira vazia, gabinete escuro, chuva na janela. Um monitor antigo acende e ilumina as mãos. | Tela inicial do jogo: **DECRETO** |
+| A3 | 2 s | Close no monitor; o cursor para sobre o primeiro nó. | Grafo de nós todo cinza |
 
-### Encerramento compartilhado (55–60 s)
+### Encerramento compartilhado (últimos 5 s)
 
 | # | Tempo | Plano | Tela |
 |---|---|---|---|
-| E1 | 5 s | Preto. Som de caneta assinando papel (eco de A1). | **Frame final**, igual nos três: *"Ninguém nasce tirano. Basta um decreto."* + **DECRETO** |
+| e1a | 3 s | Preto. Som de caneta assinando papel (eco de A1). | — |
+| e1b | 2 s | **Frame final**, igual nos três (`cartelas/final-{lang}.png`), com um *hit* grave. | *"Ninguém nasce tirano. Basta um decreto."* + **DECRETO** |
 
 ## Produção
 
@@ -66,7 +67,7 @@ Método, modelos, regras de prompt, script de geração e acompanhamento: **[pro
 - a abertura e o encerramento ficam em `comum.manifest.json`;
 - as linhas da tabela do roteiro e os planos do manifest têm o mesmo `id`;
 - um clipe gerado tem no máximo 3 s na tela;
-- o total do trailer é 60 s.
+- o total do trailer é no máximo 60 s.
 
 1. **Clipes** com Wan 2.2 T2V A14B (texto → vídeo), 832×480, 2 s por clipe, ~15 min cada, gerados
    em lote pela CLI (`pnpm generate:trailer-clips`).

@@ -1,17 +1,20 @@
 {
   "trailer": "comum",
   "plans": [
-    { "id": "a1", "kind": "black" },
+    { "id": "a1", "kind": "black", "seconds": 2 },
     {
       "id": "a2",
       "kind": "clip",
+      "seconds": 2,
       "prompt": "First-person point of view. Two hands in dark suit sleeves rest on an empty dark wooden desk in a dim presidential office at night, rain streaking the window behind. A single old beige CRT computer monitor stands on the desk; its dark screen suddenly switches on and glows bright cold blue-white, the blue light spreading over the hands and the desk. Desk lamp off, pen holder. Cinematic, shallow depth of field, slow push-in, moody low-key lighting, film grain."
     },
     {
       "id": "a3",
       "kind": "clip",
+      "seconds": 2,
       "prompt": "First-person point of view, extreme close-up on an old beige CRT monitor glowing cold blue-white. A hand rests on a computer mouse and moves it slightly; on screen, a cursor settles over a single plain gray node among a few other gray nodes. Cinematic, shallow depth of field, moody low-key lighting, film grain."
     },
-    { "id": "e1", "kind": "black" }
+    { "id": "e1a", "kind": "black", "seconds": 3 },
+    { "id": "e1b", "kind": "image", "file": "cartelas/final-{lang}.png", "seconds": 2 }
   ]
 }

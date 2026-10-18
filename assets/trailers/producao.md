@@ -170,7 +170,8 @@ O script monta o trailer a partir do manifest. Para que roteiro e manifest não 
 2. **Um clipe tem no máximo 3 s na tela.** São 2 s gerados, que viram 3 s com a câmera lenta. Um
    plano mais longo vira várias linhas (`1-10a`, `1-10b`), cada uma com um gesto só.
 3. **A coluna `Tempo` é a duração na tela** (`seconds`, ou 3 s para um `clip` sem `seconds`). A
-   soma do trailer inteiro, contando a abertura e o encerramento compartilhados, é **60 s**.
+   soma do trailer inteiro, contando a abertura e o encerramento compartilhados, é de **no máximo
+   60 s** (o trailer 1 tem 42 s).
 4. **Cada linha diz o tipo** (`clip`, `screen`, `image` ou `black`). Assim fica claro o que é
    gerado pelo Wan, o que é gravado no jogo e o que é arte parada.
 5. **Os prompts ficam só no manifest.** O roteiro descreve a cena em português, para pessoas.

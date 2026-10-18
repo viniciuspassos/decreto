@@ -9,8 +9,8 @@ cena. Mesmo áudio nas versões pt-BR e en.
 
 ## Linha do tempo
 
-Cada clipe fica **2 s** na tela; os planos 1-08a–c têm `seconds: 1` no manifest. O manifest não dá
-duração aos pretos `a1` e `e1`; valem as de [comum.md](comum.md): 2 s e 5 s.
+Cada clipe fica **2 s** na tela (`seconds: 2`); os planos 1-08a–c têm `seconds: 1`. O encerramento
+é `e1a` (preto, 3 s) e `e1b` (frame final, 2 s).
 
 | id | Tempo | id | Tempo | id | Tempo |
 |---|---|---|---|---|---|
@@ -19,8 +19,8 @@ duração aos pretos `a1` e `e1`; valem as de [comum.md](comum.md): 2 s e 5 s.
 | a3 | 4–6 s | 1-05a | 18–20 s | 1-10a | 31–33 s |
 | 1-01 | 6–8 s | 1-05b | 20–22 s | 1-10b | 33–35 s |
 | 1-02a | 8–10 s | 1-06 | 22–24 s | 1-10c | 35–37 s |
-| 1-02b | 10–12 s | 1-07 | 24–26 s | e1 (preto) | 37–42 s |
-| 1-03a | 12–14 s | 1-08a | 26–27 s | | |
+| 1-02b | 10–12 s | 1-07 | 24–26 s | e1a (preto) | 37–40 s |
+| 1-03a | 12–14 s | 1-08a | 26–27 s | e1b (frame final) | 40–42 s |
 | | | 1-08b | 27–28 s | **Total** | **42 s** |
 
 ## Intenção
@@ -37,7 +37,7 @@ sumir.
 | O custo | 16–24 s | 1-04 – 1-06 | Leito abafado e piano desafinado; corte seco no portão; o leito volta no protesto. | 4 → 5 |
 | Escalada | 24–31 s | 1-07 – 1-09 | Metais, tambores, multidão; um *hit* por corte na montagem; clímax sem resolver sobre as mãos idosas. | 7 → 10 |
 | Gancho | 31–37 s | 1-10a – 1-10c | **Corte seco para silêncio** em 31,0 s. Só chuva; depois o tique do relógio e o tremor. Silêncio total em 37,0 s. | 1 → 2 |
-| Encerramento | 37–42 s | e1 | Silêncio, caneta (mesmo arquivo de a1), *hit* grave. | 0 → 4 |
+| Encerramento | 37–42 s | e1a–e1b | Silêncio, caneta (mesmo arquivo de a1), *hit* grave no frame final. | 0 → 4 |
 
 ### Decisões globais
 
@@ -92,18 +92,28 @@ repetidos para alinhar a entrada dos metais a 24 s e o clímax a 29 s.
 | 1-10a | 31–33 s | **Nenhuma.** | **Só chuva.** | Silêncio musical exato em 31,0 s. | 1 |
 | 1-10b | 33–35 s | Nenhuma. | Chuva; tique do relógio (1 por segundo); mouse tremendo na mesa. | Tiques em 33,0; 34,0 s: o pulso continua só no relógio. | 2 |
 | 1-10c | 35–37 s | Nenhuma. | Chuva mais perto e abafada; tique mais alto; tremor. | Tiques em 35,0; 36,0 s. **Tudo corta em 37,0 s**, antes do clique. | 2 |
-| e1 | 37–42 s | Nenhuma até 40 s; `c-hit-final` em 40,0 s. | Silêncio 0,5 s; caneta (mesmo arquivo de a1) de 37,5 a 39,5 s. | *Hit* em 40,0 s (compasso 21); cauda até 42,0 s. | 0 → 4 |
+| e1a | 37–40 s | Nenhuma. | Silêncio 0,5 s; caneta (mesmo arquivo de a1) de 37,5 a 39,5 s; silêncio 0,5 s. | Caneta começa em 37,5 s. | 0 → 1 |
+| e1b | 40–42 s | `c-hit-final`. | — | *Hit* em 40,0 s (compasso 21), junto com o frame final; cauda até 42,0 s. | 4 |
 
 ## Geração
 
 Todas as peças saem do **Stable Audio 3.0 Medium** no ComfyUI local. Teste de 18/10/2026 neste Mac
 (M4 Pro, 24 GB): 60 s de áudio em **25 s**, com ~5 GB de memória.
 
-- **Prompt direto, sem a reescrita pelo Qwen** (`use_reprompt` desligado). O texto da tabela vai
-  como está para o codificador T5Gemma: 8 passos, cfg 1, `lcm`/`simple`.
+- **Workflow:** [`_audio.api.json`](_audio.api.json), no formato API do ComfyUI. Por peça, troque o
+  prompt (nó `6`), a duração em segundos (nó `11`), a seed (nó `3`) e o nome do arquivo (nó `57`).
+  O prompt vai direto para o codificador T5Gemma, sem a reescrita pelo Qwen do template oficial: 8
+  passos, cfg 1, `lcm`/`simple`. O template oficial não roda pela CLI, porque o seletor de categoria
+  dele só tem opções na interface.
+- **Onde ficam:** `~/ComfyUI-Shared/output/audio/trilha/<trailer>/<peça>-s<seed>_00001.flac` (as
+  peças comuns em `trilha/comum/`). Fora do repo, como os clipes de vídeo.
+- **Seeds geradas:** 42 e 43 em todas as peças; 42 a 45 em `1-m-leito` e `1-m-piano`. Escolha
+  atual, a confirmar ouvindo: `1-m-leito` **s43** (a que mais cresce até o fim), `1-m-piano`
+  **s43** (4 notas de 1 s, sobe e desce, como o motivo); as demais, **s42**.
 - **Uma peça por arquivo.** Transições, cortes secos e *hits* são feitos na edição.
-- **Gerar com sobra:** a coluna "Gerar" já inclui margem para escolher o trecho que encaixa na
-  grade.
+- **Gerar com sobra:** o modelo costuma terminar o som 1–2 s antes da duração pedida (o fim do
+  arquivo sai mudo). A coluna "Gerar" já inclui essa margem e a folga para escolher o trecho que
+  encaixa na grade.
 - **Várias seeds para as peças principais** (`1-m-leito`, `1-m-piano`): é barato (menos de 30 s
   cada) e o arco muda bastante de uma seed para outra.
 - **Sem voz inteligível, sem letra, sem coro, sem marca.** Multidão é murmúrio, aplauso e grito
@@ -113,20 +123,19 @@ Todas as peças saem do **Stable Audio 3.0 Medium** no ComfyUI local. Teste de 1
 
 ### Peças comuns (abertura e encerramento): reaproveitar nos trailers 2 e 3
 
-São atonais ou ambientes, para servirem a qualquer trilha. Exceção: `c-hit-final` tem uma nota em
-Ré (ver [pontos em aberto](#pontos-em-aberto)).
+São atonais ou ambientes, sem tom nem andamento, para servirem a qualquer trilha.
 
 | Peça | Tipo | Gerar / usar | Onde entra | Prompt |
 |---|---|---|---|---|
-| `c-caneta` | Efeito | 3 s / 2 s | a1, e1 | `Close-up foley of a fountain pen signing a signature on thick paper on a wooden desk, slow deliberate strokes, scratch of the nib, quiet office room, dry, intimate, no music. Length: 3 seconds` |
+| `c-caneta` | Efeito | 6 s / 2 s | a1, e1a | `Close-up foley of a fountain pen signing a signature on thick paper on a wooden desk, slow deliberate strokes, scratch of the nib, quiet office room, dry, intimate, no music. Length: 6 seconds` |
 | `c-chuva` | Ambiente | 30 s / em loop | a2, a3, 1-06, 1-10a–c | `Interior ambience of steady rain against a large office window at night, droplets on glass, soft gutter trickle, distant low city hush, no thunder, no music, calm and heavy. Length: 30 seconds` |
 | `c-gabinete` | Ambiente | 20 s / em loop | a2, a3, 1-04, 1-09, 1-10a–c | `Quiet room tone of an old wood-paneled office at night with the faint high-pitched hum of an old CRT monitor, subtle electrical buzz, no music, no voices. Length: 20 seconds` |
 | `c-maos-mesa` | Efeito | 2 s / 1 s | a2 | `Foley of two hands gently placed flat on a solid wooden desk, soft thud and fabric rustle of suit sleeves, close and dry. Length: 2 seconds` |
 | `c-crt-liga` | Efeito | 3 s / 2 s | a2 | `An old CRT computer monitor powering on: a deep electrical thunk, a short degauss buzz, then a rising high-pitched whine settling into a hum. Length: 3 seconds` |
-| `c-mouse-clique` | Efeito | 1 s / 0,2 s | 1-02a, 1-05a | `Single close-up click of an old computer mouse button on a wooden desk, crisp plastic click, dry, no room reverb. Length: 1 second` |
+| `c-mouse-clique` | Efeito | 2 s / 0,2 s | 1-02a, 1-05a | `Single close-up click of an old computer mouse button on a wooden desk, crisp plastic click, dry, no room reverb, then silence. Length: 2 seconds` |
 | `c-mouse-desliza` | Efeito | 3 s / 2 s | a3, 1-10a (baixo, opcional) | `Slow slide of an old computer mouse across a mouse pad on a wooden desk, soft friction, close and quiet. Length: 3 seconds` |
 | `c-swell` | Efeito | 4 s / 2 s | a3 | `Cinematic low sub-bass swell rising slowly with a dark airy texture, reversed cymbal and deep rumble building tension, no melody, atonal, ends abruptly at the peak. Length: 4 seconds` |
-| `c-hit-final` | Efeito | 4 s / 2 s | e1 (40,0 s) | `Single cinematic low impact: deep sub boom layered with one low D note on an old felt piano, long dark decay, solemn, no melody. Length: 4 seconds` |
+| `c-hit-final` | Efeito | 4 s / 2 s | e1b (40,0 s) | `Single cinematic low impact: deep sub boom with a dark low rumble, long dark decay, solemn, atonal, no melody. Length: 4 seconds` |
 
 ### Peças do trailer 1: música
 
@@ -153,7 +162,7 @@ Ré (ver [pontos em aberto](#pontos-em-aberto)).
 | `1-a-aula` | Ambiente | 4 s / 2 s | 1-02b | `Crowded classroom ambience, many students settling, indistinct low murmur, chairs scraping, pages turning, no intelligible words. Length: 4 seconds` |
 | `1-a-bar` | Ambiente | 4 s / 2 s | 1-03a | `Crowded bar at night watching a television, tense indistinct murmur of many people, glasses clinking, muffled TV broadcast tone with no intelligible words, anticipation. Length: 4 seconds` |
 | `1-a-confete` | Ambiente | 4 s / 2 s | 1-03b; camada de 1-08a–c | `Confetti cannon pop followed by a crowd erupting in joyful cheering and applause indoors, indistinct shouts, no intelligible words. Length: 4 seconds` |
-| `1-a-alerta` | Efeito | 1 s / 1 s, repetido | 1-04 | `Soft digital warning beep from a computer interface, single short tone, clean, slightly ominous. Length: 1 second` |
+| `1-a-alerta` | Efeito | 2 s / 0,5 s, repetido | 1-04 | `Soft digital warning beep from a computer interface, single short tone, clean, slightly ominous, then silence. Length: 2 seconds` |
 | `1-a-turbinas` | Ambiente | 4 s / 2 s | 1-05a | `Large wind turbines turning slowly at dawn, deep rhythmic blade whoosh, gentle wind, a few distant birds, open landscape, peaceful. Length: 4 seconds` |
 | `1-a-portao` | Efeito | 4 s / 2 s | 1-05b | `Heavy metal factory gate rolling shut on old rails, grinding metal, ending in a loud final clang, empty industrial yard, light wind. Length: 4 seconds` |
 | `1-a-protesto` | Ambiente | 4 s / 2 s | 1-06 (por baixo de `c-chuva`, filtrado) | `Peaceful protest crowd in the rain heard from inside a building through a closed window, rhythmic hand clapping and indistinct chanting, muffled, no intelligible words. Length: 4 seconds` |
@@ -181,7 +190,7 @@ ajustar o tempo antes de alinhar o primeiro tempo forte a 6,0 s.
 | 1-07 – 1-08c | 0 dB | −3 dB | Multidão e confete crescendo a cada corte. |
 | 1-09 | 0 dB | −20 dB | Clímax: a música toma tudo. |
 | 1-10a – 1-10c | — | 0 dB | Só ambiente. |
-| e1 | `c-hit-final` 0 dB | caneta −3 dB | — |
+| e1a–e1b | `c-hit-final` 0 dB | caneta −3 dB | — |
 
 **Cortes secos** (sem *fade*, sem cauda de reverb; cortar o envio de reverb junto):
 
@@ -201,17 +210,11 @@ ajustar o tempo antes de alinhar o primeiro tempo forte a 6,0 s.
 **Montagem 1-08:** um `1-hit-montagem` em cada corte (26, 27, 28 e 29 s), cada um 2 dB acima do
 anterior. `1-a-praca` e `1-a-confete` também sobem a cada corte e abrem no estéreo.
 
-**Eco da caneta:** e1 usa o **mesmo arquivo** `c-caneta` de a1, no mesmo nível e sem efeito, de
+**Eco da caneta:** e1a usa o **mesmo arquivo** `c-caneta` de a1, no mesmo nível e sem efeito, de
 37,5 a 39,5 s. O primeiro e o último som do trailer são iguais, como o primeiro e o último frame.
 
 ## Pontos em aberto
 
-- **Duração total:** seguindo o manifest, o trailer tem **42 s**, não os 60 s de
-  [comum.md](comum.md). A tabela de [1-mandato.md](1-mandato.md) ainda mostra 3 s por clipe.
-- **Pretos a1 e e1:** o manifest não diz a duração; aqui valem 2 s e 5 s. O frame final (tagline +
-  DECRETO) ainda não está no manifest; a proposta é `e1` virar 3 s de preto + 2 s de `image`, com o
-  `c-hit-final` entrando junto com o frame.
 - **Motivo:** o Stable Audio não aceita notas exatas. Se `1-m-piano` não sair reconhecível, tocar as
   4 notas num piano virtual e usar essa gravação.
-- **Tom comum:** `c-hit-final` tem uma nota em Ré. Ou os trailers 2 e 3 também usam Ré menor e
-  120 BPM, ou a nota sai e o *hit* fica só grave.
+- **Frame final:** `cartelas/final-{lang}.png` ainda não existe.
