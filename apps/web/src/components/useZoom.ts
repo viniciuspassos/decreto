@@ -3,7 +3,7 @@ import { useRef, useState, type PointerEvent, type WheelEvent } from "react";
 /** Lado do quadrado do mapa radial, em unidades SVG. */
 export const MAP_SIZE = 1400;
 export const MIN_SCALE = 0.6;
-export const MAX_SCALE = 4;
+export const MAX_SCALE = 6;
 /** Abaixo desta escala, as ações se agrupam por campo. */
 export const CLUSTER_BELOW = 1;
 const STEP = 1.4;

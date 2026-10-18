@@ -1,17 +1,19 @@
 import { useTranslation } from "react-i18next";
-import { historicalFigures, nodeFigures, policyTrees, type FieldId, type PolicyTree } from "@decreto/game-content";
+import { historicalFigures, nodeFigures, policyTrees, type FieldId } from "@decreto/game-content";
 import type { GameState, NodeStatus } from "@decreto/shared-types";
 import { nodeCost, nodeStatus } from "../api/mockApi.js";
+import { NODE_RADIUS, layoutLabels, type LabelCandidate } from "./labelLayout.js";
 import { CLUSTER_BELOW, MAP_SIZE, useZoom, viewBox } from "./useZoom.js";
 
 const C = MAP_SIZE / 2;
-const R0 = 90;
+const R0 = 120;
 const STEP = 80;
 const RINGS = 6;
 const CLUSTER_ZOOM = 1.8;
-/** Escalas a partir das quais as disponíveis e, depois, as ativas ganham rótulo. */
-const LABEL_AVAILABLE_FROM = 1.4;
-const LABEL_ACTIVE_FROM = 2.4;
+/** Tamanho do rótulo em unidades SVG na escala 1; dividido pela escala para ficar constante na tela. */
+const LABEL_FONT = 24;
+const BLOCKED_RADIUS = 4;
+const PRIORITY: Record<NodeStatus, number> = { queued: 1, available: 2, active: 3, blocked: 9 };
 
 export const ringRadius = (depth: number) => R0 + depth * STEP;
 export const polar = (angle: number, r: number) => ({ x: C + r * Math.cos(angle), y: C + r * Math.sin(angle) });
@@ -31,13 +33,6 @@ export function fieldAngle(field: FieldId): number {
 export const figureShortName = (figureId: string) =>
   historicalFigures.find((f) => f.id === figureId)?.figure.split(" ").at(-1) ?? "";
 
-/** Texto ao longo do raio, sem ficar de cabeça para baixo no lado esquerdo. */
-function radialText(angle: number, r: number) {
-  const { x, y } = polar(angle, r);
-  const left = Math.cos(angle) < 0;
-  const deg = (angle * 180) / Math.PI + (left ? 180 : 0);
-  return { x, y, transform: `rotate(${deg} ${x} ${y})`, textAnchor: left ? "end" : "start" } as const;
-}
 
 interface Props {
   game: GameState;
@@ -70,9 +65,7 @@ export function RadialMap({ game, selected, onSelect }: Props) {
               const { x, y } = polar(fieldAngle(field), ringRadius(RINGS) + 45);
               return <text key={field} className="field-label" x={x} y={y} textAnchor="middle">{t(`field.${field}`)}</text>;
             })}
-            {policyTrees.map((tree, i) => (
-              <TreeSpoke key={tree.id} game={game} tree={tree} angle={TREE_ANGLES[i] ?? 0} selected={selected} onSelect={onSelect} scale={zoom.view.scale} />
-            ))}
+            <Network game={game} selected={selected} onSelect={onSelect} scale={zoom.view.scale} />
           </>
         )}
         <circle className="center" cx={C} cy={C} r={R0 - 20} />
@@ -103,48 +96,58 @@ function FieldClusters({ game, onFocus }: { game: GameState; onFocus: (x: number
   );
 }
 
-interface SpokeProps extends Props {
-  tree: PolicyTree;
-  angle: number;
-  scale: number;
-}
-
-function TreeSpoke({ game, tree, angle, selected, onSelect, scale }: SpokeProps) {
-  const start = polar(angle, R0 - 20);
-  const end = polar(angle, ringRadius(tree.nodes.length));
-  return (
-    <g>
-      <line className="spoke" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />
-      {/* Do mais radical ao moderado, para o rótulo de cada nó ficar por cima dos pontos seguintes. */}
-      {tree.nodes.map((nodeId, d) => (
-        <SpokeNode key={nodeId} nodeId={nodeId} status={nodeStatus(game, nodeId)} angle={angle} r={ringRadius(d + 1)} isSelected={selected === nodeId} onSelect={onSelect} scale={scale} />
-      )).reverse()}
-    </g>
-  );
-}
-
-interface NodeProps {
+interface MapNode {
   nodeId: string;
   status: NodeStatus;
-  angle: number;
-  r: number;
-  isSelected: boolean;
-  onSelect: (nodeId: string) => void;
-  scale: number;
+  x: number;
+  y: number;
 }
 
-function SpokeNode({ nodeId, status, angle, r, isSelected, onSelect, scale }: NodeProps) {
+const mapNodes = (game: GameState): MapNode[] =>
+  policyTrees.flatMap((tree, i) =>
+    tree.nodes.map((nodeId, d) => ({ nodeId, status: nodeStatus(game, nodeId), ...polar(TREE_ANGLES[i] ?? 0, ringRadius(d + 1)) })),
+  );
+
+/** Rótulos candidatos: tudo que não está bloqueado, mais a política selecionada (prioridade máxima). */
+export function labelCandidates(nodes: MapNode[], selected: string | null, nameOf: (n: MapNode) => string): LabelCandidate[] {
+  return nodes
+    .filter((n) => n.status !== "blocked" || n.nodeId === selected)
+    .map((n) => {
+      const figure = n.status === "active" ? nodeFigures[n.nodeId] : undefined;
+      return {
+        id: n.nodeId, x: n.x, y: n.y, name: nameOf(n),
+        figure: figure && `≈ ${figureShortName(figure)}`,
+        priority: n.nodeId === selected ? 0 : PRIORITY[n.status],
+      };
+    });
+}
+
+function Network({ game, selected, onSelect, scale }: Props & { scale: number }) {
   const { t } = useTranslation();
-  const { x, y } = polar(angle, r);
-  const figure = status === "active" ? nodeFigures[nodeId] : undefined;
-  const labelled = isSelected || status === "queued" || scale >= { available: LABEL_AVAILABLE_FROM, active: LABEL_ACTIVE_FROM, queued: 0, blocked: Infinity }[status];
-  const suffix = { available: ` ${nodeCost(nodeId)}`, queued: ` · ${t("main.queued")}`, active: "", blocked: "" }[status];
+  const nodes = mapNodes(game);
+  const nameOf = (n: MapNode) =>
+    t(`node.${n.nodeId}`) + { available: ` ${nodeCost(n.nodeId)}`, queued: ` · ${t("main.queued")}`, active: "", blocked: "" }[n.status];
+  const font = LABEL_FONT / scale;
+  const obstacles = [{ x: C, y: C, r: R0 - 20 }, ...nodes.map((n) => ({ x: n.x, y: n.y, r: n.status === "blocked" ? BLOCKED_RADIUS : NODE_RADIUS }))];
+  const labels = layoutLabels(labelCandidates(nodes, selected, nameOf), font, obstacles);
   return (
-    <g className={`node ${status}${isSelected ? " selected" : ""}`} onClick={() => onSelect(nodeId)}>
-      <title>{t(`node.${nodeId}`)}</title>
-      <circle cx={x} cy={y} r={status === "blocked" ? 4 : 10} />
-      {labelled && <text {...radialText(angle, r + 20)}>{t(`node.${nodeId}`) + suffix}</text>}
-      {figure && <text className="figure" {...radialText(angle + 0.05, r - 50)}>≈ {figureShortName(figure)}</text>}
-    </g>
+    <>
+      {policyTrees.map((tree, i) => {
+        const start = polar(TREE_ANGLES[i] ?? 0, R0 - 20);
+        const end = polar(TREE_ANGLES[i] ?? 0, ringRadius(tree.nodes.length));
+        return <line key={tree.id} className="spoke" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />;
+      })}
+      {nodes.map((n) => (
+        <g key={n.nodeId} className={`node ${n.status}${selected === n.nodeId ? " selected" : ""}`} onClick={() => onSelect(n.nodeId)}>
+          <title>{t(`node.${n.nodeId}`)}</title>
+          <circle cx={n.x} cy={n.y} r={n.status === "blocked" ? BLOCKED_RADIUS : NODE_RADIUS} />
+        </g>
+      ))}
+      {labels.map((l) => (
+        <text key={`${l.kind}-${l.id}`} className={l.kind === "figure" ? "label figure" : "label"} x={l.x} y={l.y} textAnchor="middle" style={{ fontSize: font }} onClick={() => onSelect(l.id)}>
+          {l.text}
+        </text>
+      ))}
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import "../i18n/index.js";
 import { loadSave } from "../api/mockApi.js";
-import { RadialMap, TREE_ANGLES, fieldAngle } from "./RadialMap.js";
+import { RadialMap, TREE_ANGLES, fieldAngle, labelCandidates } from "./RadialMap.js";
 import { INITIAL_VIEW, MAX_SCALE, MIN_SCALE, panBy, viewBox, zoomBy } from "./useZoom.js";
 
 const renderMap = () => {
@@ -56,11 +56,12 @@ describe("RadialMap", () => {
     expect(screen.queryByText("Prender opositores 48")).toBeNull();
     expect(screen.getByText("2 ativas · 4 disponíveis")).toBeTruthy();
     fireEvent.click(screen.getByText("Segurança"));
-    expect(screen.getByText("Prender opositores 48")).toBeTruthy();
+    expect(screen.queryByText("2 ativas · 4 disponíveis")).toBeNull();
+    expect(screen.getAllByText("Prender opositores")[0]?.tagName).toBe("title");
     expect(svg.getAttribute("viewBox")).not.toBe("0 0 1400 1400");
   });
 
-  it("arrasta para mover e só rotula ativas com zoom alto", () => {
+  it("arrasta para mover", () => {
     const svg = renderMap();
     fireEvent.pointerMove(svg, { clientX: 50, clientY: 0 });
     expect(svg.getAttribute("viewBox")).toBe("0 0 1400 1400");
@@ -68,10 +69,34 @@ describe("RadialMap", () => {
     fireEvent.pointerMove(svg, { clientX: 1, clientY: 0 });
     fireEvent.pointerUp(svg);
     expect(svg.getAttribute("viewBox")).toBe("-1400 0 1400 1400");
-    expect(screen.queryByText("Polícia secreta")?.tagName).toBe("title");
+  });
+
+  it("aproximar revela mais rótulos, com nome acima e figura abaixo, e clicar no rótulo seleciona", () => {
+    const selected: string[] = [];
+    render(<RadialMap game={loadSave()} selected="torture" onSelect={(id) => selected.push(id)} />);
+    const count = () => document.querySelectorAll("text.label").length;
+    const before = count();
     fireEvent.click(screen.getByLabelText("Aproximar"));
     fireEvent.click(screen.getByLabelText("Aproximar"));
     fireEvent.click(screen.getByLabelText("Aproximar"));
-    expect(screen.getAllByText("Polícia secreta").map((el) => el.tagName)).toContain("text");
+    expect(count()).toBeGreaterThan(before);
+    expect(screen.getByText("≈ Honecker")).toBeTruthy();
+    const label = screen.getAllByText("Tortura").find((el) => el.tagName === "text");
+    if (!label) throw new Error("rótulo da selecionada não posicionado");
+    fireEvent.click(label);
+    expect(selected).toEqual(["torture"]);
+  });
+});
+
+describe("labelCandidates", () => {
+  it("ignora bloqueadas, exceto a selecionada, que tem prioridade máxima", () => {
+    const nodes = [
+      { nodeId: "torture", status: "blocked" as const, x: 0, y: 0 },
+      { nodeId: "censorship", status: "blocked" as const, x: 0, y: 0 },
+      { nodeId: "opposition-surveillance", status: "active" as const, x: 0, y: 0 },
+    ];
+    const result = labelCandidates(nodes, "torture", (n) => n.nodeId);
+    expect(result.map((c) => [c.id, c.priority])).toEqual([["torture", 0], ["opposition-surveillance", 3]]);
+    expect(result[1]?.figure).toBe("≈ Honecker");
   });
 });

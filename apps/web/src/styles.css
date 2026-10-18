@@ -89,6 +89,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .radial .spoke { stroke: var(--line); }
 .radial text { fill: var(--text); font-size: 17px; dominant-baseline: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
 .radial .field-label { fill: var(--muted); font: 700 24px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+.radial .label { cursor: pointer; }
 .radial .figure { fill: var(--accent); font-style: italic; }
 .radial .center { fill: var(--bg); stroke: var(--accent); stroke-width: 2; }
 .radial .center-label { font: 700 20px var(--display); }
