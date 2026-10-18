@@ -23,9 +23,11 @@ RUN pnpm --filter "@decreto/api..." run build
 FROM node:22-slim AS runtime
 WORKDIR /repo
 ENV NODE_ENV=production
+ENV ASSETS_DIR=/repo/assets/images
 COPY --from=build /repo/node_modules ./node_modules
 COPY --from=build /repo/packages ./packages
 COPY --from=build /repo/apps/api ./apps/api
+COPY assets/images ./assets/images
 WORKDIR /repo/apps/api
 EXPOSE 3001
 CMD ["node", "dist/index.js"]
