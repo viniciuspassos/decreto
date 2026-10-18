@@ -6,9 +6,6 @@ const initialEventImages = [
   { eventName: "prisao-oposicao", fileLocation: "prisao-oposicao/prisao-oposicao.png" },
   { eventName: "posse", fileLocation: "posse/juramento.png" },
   { eventName: "comicio", fileLocation: "comicio/palanque.png" },
-  { eventName: "eleicao", fileLocation: "eleicao/apuracao.png" },
-  { eventName: "atentado", fileLocation: "atentado/tentativa.png" },
-  { eventName: "morte", fileLocation: "morte/velorio-oficial.png" },
 ];
 
 export async function seedEventImages(db: ReturnType<typeof createDb>): Promise<void> {
