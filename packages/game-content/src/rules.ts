@@ -39,3 +39,11 @@ export type TaxRate = (typeof TAX_RATES)[number];
 
 /** Custo de mudar `taxRate`: `10 × (1 + salto em faixas de 10%)`. */
 export const TAX_STEP_COST_BASE = 10;
+
+/** Partida nova: capital e apoio de cada grupo não emergente ao tomar posse. */
+export const INITIAL_CAPITAL = 60;
+export const INITIAL_SUPPORT = 50;
+/** Capital ganho por semestre = aprovação × este fator (roteiro §4.21: só a aprovação conta). */
+export const CAPITAL_PER_APPROVAL = 0.5;
+/** Reação de grupo por ação de política que ele gosta (+) ou não gosta (−). */
+export const POLICY_REACTION = 4;

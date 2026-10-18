@@ -159,7 +159,7 @@ export function endSemester(state: GameState): { state: GameState; report: Semes
   const groupChanges = groups.filter((g) => g.delta !== 0).map((g) => ({ id: g.id, delta: g.delta }));
   const report: SemesterReport = {
     applied, approvalBefore: state.approval, capitalBefore: state.capital,
-    indicatorsBefore: state.indicators, groupChanges, risks: risksOf(next),
+    indicatorsBefore: state.indicators, groupChanges, risks: risksOf(next), events: [],
   };
   const revealed = applied.find((n) => nodeFigures[n]);
   const event: GameEvent | null = revealed

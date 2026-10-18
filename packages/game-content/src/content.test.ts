@@ -5,6 +5,7 @@ import { events, systemEvents } from "./events";
 import { historicalFigures } from "./historical-figures";
 import { BASE_INDICATORS, INITIAL_TAX_RATE, SITUATIONS } from "./initial-state";
 import { nodeEffects, taxRateEffects } from "./node-effects";
+import { EVENT_COUNT_ODDS, GROUP_INDICATOR_REACTIONS, GROUP_SIZE_LIMITS, INDICATOR_DYNAMICS, LEVEL_INDICATORS } from "./movement";
 import { EXCLUSIVE_NODE_PAIRS, EXTRA_PREREQS, nodeFigures, policyTrees } from "./policy-trees";
 import { TAX_RATES } from "./rules";
 import { utopias } from "./utopias";
@@ -116,5 +117,14 @@ describe("conteúdo de jogo", () => {
         expect(entry?.option?.b).toBeTruthy();
       });
     });
+  });
+
+  it("tabelas de movimento: grupos existentes, 9 indicadores de nível e cota de eventos somando 100%", () => {
+    GROUP_INDICATOR_REACTIONS.forEach((r) => {
+      if (r.groups !== "all") r.groups.forEach((id) => expect(groupIds.has(id)).toBe(true));
+    });
+    Object.keys(GROUP_SIZE_LIMITS).forEach((id) => expect(groupIds.has(id)).toBe(true));
+    expect(Object.keys(INDICATOR_DYNAMICS).sort()).toEqual([...LEVEL_INDICATORS].sort());
+    expect(EVENT_COUNT_ODDS.reduce((sum, o) => sum + o.probability, 0)).toBeCloseTo(1);
   });
 });
