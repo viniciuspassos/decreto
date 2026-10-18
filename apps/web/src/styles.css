@@ -74,14 +74,25 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .big { font-size: 40px; }
 
 /* Radial */
-.radial { width: 100%; height: calc(100vh - 70px); }
+.radial-wrap { position: relative; }
+.radial { width: 100%; height: calc(100vh - 70px); cursor: grab; touch-action: none; user-select: none; }
+.radial:active { cursor: grabbing; }
+.zoom-controls { position: absolute; top: 16px; right: 16px; display: flex; gap: 6px; }
+.zoom-controls .btn { width: 40px; padding: 6px 0; background: var(--bg); }
+.zoom-hint { position: absolute; bottom: 16px; left: 24px; }
+.radial .cluster { cursor: pointer; }
+.radial .cluster circle { fill: var(--bg-raised); stroke: var(--accent); stroke-width: 2; }
+.radial .cluster .field-label { fill: var(--text); font-size: 34px; }
+.radial .cluster .counts { font-size: 22px; }
+.radial .cluster:hover circle { fill: var(--line); }
 .radial .ring { fill: none; stroke: var(--line); stroke-dasharray: 3 5; }
 .radial .spoke { stroke: var(--line); }
-.radial text { fill: var(--text); font-size: 12px; dominant-baseline: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
-.radial .field-label { fill: var(--muted); font: 700 14px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+.radial text { fill: var(--text); font-size: 17px; dominant-baseline: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.radial .field-label { fill: var(--muted); font: 700 24px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+.radial .label { cursor: pointer; }
 .radial .figure { fill: var(--accent); font-style: italic; }
 .radial .center { fill: var(--bg); stroke: var(--accent); stroke-width: 2; }
-.radial .center-label { font: 700 15px var(--display); }
+.radial .center-label { font: 700 20px var(--display); }
 .node { cursor: pointer; }
 .node circle { stroke: var(--accent); stroke-width: 2; fill: var(--bg); }
 .node.active circle { fill: var(--accent); }
