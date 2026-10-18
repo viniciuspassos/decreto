@@ -127,6 +127,12 @@ condições de utopia/fim de jogo).
 - Se a remoção de código obsoleto for **grande** (fora do escopo da tarefa), não fazer na hora:
   avisar o usuário e abrir uma issue no repo (`gh issue create`) para implementar depois.
 
+## Antes de começar
+
+- Antes de iniciar qualquer alteração de código ou de montar um plano, rodar `git fetch origin main`
+  (ou equivalente) para garantir que o estado de `main` usado como referência está atualizado —
+  especialmente relevante com múltiplas branches/worktrees em paralelo neste repo.
+
 ## Git hooks e CI
 
 - **`pre-commit`:** typecheck → lint → complexidade → testes.
