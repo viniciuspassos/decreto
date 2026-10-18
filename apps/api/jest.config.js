@@ -9,9 +9,6 @@ export default {
   transform: {
     "^.+\\.ts$": ["ts-jest", { useESM: true }],
   },
-  // Testes de src/db e src/routes compartilham um único Postgres real entre
-  // arquivos; rodar em série evita corrida entre eles (ver event_images).
-  maxWorkers: 1,
   collectCoverage: true,
   coverageDirectory: "coverage",
   coverageReporters: ["json", "text-summary"],

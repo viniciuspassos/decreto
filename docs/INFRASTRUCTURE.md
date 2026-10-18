@@ -83,11 +83,11 @@ principal e para todos os worktrees que compartilham o mesmo `.git`.
 - `pnpm install --frozen-lockfile` → `pnpm turbo run typecheck lint test build` → 
   `pnpm diff-coverage origin/main` (mesmo gate do `pre-push`, agora bloqueante de merge).
 - Cache do Turborepo via `actions/cache` (chave por `github.sha`, fallback por `runner.os`).
-- O job `ci` sobe um `services.postgres` (`postgres:16-alpine`, mesmas credenciais do
-  `.env.example`) e expõe `DATABASE_URL=postgresql://decreto:decreto@localhost:5432/decreto` no
-  `env` do job; um step "Apply DB migrations" (`pnpm --filter @decreto/api run db:migrate`) roda
-  antes de `pnpm turbo run typecheck lint test build`, já que os testes do `apps/api` que tocam
-  `src/db/**` rodam contra um Postgres real (sem mocks).
+- O job `ci` ainda sobe um `services.postgres` (`postgres:16-alpine`, mesmas credenciais do
+  `.env.example`) e roda um step "Apply DB migrations"
+  (`pnpm --filter @decreto/api run db:migrate`), mas isso não é mais exigido pelos testes — ver
+  "Postgres (`apps/api`)" abaixo. Removê-los do workflow é cleanup pendente (fora do escopo da
+  mudança que tirou a dependência de Postgres real dos testes).
 
 ## Postgres (`apps/api`)
 
@@ -97,10 +97,13 @@ principal e para todos os worktrees que compartilham o mesmo `.git`.
 - Scripts do pacote: `db:generate` (gera migration a partir do schema), `db:migrate` (aplica
   migrations pendentes, lê `DATABASE_URL`), `db:seed` (popula dados iniciais de forma idempotente,
   ex. `event_images`).
-- **Pré-requisito local**: como o `pre-commit`/`pre-push` roda `test` e os testes do `apps/api`
-  conectam a um Postgres real (sem mocks), é preciso ter `docker compose up -d db` rodando e
-  `DATABASE_URL` exportada no shell (mesmo valor do `.env.example`, trocando `db` por `localhost`)
-  antes de commitar/pushar — senão os hooks falham por falta de banco, não por erro de código.
+- **Testes**: os testes do `apps/api` que tocam `src/db/**` (e as rotas que dependem do banco)
+  rodam contra **PGlite** (`@electric-sql/pglite`) via `apps/api/src/db/testDb.ts` — o mesmo motor
+  Postgres compilado para WASM, aplicando as migrations reais em um banco isolado e descartável
+  por teste, sem mock da camada de query nem servidor externo. Não é preciso `DATABASE_URL` nem
+  `docker compose up -d db` para rodar `pnpm test`, nem para os hooks `pre-commit`/`pre-push`.
+  `DATABASE_URL` só é lida por `createDb()` (produção/dev real) e pelos scripts `db:migrate`/
+  `db:seed`/`db:generate`.
 
 ## Deploy (a decidir)
 

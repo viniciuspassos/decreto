@@ -1,24 +1,24 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import request from "supertest";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createApp } from "../app.js";
-import { createDb, type Db } from "../db/client.js";
+import { createTestDb } from "../db/testDb.js";
 import { seedEventImages } from "../db/seed.js";
 import { eventImages } from "../db/schema.js";
+import type { Db } from "../db/client.js";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const assetsDir = path.resolve(dirname, "../../../../assets/images");
 let db: Db;
+let close: () => Promise<void>;
 
 beforeAll(async () => {
-  db = createDb();
-  await migrate(db, { migrationsFolder: path.resolve(dirname, "../../drizzle") });
+  ({ db, close } = await createTestDb());
   await seedEventImages(db);
 });
 
 afterAll(async () => {
-  await db.$client.end();
+  await close();
 });
 
 describe("GET /events/:eventName/image", () => {
@@ -62,8 +62,8 @@ describe("GET /events/:eventName/image", () => {
   });
 
   it("retorna 500 (em vez de derrubar o processo) quando a consulta ao banco falha", async () => {
-    const brokenDb = createDb();
-    await brokenDb.$client.end();
+    const { db: brokenDb, close: closeBrokenDb } = await createTestDb();
+    await closeBrokenDb();
     const app = createApp({ db: brokenDb, assetsDir });
 
     const response = await request(app).get("/events/prisao-oposicao/image");

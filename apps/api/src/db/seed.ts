@@ -8,7 +8,7 @@ const initialEventImages = [
   { eventName: "comicio", fileLocation: "comicio/palanque.png" },
 ];
 
-export async function seedEventImages(db: ReturnType<typeof createDb>): Promise<void> {
+export async function seedEventImages(db: Db): Promise<void> {
   for (const row of initialEventImages) {
     const [existing] = await db
       .select({ id: eventImages.id, fileLocation: eventImages.fileLocation })

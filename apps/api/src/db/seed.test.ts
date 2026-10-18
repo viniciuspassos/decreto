@@ -1,27 +1,24 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { jest } from "@jest/globals";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { eq } from "drizzle-orm";
-import { createDb, type Db } from "./client.js";
+import { createTestDb } from "./testDb.js";
 import { main, handleCliError } from "./seed.js";
 import { eventImages } from "./schema.js";
+import type { Db } from "./client.js";
 
-const dirname = path.dirname(fileURLToPath(import.meta.url));
 const seededEventName = "prisao-oposicao";
 let db: Db;
+let close: () => Promise<void>;
 
 beforeAll(async () => {
-  db = createDb();
-  await migrate(db, { migrationsFolder: path.resolve(dirname, "../../drizzle") });
+  ({ db, close } = await createTestDb());
 });
 
 afterAll(async () => {
-  await db.$client.end();
+  await close();
 });
 
 // Cada teste reparte o fixture seedado por nome de evento, nunca a tabela inteira
-// — outros arquivos de teste rodam contra o mesmo Postgres e têm suas próprias linhas.
+// — os outros testes deste arquivo rodam contra o mesmo banco em memória.
 async function clearSeededFixture(): Promise<void> {
   await db.delete(eventImages).where(eq(eventImages.eventName, seededEventName));
 }

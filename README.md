@@ -79,8 +79,10 @@ pnpm --filter @decreto/api run db:migrate
 pnpm --filter @decreto/api run db:seed
 ```
 
-Rodar `pnpm test`/os git hooks localmente também exige um Postgres acessível em `DATABASE_URL` —
-ver [`docs/INFRASTRUCTURE.md`](./docs/INFRASTRUCTURE.md#postgres-appsapi).
+`pnpm test`/os git hooks não exigem Postgres nem `DATABASE_URL`: os testes de `apps/api` rodam
+contra um banco PGlite (Postgres em WASM) isolado por teste — ver
+[`docs/INFRASTRUCTURE.md`](./docs/INFRASTRUCTURE.md#postgres-appsapi). `DATABASE_URL` só é
+necessária para rodar a API de verdade (`pnpm dev`, Docker) ou os scripts `db:migrate`/`db:seed`.
 
 ## Documentação
 

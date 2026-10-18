@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
+import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import * as schema from "./schema.js";
 
 function requireDatabaseUrl(): string {
@@ -15,4 +16,4 @@ export function createDb(connectionString = requireDatabaseUrl()) {
   return drizzle(pool, { schema });
 }
 
-export type Db = ReturnType<typeof createDb>;
+export type Db = PgDatabase<PgQueryResultHKT, typeof schema>;

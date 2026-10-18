@@ -1,20 +1,21 @@
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { startServer } from "./index.js";
-import { createDb, type Db } from "./db/client.js";
+import { createTestDb } from "./db/testDb.js";
 
 describe("startServer", () => {
   let server: Server;
-  let db: Db;
+  let close: () => Promise<void>;
 
   afterEach(async () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
-    await db.$client.end();
+    await close();
   });
 
   it("sobe o servidor HTTP e responde em /health", async () => {
     process.env.PORT = "0";
-    db = createDb();
+    const { db, close: closeDb } = await createTestDb();
+    close = closeDb;
     server = startServer(db);
     await new Promise<void>((resolve) => server.once("listening", resolve));
 
