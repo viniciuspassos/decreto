@@ -3,6 +3,12 @@
 Workflows do ComfyUI (formato API) que geram as imagens de `assets/images/`. Cada arquivo em
 `prompts/<categoria>/<nome>.json` gera `images/<categoria>/<nome>.png` — mesmo caminho, mesmo nome.
 
+`_base.workflow.json` é o mesmo pipeline (checkpoint → prompt positivo/negativo → KSampler →
+VAEDecode → SaveImage), mas no **formato UI** do ComfyUI (nodes/links/posições), para abrir e editar
+visualmente no ComfyUI Desktop — arraste o arquivo para a janela do app, ou use File → Open
+Workflow. Use-o como ponto de partida para montar um novo evento: edite os prompts, exporte de volta
+(Workflow → Export (API)) para um `.json` em `prompts/<categoria>/<nome>.json` e rode como abaixo.
+
 As imagens aparecem após eventos marcantes (roteiro §8). Tom de "simulação séria": repressão
 aparece de forma sóbria, sem violência gráfica, sangue ou ferimentos (roteiro §6) — o negative
 prompt de cada workflow já bloqueia isso; mantenha ao criar novos.
