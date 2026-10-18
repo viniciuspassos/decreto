@@ -18,11 +18,15 @@ As imagens aparecem após eventos marcantes (roteiro §8). Tom de "simulação s
 aparece de forma sóbria, sem violência gráfica, sangue ou ferimentos (roteiro §6) — por isso o
 negative prompt é fixo no template e **não** faz parte do manifest.
 
-## Modelo
+## Pré-requisitos
 
-- **Checkpoint:** `RealVisXL_V5.0_Lightning_fp16.safetensors` (SDXL destilado, ~6,9 GB)
-  — https://huggingface.co/SG161222/RealVisXL_V5.0_Lightning
-- Colocar em `models/checkpoints/` do ComfyUI. Não precisa de VAE, LoRA nem nós customizados.
+1. **ComfyUI rodando** em `127.0.0.1:8188` (ComfyUI Desktop ou `comfy launch`).
+2. **Checkpoint instalado**: baixe `RealVisXL_V5.0_Lightning_fp16.safetensors` (SDXL destilado,
+   ~6,9 GB) de https://huggingface.co/SG161222/RealVisXL_V5.0_Lightning e coloque em
+   `models/checkpoints/` do ComfyUI. Não precisa de VAE, LoRA nem nós customizados. Se o ComfyUI já
+   estava aberto antes do download, reinicie-o (ele só lê a pasta de checkpoints na inicialização).
+3. **Dependências do repo instaladas**: `pnpm install` na raiz (instala o pacote
+   `tools/generate-images`).
 
 ## Parâmetros (padrão de todos os workflows)
 
@@ -33,16 +37,63 @@ negative prompt é fixo no template e **não** faz parte do manifest.
 | CFG | 1,5 |
 | Sampler / scheduler | `dpmpp_sde` / `karras` |
 
-## Como rodar
+## Gerar imagens
 
-Com o ComfyUI aberto em `127.0.0.1:8188`, para gerar todo o lote do `manifest.json` (pula imagens
-que já existem em `assets/images/`):
+### 1. Adicionar entradas ao manifest
+
+Edite `assets/prompts/manifest.json` e acrescente uma entrada por imagem:
+
+```json
+{
+  "category": "eventos",
+  "name": "golpe-militar",
+  "prompt": "cinematic video game screenshot, Unreal Engine 5, photorealistic. ..."
+}
+```
+
+- `category`/`name`: minúsculo, só letras/números/hífen (`[a-z0-9-]+`) — definem o destino
+  `assets/images/<category>/<name>.png`.
+- `prompt`: só o prompt **positivo**. O negative prompt (bloqueia violência gráfica/sangue, roteiro
+  §6) já é fixo no template e não deve ser repetido aqui.
+- `seed` (opcional): número fixo para reproduzir uma geração específica; se omitido, usa a seed do
+  template (`_base.api.json`).
+
+Para gerar as 100 imagens do roteiro, basta ter 100 entradas no array — o script processa todas,
+uma a uma.
+
+### 2. (opcional) Testar o prompt no ComfyUI Desktop antes de rodar o lote
+
+Abra `assets/prompts/_base.workflow.json` no ComfyUI Desktop (arraste o arquivo para a janela do
+app, ou File → Open Workflow), edite o texto do nó "Prompt positivo", clique em "Run" e confira o
+resultado. É o mesmo pipeline do template usado pelo script — só em formato visual, para testar
+seed/prompt rapidamente sem editar o manifest.
+
+### 3. Rodar o script
+
+Com o ComfyUI aberto (pré-requisito 1):
 
 ```bash
 pnpm --filter @decreto/generate-images generate
 ```
 
-Flags úteis:
+Lê `assets/prompts/manifest.json`, e para cada entrada: clona `_base.api.json`, troca o
+prompt/seed/destino, envia para a fila do ComfyUI (`POST /prompt`), espera terminar (`GET
+/history/<id>`) e baixa o PNG (`GET /view`) direto para `assets/images/<categoria>/<nome>.png` — sem
+passo manual de copiar arquivo. Entradas cujo arquivo de destino já existe são puladas (log
+`[skipped] ...`); as novas saem como `[generated] ...`.
+
+Como o ComfyUI local roda um job por vez, o script gera as imagens **em sequência** (não em
+paralelo) — para 100 entradas, espere algo como 100 × tempo por imagem (ver tabela "Máquina"
+abaixo).
+
+Flags:
+
+| Flag | Efeito |
+|---|---|
+| `--only <nome>` | gera só a entrada com esse `name`, ignora as demais |
+| `--force` | regera mesmo que o arquivo de destino já exista |
+| `--comfy-url <url>` | usa outro ComfyUI (padrão: `http://127.0.0.1:8188`, ou a env `COMFYUI_URL`) |
+| `--manifest <caminho>` | usa outro arquivo de manifest (padrão: `assets/prompts/manifest.json`) |
 
 ```bash
 # gera (ou regera) só uma entrada, mesmo que o arquivo já exista
@@ -52,12 +103,14 @@ pnpm --filter @decreto/generate-images generate -- --only golpe-militar --force
 pnpm --filter @decreto/generate-images generate -- --comfy-url http://192.168.1.10:8188
 ```
 
-O script lê `manifest.json`, para cada entrada clona `_base.api.json`, troca o prompt/seed/destino,
-envia para a fila do ComfyUI (`/prompt`), espera terminar (`/history`) e grava o PNG direto em
-`assets/images/<categoria>/<nome>.png` — sem passo manual de copiar arquivo.
+### Erros comuns
 
-Para testar um prompt novo antes de colocá-lo no manifest, use `_base.workflow.json` no ComfyUI
-Desktop (veja acima) ou rode manualmente com `comfy run --workflow <arquivo API>`.
+- `ComfyUI recusou o prompt: ...` — ComfyUI não está rodando em `127.0.0.1:8188`, ou o checkpoint
+  não está instalado/visível (reinicie o ComfyUI após colocar o arquivo em `models/checkpoints/`).
+- `tempo esgotado esperando o prompt ...` — geração demorou mais que 5 minutos (padrão); confira a
+  fila no próprio ComfyUI, pode haver outro job pesado rodando na frente.
+- `ComfyUI não retornou imagem para "<nome>"` — o workflow rodou mas o nó `SaveImage` não produziu
+  saída; confira o log do ComfyUI para o erro real.
 
 ## Máquina
 
