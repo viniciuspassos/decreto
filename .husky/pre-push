@@ -1,0 +1,2 @@
+pnpm turbo run typecheck lint test build
+pnpm diff-coverage origin/main
