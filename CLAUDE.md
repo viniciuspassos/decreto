@@ -152,6 +152,14 @@ condições de utopia/fim de jogo).
 - Débitos de severidade **baixa** viram issue no repo (`gh issue create`), com o link citado na
   descrição do PR.
 
+### Auto-merge
+
+- Logo após abrir o PR, ativar o auto-merge: `gh pr merge <número> --auto --squash
+  --delete-branch`. O merge acontece sozinho quando o check obrigatório `ci` passa (proteção da
+  `main`), sem acompanhar a CI nem fazer merge manual.
+- Se a CI falhar, o PR fica aberto: corrigir na mesma branch e dar push. O auto-merge continua
+  ativo.
+
 ## Documentação
 
 Quando o repo crescer, dividir em:
