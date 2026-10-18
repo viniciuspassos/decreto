@@ -46,6 +46,17 @@ describe("parseTrailerManifest", () => {
     });
   });
 
+  it("rejeita um valor que não é objeto", () => {
+    expect(() => parseTrailerManifest(JSON.stringify(["x"]))).toThrow(
+      'manifest de trailer deve ser um objeto',
+    );
+  });
+
+  it("rejeita plano que não é objeto", () => {
+    const raw = JSON.stringify({ trailer: "1-mandato", plans: ["x"] });
+    expect(() => parseTrailerManifest(raw)).toThrow("plano inválido: não é um objeto");
+  });
+
   it("rejeita trailer fora do padrão slug", () => {
     const raw = JSON.stringify({ trailer: "1 Mandato", plans: [] });
     expect(() => parseTrailerManifest(raw)).toThrow('"trailer"');
@@ -157,6 +168,15 @@ describe("resolveTrailerClipEntries", () => {
 
     expect(() => resolveTrailerClipEntries(trailerManifest, undefined)).toThrow(
       'plano compartilhado "a2" não encontrado',
+    );
+  });
+
+  it("lança erro quando o plano shared aponta para outro plano shared em comum", () => {
+    const trailerManifest = { trailer: "1-mandato", plans: [{ id: "a2", shared: true as const }] };
+    const comumManifest = { trailer: "comum", plans: [{ id: "a2", shared: true as const }] };
+
+    expect(() => resolveTrailerClipEntries(trailerManifest, comumManifest)).toThrow(
+      'plano compartilhado "a2" não pode apontar para outro plano shared',
     );
   });
 });
