@@ -31,5 +31,6 @@ export function handleCliError(error: unknown): void {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  /* istanbul ignore next -- bootstrap de CLI, não roda sob o import dos testes */
   main().catch(handleCliError);
 }
