@@ -6,11 +6,10 @@ sem pontuação, com decisões livres entre qualquer espectro político.
 
 ## Estado atual
 
-Scaffold inicial do monorepo criado: `apps/web` (frontend), `apps/api` (backend) e os pacotes
-`packages/shared-types`, `packages/game-content`, `packages/game-engine`. O conteúdo de jogo
-(árvores de políticas, grupos, regimes etc.) e as regras do motor ainda não foram implementados —
-por enquanto os pacotes expõem só o essencial para o monorepo buildar, testar e rodar de ponta a
-ponta (frontend servido, backend respondendo `/health`, Postgres de pé).
+v0 do frontend (`apps/web`) com todas as telas do design, jogável de ponta a ponta com o backend
+**mockado** em `apps/web/src/api/mockApi.ts`. O conteúdo de jogo (árvores, grupos, regimes,
+utopias, figuras históricas) já está em `packages/game-content`; o motor real (`apps/api` +
+`packages/game-engine`) ainda não foi implementado — a API só responde `/health`.
 
 ## Pré-requisitos
 
@@ -24,6 +23,16 @@ ponta (frontend servido, backend respondendo `/health`, Postgres de pé).
 pnpm install        # instala as dependências de todos os pacotes do workspace
 pnpm dev             # sobe apps/web (Vite, http://localhost:5173) e apps/api (http://localhost:3001) em paralelo
 ```
+
+### Só o frontend, com dados mockados
+
+```bash
+pnpm install
+pnpm dev:mocked      # builda os pacotes compartilhados e sobe só apps/web em http://localhost:5173
+```
+
+Não precisa de API, banco nem Docker: toda regra de jogo vem de `apps/web/src/api/mockApi.ts`.
+Para começar rápido, use "Continuar partida" na tela inicial (save de exemplo).
 
 Outros comandos úteis na raiz (executam em todos os pacotes via Turborepo, com cache):
 
@@ -80,7 +89,7 @@ apps/
   web/      # frontend React + Vite + TypeScript, i18next (pt-BR/en)
   api/      # backend Node + TypeScript (Express), motor de jogo roda aqui
 packages/
-  game-content/  # dados tipados: árvores, grupos, regimes, utopias, figuras históricas (ainda vazio)
+  game-content/  # dados tipados: árvores, grupos, regimes, utopias, figuras históricas
   game-engine/   # regras puras do motor de jogo (ainda só um placeholder testável)
   shared-types/  # tipos compartilhados entre api e web
 tools/
