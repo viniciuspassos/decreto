@@ -52,6 +52,28 @@ describe("comfyClient", () => {
     ).rejects.toThrow("ComfyUI recusou /history");
   });
 
+  it("pollForOutputImages lança na hora o erro de execução do ComfyUI", async () => {
+    const status = {
+      status_str: "error",
+      messages: [["execution_error", { exception_message: "MPS out of memory" }]],
+    };
+    jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ p1: { outputs: {}, status } }));
+
+    await expect(
+      pollForOutputImages("http://localhost:8188", "p1", { intervalMs: 1 }),
+    ).rejects.toThrow("ComfyUI falhou no prompt p1: MPS out of memory");
+  });
+
+  it("pollForOutputImages usa mensagem genérica quando o erro não tem detalhe", async () => {
+    jest
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse({ p1: { status: { status_str: "error" } } }));
+
+    await expect(
+      pollForOutputImages("http://localhost:8188", "p1", { intervalMs: 1 }),
+    ).rejects.toThrow("erro desconhecido");
+  });
+
   it("pollForOutputImages lança erro de timeout quando o prompt nunca termina", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}));
 

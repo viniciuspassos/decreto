@@ -8,6 +8,8 @@ export interface CliArgs {
   comfyUrl: string;
   force: boolean;
   only?: string;
+  extension?: string;
+  timeoutMin?: number;
 }
 
 const DEFAULTS = {
@@ -16,7 +18,14 @@ const DEFAULTS = {
   imagesDir: "assets/images",
 };
 
-type StringField = "only" | "manifestPath" | "basePath" | "imagesDir" | "comfyUrl";
+type StringField =
+  | "only"
+  | "manifestPath"
+  | "basePath"
+  | "imagesDir"
+  | "comfyUrl"
+  | "extension"
+  | "timeoutMin";
 
 const VALUE_FLAGS: Record<string, StringField> = {
   "--only": "only",
@@ -24,6 +33,8 @@ const VALUE_FLAGS: Record<string, StringField> = {
   "--base": "basePath",
   "--images-dir": "imagesDir",
   "--comfy-url": "comfyUrl",
+  "--ext": "extension",
+  "--timeout-min": "timeoutMin",
 };
 
 interface ParsedFlags {
@@ -52,7 +63,10 @@ function collectFlags(argv: string[]): ParsedFlags {
   return { values, force };
 }
 
-/** Lê flags de linha de comando (--manifest, --base, --images-dir, --comfy-url, --force, --only). */
+/**
+ * Lê flags de linha de comando (--manifest, --base, --images-dir, --comfy-url, --force, --only,
+ * --ext, --timeout-min).
+ */
 export function parseArgs(argv: string[]): CliArgs {
   const { values, force } = collectFlags(argv);
 
@@ -63,23 +77,38 @@ export function parseArgs(argv: string[]): CliArgs {
     comfyUrl: values.comfyUrl ?? process.env.COMFYUI_URL ?? "http://127.0.0.1:8188",
     force,
     only: values.only,
+    extension: values.extension,
+    timeoutMin: parseTimeoutMin(values.timeoutMin),
   };
 }
 
-/** Roda o lote completo a partir dos argumentos de CLI e imprime um resumo. */
+function parseTimeoutMin(value: string | undefined): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const minutes = Number(value);
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    throw new Error(`--timeout-min deve ser um número de minutos maior que zero (recebido: "${value}")`);
+  }
+  return minutes;
+}
+
+/** Roda o lote completo a partir dos argumentos de CLI e imprime cada entrada assim que termina. */
 export async function run(argv: string[]): Promise<void> {
   const args = parseArgs(argv);
   const base = loadBaseWorkflow(args.basePath);
   const entries = loadManifest(args.manifestPath);
 
-  const results = await runBatch(base, entries, {
+  await runBatch(base, entries, {
     comfyUrl: args.comfyUrl,
     imagesDir: args.imagesDir,
     force: args.force,
     only: args.only,
+    extension: args.extension,
+    timeoutMs: args.timeoutMin === undefined ? undefined : args.timeoutMin * 60 * 1000,
+    onResult: (result) => {
+      const time = new Date().toLocaleTimeString("pt-BR");
+      console.log(`${time} [${result.status}] ${result.category}/${result.name} -> ${result.destination}`);
+    },
   });
-
-  for (const result of results) {
-    console.log(`[${result.status}] ${result.category}/${result.name} -> ${result.destination}`);
-  }
 }

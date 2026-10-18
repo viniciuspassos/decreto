@@ -16,3 +16,6 @@ coverage/
 
 # Logs
 *.log
+
+# Clipes de vídeo gerados para os trailers (ver assets/trailers/producao.md)
+assets/trailers/clips/

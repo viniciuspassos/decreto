@@ -1,7 +1,7 @@
 # Trailers do Decreto: base comum
 
 Três trailers de **no máximo 60 s**, horizontais (16:9), sem versão para redes sociais, gerados no
-ComfyUI (Wan 2.2 TI2V 5B, clipes de ~5 s) e montados na edição.
+ComfyUI (Wan 2.2 T2V A14B, clipes de 2 s; ver [produção](producao.md)) e montados na edição.
 Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame final)
 
 ## Roteiros
@@ -30,7 +30,7 @@ Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame fina
   aos dados de `game-content`.
 - **Um gesto simples por clipe.** Cada plano é uma única ação contínua (sem transição animada
   dentro do clipe — preenchimentos, texto surgindo, formas se transformando — e sem movimento de
-  câmera composto). O Wan 2.2 TI2V 5B anima bem um gesto só; qualquer transição complexa deve ser
+  câmera composto). O Wan 2.2 anima bem um gesto só; qualquer transição complexa deve ser
   resolvida na edição, com um corte entre dois keyframes.
 - **Sem violência gráfica (roteiro §S6).** Repressão e morte aparecem por som fora de quadro,
   sombras, objetos e reação das pessoas — nunca sangue, ferimento ou corpo.
@@ -58,12 +58,11 @@ plano.
 
 ## Produção
 
-1. **Keyframes** (RealVisXL, como as imagens de evento) para manter o gabinete, a mesa e as mãos
-   iguais entre planos. Precisa baixar o checkpoint (~7 GB) nesta máquina.
-2. **Animação** com Wan 2.2 TI2V 5B a partir dos keyframes (imagem→vídeo), 1280×704, 24 fps,
-   ~5 s por clipe.
+Método, modelos, regras de prompt, script de geração e acompanhamento: **[producao.md](producao.md)**.
+
+1. **Clipes** com Wan 2.2 T2V A14B (texto → vídeo), 832×480, 2 s por clipe, ~15 min cada, gerados
+   em lote pela CLI (`pnpm generate:trailer-clips`).
+2. **Pós-produção** com ffmpeg: 24 fps, câmera lenta 1,5× (cada clipe vira 3 s) e 1080p. Planos
+   mais longos que 3 s viram 2 ou 3 clipes encadeados por cortes.
 3. **Edição:** gravação de tela do jogo sobre o monitor (versões pt-BR e en da interface), frame
    final nos dois idiomas, trilha e som (o Wan não gera áudio).
-
-Total estimado de clipes de IA (planos em preto não contam; montagens contam um clipe por imagem):
-2 (abertura) + 14 + 10 + 14 ≈ **40 clipes**. O encerramento é só cartela, sem IA.

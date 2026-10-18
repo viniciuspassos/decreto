@@ -10,7 +10,12 @@ interface QueueResponse {
   prompt_id: string;
 }
 
-type HistoryResponse = Record<string, { outputs?: Record<string, { images?: OutputImage[] }> }>;
+interface HistoryEntry {
+  outputs?: Record<string, { images?: OutputImage[] }>;
+  status?: { status_str?: string; messages?: [string, { exception_message?: string }][] };
+}
+
+type HistoryResponse = Record<string, HistoryEntry>;
 
 /** Envia o workflow para a fila do ComfyUI e retorna o id do prompt. */
 export async function queuePrompt(baseUrl: string, workflow: ApiWorkflow): Promise<string> {
@@ -63,9 +68,17 @@ async function fetchHistoryOutputImages(
   if (!entry) {
     return null;
   }
+  if (entry.status?.status_str === "error") {
+    throw new Error(`ComfyUI falhou no prompt ${promptId}: ${executionErrorMessage(entry)}`);
+  }
 
   const images = Object.values(entry.outputs ?? {}).flatMap((output) => output.images ?? []);
   return images.length > 0 ? images : null;
+}
+
+function executionErrorMessage(entry: HistoryEntry): string {
+  const error = entry.status?.messages?.find(([type]) => type === "execution_error");
+  return error?.[1].exception_message ?? "erro desconhecido";
 }
 
 function sleep(ms: number): Promise<void> {

@@ -43,6 +43,20 @@ describe("buildWorkflowForEntry", () => {
     expect(workflow["5"]?.inputs.seed).toBe(999);
   });
 
+  it("sobrescreve noise_seed quando o sampler é KSamplerAdvanced", () => {
+    const base = baseWorkflow();
+    base["5"] = { class_type: "KSamplerAdvanced", inputs: { noise_seed: 42 } };
+
+    const workflow = buildWorkflowForEntry(base, {
+      category: "trailer",
+      name: "a2",
+      prompt: "hands on a desk",
+      seed: 7,
+    });
+
+    expect(workflow["5"]?.inputs).toEqual({ noise_seed: 7 });
+  });
+
   it("não modifica o template base original", () => {
     const base = baseWorkflow();
     buildWorkflowForEntry(base, { category: "eventos", name: "x", prompt: "y" });

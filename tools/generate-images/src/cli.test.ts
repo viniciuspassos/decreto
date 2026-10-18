@@ -40,6 +40,10 @@ describe("parseArgs", () => {
       "http://x:1",
       "--only",
       "golpe-militar",
+      "--ext",
+      "mp4",
+      "--timeout-min",
+      "60",
       "--force",
     ]);
 
@@ -49,8 +53,14 @@ describe("parseArgs", () => {
       imagesDir: "out",
       comfyUrl: "http://x:1",
       only: "golpe-militar",
+      extension: "mp4",
+      timeoutMin: 60,
       force: true,
     });
+  });
+
+  it.each(["abc", "0", "-5"])("rejeita --timeout-min inválido (%s)", (value) => {
+    expect(() => parseArgs(["--timeout-min", value])).toThrow("--timeout-min deve ser um número");
   });
 });
 
@@ -59,23 +69,30 @@ describe("run", () => {
     jest.resetAllMocks();
   });
 
-  it("carrega base/manifest, roda o lote e imprime o resumo", async () => {
+  it("carrega base/manifest, roda o lote e imprime cada entrada concluída", async () => {
+    const result: RunBatchResult = {
+      name: "a",
+      category: "eventos",
+      status: "generated",
+      destination: "assets/images/eventos/a.png",
+    };
     loadBaseWorkflowMock.mockReturnValue({});
     loadManifestMock.mockReturnValue([{ category: "eventos", name: "a", prompt: "x" }]);
-    runBatchMock.mockResolvedValue([
-      { name: "a", category: "eventos", status: "generated", destination: "assets/images/eventos/a.png" },
-    ]);
+    runBatchMock.mockImplementation(async (...args: unknown[]) => {
+      (args[2] as { onResult: (r: RunBatchResult) => void }).onResult(result);
+      return [result];
+    });
     const logSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
 
-    await run(["--only", "a"]);
+    await run(["--only", "a", "--timeout-min", "60"]);
 
     expect(runBatchMock).toHaveBeenCalledWith(
       {},
       [{ category: "eventos", name: "a", prompt: "x" }],
-      expect.objectContaining({ only: "a" }),
+      expect.objectContaining({ only: "a", timeoutMs: 3_600_000 }),
     );
     expect(logSpy).toHaveBeenCalledWith(
-      "[generated] eventos/a -> assets/images/eventos/a.png",
+      expect.stringMatching(/ \[generated\] eventos\/a -> assets\/images\/eventos\/a\.png$/),
     );
   });
 });
