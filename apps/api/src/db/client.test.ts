@@ -13,4 +13,14 @@ describe("createDb", () => {
       }
     }
   });
+
+  it("cria um client drizzle quando uma connection string é passada", async () => {
+    const db = createDb("postgresql://decreto:decreto@localhost:5432/decreto");
+
+    try {
+      expect(db).toBeDefined();
+    } finally {
+      await db.$client.end();
+    }
+  });
 });

@@ -86,8 +86,8 @@ principal e para todos os worktrees que compartilham o mesmo `.git`.
 - O job `ci` ainda sobe um `services.postgres` (`postgres:16-alpine`, mesmas credenciais do
   `.env.example`) e roda um step "Apply DB migrations"
   (`pnpm --filter @decreto/api run db:migrate`), mas isso não é mais exigido pelos testes — ver
-  "Postgres (`apps/api`)" abaixo. Removê-los do workflow é cleanup pendente (fora do escopo da
-  mudança que tirou a dependência de Postgres real dos testes).
+  "Postgres (`apps/api`)" abaixo. Removê-los do workflow é cleanup rastreado na
+  [issue #42](https://github.com/viniciuspassos/decreto/issues/42).
 
 ## Postgres (`apps/api`)
 
@@ -100,7 +100,8 @@ principal e para todos os worktrees que compartilham o mesmo `.git`.
 - **Testes**: os testes do `apps/api` que tocam `src/db/**` (e as rotas que dependem do banco)
   rodam contra **PGlite** (`@electric-sql/pglite`) via `apps/api/src/db/testDb.ts` — o mesmo motor
   Postgres compilado para WASM, aplicando as migrations reais em um banco isolado e descartável
-  por teste, sem mock da camada de query nem servidor externo. Não é preciso `DATABASE_URL` nem
+  por arquivo de teste (uma instância por `beforeAll`, reaproveitada pelos `it`s do mesmo
+  arquivo), sem mock da camada de query nem servidor externo. Não é preciso `DATABASE_URL` nem
   `docker compose up -d db` para rodar `pnpm test`, nem para os hooks `pre-commit`/`pre-push`.
   `DATABASE_URL` só é lida por `createDb()` (produção/dev real) e pelos scripts `db:migrate`/
   `db:seed`/`db:generate`.

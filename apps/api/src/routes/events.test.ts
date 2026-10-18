@@ -62,7 +62,7 @@ describe("GET /events/:eventName/image", () => {
   });
 
   it("retorna 500 (em vez de derrubar o processo) quando a consulta ao banco falha", async () => {
-    const { db: brokenDb, close: closeBrokenDb } = await createTestDb();
+    const { db: brokenDb, close: closeBrokenDb } = await createTestDb({ runMigrations: false });
     await closeBrokenDb();
     const app = createApp({ db: brokenDb, assetsDir });
 
