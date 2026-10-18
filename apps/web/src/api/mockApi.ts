@@ -3,7 +3,19 @@
  * vive em apps/api + packages/game-engine (ver docs/ARCHITECTURE.md). Ao ligar o backend, trocar
  * este módulo por chamadas HTTP mantendo as assinaturas — os componentes só falam com ele.
  */
-import { nodeFigures, policyTrees, voterGroups } from "@decreto/game-content";
+import {
+  BASE_INDICATORS,
+  COUP_APPROVAL,
+  EXTRA_PREREQS,
+  LAST_TURN,
+  MAX_ACTIONS,
+  SITUATIONS,
+  TERMS_TO_WIN,
+  TURNS_PER_TERM,
+  nodeFigures,
+  policyTrees,
+  voterGroups,
+} from "@decreto/game-content";
 import type {
   ActorMood,
   CampaignPromise,
@@ -19,33 +31,7 @@ import type {
   SemesterReport,
 } from "@decreto/shared-types";
 
-export const MAX_ACTIONS = 6;
-export const TURNS_PER_TERM = 8;
-const TERMS_TO_WIN = 5;
-const LAST_TURN = 80;
-const COUP_APPROVAL = 15;
-
-/** Pré-requisitos extras além do nó anterior (S4: Monarquia exige Autoritarismo 4 ou Culto 3). */
-const EXTRA_PREREQS: Record<string, string[]> = {
-  "lifetime-title": ["congress-dissolution", "mandatory-portraits"],
-};
-
-const BASE_INDICATORS: Indicators = {
-  gdp: 1.8, unemployment: 9.4, inflation: 6.1, debt: 74, crime: 38,
-  health: 52, education: 49, pollution: 44, pressFreedom: 58, corruption: 36,
-};
-
-const SITUATIONS: Record<InitialSituation, Partial<Indicators>> = {
-  stable: { gdp: 2.6, unemployment: 6.2, inflation: 3.8, debt: 48 },
-  unstable: {},
-  crisis: { gdp: -2.1, unemployment: 14.5, inflation: 12.3, debt: 96, crime: 55 },
-};
-
-const GROUP_SIZES: Record<string, number> = {
-  religious: 28, progressives: 22, business: 6, workers: 41, poor: 33, "middle-class": 30, rich: 3,
-  environmentalists: 7, agribusiness: 5, "security-forces": 2, youth: 24, retirees: 15,
-  nationalists: 12, immigrants: 4, "gun-owners": 6, revolutionaries: 0, rebels: 0,
-};
+export { MAX_ACTIONS, TURNS_PER_TERM };
 
 const clamp = (n: number, min = 0, max = 100) => Math.min(max, Math.max(min, n));
 const round1 = (n: number) => Math.round(n * 10) / 10;
@@ -86,7 +72,7 @@ export function toggleQueued(state: GameState, nodeId: string): GameState {
 export function newGame(country: string, president: string, situation: InitialSituation): GameState {
   const groups: GroupState[] = voterGroups.map((g) => ({
     id: g.id,
-    size: GROUP_SIZES[g.id] ?? 0,
+    size: g.initialSize,
     support: g.emergent ? null : 50,
     delta: 0,
     loyalty: "medium",

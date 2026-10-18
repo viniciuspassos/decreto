@@ -26,6 +26,20 @@ export interface PolicyTree {
   intensity?: boolean;
 }
 
+/**
+ * Pré-requisitos extras além do nó anterior na mesma árvore (S4: Monarquia exige
+ * Autoritarismo 4 ou Culto 3). Satisfeito se QUALQUER um dos nós listados estiver ativo.
+ */
+export const EXTRA_PREREQS: Record<string, string[]> = {
+  "lifetime-title": ["congress-dissolution", "mandatory-portraits"],
+};
+
+/**
+ * Pares de nós mutuamente exclusivos que não estão em árvores opostas (game-design §6.6):
+ * `casino-ban` e `casinos-allowed` podem coexistir nas árvores, mas um bloqueia o outro.
+ */
+export const EXCLUSIVE_NODE_PAIRS: [string, string][] = [["casino-ban", "casinos-allowed"]];
+
 export const policyTrees: PolicyTree[] = [
   { id: "disarmament", field: "security", opposite: "civil-arms", nodes: ["mandatory-registration", "carry-restriction", "gun-buyback", "total-gun-ban"] },
   { id: "civil-arms", field: "security", opposite: "disarmament", nodes: ["easier-registration", "citizen-carry", "free-carry", "legal-militias"] },
