@@ -28,7 +28,7 @@
 
 11. **Turnos semestrais:** cada mandato de 4 anos tem **8 turnos**.
 12. **De 0 a 6 ações por turno**, em vários campos (economia, educação, segurança etc.), desde que ainda haja capital político.
-13. **Ajustar a intensidade** de uma política também conta como uma das 6 ações.
+13. **Ajustar a intensidade** de uma política também conta como uma das 6 ações. Subir ou baixar a intensidade é ajuste, não desfazer: o presidente em exercício pode mexer nos dois sentidos.
 
 ### 3. Políticas
 
@@ -38,7 +38,7 @@
 16.1. **Árvores opostas se bloqueiam:** se uma árvore está ativa (ex.: Desarmamento), a árvore oposta (ex.: Armamento civil) fica bloqueada.
 17. **Desfazer nós:** o presidente **não pode desfazer** as próprias políticas. Só um **novo presidente** pode desfazer políticas do governo anterior. Isso inclui o jogador quando **volta ao poder depois de perder**: ele pode desfazer o que o antecessor fez. Na **reeleição seguida**, o jogador continua sem poder desfazer as próprias políticas. Ao desfazer um nó, os nós que dependem dele **caem juntos**. Quanto **mais radical** o nó, **menos capital** é preciso para desfazê-lo, ao contrário da criação.
 18. **Tipos:** existem políticas **liga/desliga** e políticas **de intensidade**.
-19. **Efeito no tempo:** o efeito cresce de forma acelerada e atinge o **impacto total até o fim do semestre**. Quanto mais radical, mais imediato. Depois disso, o efeito **continua** enquanto a política estiver ativa, e pode ser **modificado por outras políticas**.
+19. **Efeito no tempo:** o efeito cresce de forma acelerada e atinge o **impacto total até o fim do semestre**. Quanto mais radical, mais imediato. Depois disso, o efeito **continua** enquanto a política estiver ativa, e pode ser **modificado por outras políticas**. O motor aplica o impacto total no fim do semestre; "mais radical, mais imediato" aparece na animação e em consequências (eventos) já no semestre da ativação.
 20. **Consequências:** as políticas alteram os indicadores do país e a opinião de grupos e aliados. Cada ação aumenta o apoio de um grupo e reduz o de outro.
 
 ### 4. Capital político
@@ -60,7 +60,7 @@
 30. **Recessão causa:** desemprego, queda de apoio, menos arrecadação e, dependendo do nível, **surgimento de rebeldes** e **golpe** para derrubar o governo.
 31. **Sem partidos:** o jogo não usa partidos nem bancadas. O apoio é medido apenas pela **opinião pública** dos grupos.
 32. **Atores que reagem:** **mídia** e **Forças Armadas**.
-33. **Eventos aleatórios e crises:** existem, mas são **raros e improváveis**.
+33. **Eventos e crises:** acontecem **todo semestre** (de 1 a 3), puxados principalmente pelas políticas ativas e pelo estado do país. Mesmo sem novas políticas o país se move e algo acontece. Alguns eventos pedem uma decisão entre duas respostas. Números e catálogo em `docs/game-design/efeitos-movimento-eventos.md`.
 
 ### 6. Eleitores
 
@@ -191,7 +191,7 @@ Exemplo: prender opositores (profundidade 3, distância 2) custa 10 × (1 + 3 + 
 ### S4. Etapas dos regimes (F2 e F3)
 
 **Autoritarismo:**
-1. Estado de emergência (exige uma crise ou aprovação alta)
+1. Estado de emergência (exige uma crise ou aprovação alta, ≥ 60)
 2. Governar por decreto
 3. Controle do Judiciário
 4. Dissolução do Congresso
