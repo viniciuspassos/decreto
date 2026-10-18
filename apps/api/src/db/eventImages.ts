@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import type { Db } from "./client.js";
 import { eventImages } from "./schema.js";
 
@@ -7,6 +7,7 @@ export async function findImageForEvent(db: Db, eventName: string): Promise<stri
     .select({ fileLocation: eventImages.fileLocation })
     .from(eventImages)
     .where(eq(eventImages.eventName, eventName))
+    .orderBy(sql`random()`)
     .limit(1);
 
   return rows[0]?.fileLocation ?? null;

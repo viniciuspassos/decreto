@@ -3,6 +3,13 @@
 Geram as imagens de `assets/images/<categoria>/<nome>.png` a partir de um workflow do ComfyUI
 reutilizável — um único template, um prompt por imagem.
 
+**`categoria` é o nome do evento** (`eventName` na tabela `event_images`, a mesma chave usada pela
+API em `GET /events/:eventName/image`) — ex.: `posse`, `comicio`, `eleicao`, `atentado`, `morte`.
+Um evento pode ter **mais de uma imagem**: basta acrescentar outra entrada no manifest com a mesma
+`category` e um `name` diferente (ex.: `comicio/palanque.png` e `comicio/multidao.png`); a API
+escolhe uma delas ao acaso a cada chamada (`findImageForEvent`, `ORDER BY random()`). Depois de
+gerar, registre cada `fileLocation` em `apps/api/src/db/seed.ts` sob o mesmo `eventName`.
+
 - **`_base.api.json`** — o template, no formato API do ComfyUI. Tem um só nó de prompt positivo
   (texto `"{{PROMPT}}"`), um negative prompt fixo (bloqueia violência gráfica/sangue, roteiro §6) e
   os parâmetros padrão da tabela abaixo. Não editar o prompt deste arquivo diretamente — ele é
@@ -45,21 +52,25 @@ Edite `assets/prompts/manifest.json` e acrescente uma entrada por imagem:
 
 ```json
 {
-  "category": "eventos",
-  "name": "golpe-militar",
+  "category": "atentado",
+  "name": "tentativa",
   "prompt": "cinematic video game screenshot, Unreal Engine 5, photorealistic. ..."
 }
 ```
 
-- `category`/`name`: minúsculo, só letras/números/hífen (`[a-z0-9-]+`) — definem o destino
-  `assets/images/<category>/<name>.png`.
+- `category`: o nome do evento (`eventName`), minúsculo, só letras/números/hífen (`[a-z0-9-]+`).
+  Use o mesmo `category` em várias entradas para dar **mais de uma imagem ao mesmo evento**.
+- `name`: identifica a variante dentro do evento (minúsculo, `[a-z0-9-]+`) — junto com `category`
+  define o destino `assets/images/<category>/<name>.png`.
 - `prompt`: só o prompt **positivo**. O negative prompt (bloqueia violência gráfica/sangue, roteiro
   §6) já é fixo no template e não deve ser repetido aqui.
 - `seed` (opcional): número fixo para reproduzir uma geração específica; se omitido, usa a seed do
   template (`_base.api.json`).
 
-Para gerar as 100 imagens do roteiro, basta ter 100 entradas no array — o script processa todas,
-uma a uma.
+O manifest já tem as **100 entradas do roteiro**: um nó por árvore de política (S1, inclui as
+variações de intensidade de impostos como uma entrada ilustrativa) mais os eventos universais do
+loop principal (`posse`, `comicio`, `eleicao`, `atentado`, `morte`, `golpe-militar`,
+`prisao-oposicao`). O script processa todas, uma a uma.
 
 ### 2. (opcional) Testar o prompt no ComfyUI Desktop antes de rodar o lote
 
@@ -97,7 +108,7 @@ Flags:
 
 ```bash
 # gera (ou regera) só uma entrada, mesmo que o arquivo já exista
-pnpm --filter @decreto/generate-images generate -- --only golpe-militar --force
+pnpm --filter @decreto/generate-images generate -- --only tentativa --force
 
 # aponta para outro ComfyUI (ex.: outra máquina na rede)
 pnpm --filter @decreto/generate-images generate -- --comfy-url http://192.168.1.10:8188
@@ -125,4 +136,9 @@ pnpm --filter @decreto/generate-images generate -- --comfy-url http://192.168.1.
 
 | Imagem | Evento | Observação |
 |---|---|---|
-| `eventos/prisao-oposicao` | Agentes do governo prendem líderes da oposição | Saiu só o agente; falta o líder detido algemado. Testar outras seeds ou destacar "two men" no início do prompt. |
+| `prisao-oposicao/prisao-oposicao` | Agentes do governo prendem líderes da oposição | Saiu só o agente; falta o líder detido algemado. Testar outras seeds ou destacar "two men" no início do prompt. |
+| `posse/juramento` | Posse presidencial | — |
+| `comicio/palanque` | Comício de campanha | — |
+| `eleicao/apuracao` | Noite de apuração da eleição | — |
+| `atentado/tentativa` | Atentado sofrido pelo presidente (sobrevive) | Sem sangue/ferimentos visíveis, por design (roteiro §6). |
+| `morte/velorio-oficial` | Morte do presidente (atentado fatal) | Caixão fechado, sem corpo visível (roteiro §6). |
