@@ -71,11 +71,12 @@ export function loadTrailerManifest(path: string): TrailerManifest {
 export function resolveTrailerClipEntries(
   trailerManifest: TrailerManifest,
   comumManifest: TrailerManifest | undefined,
+  comumManifestPath: string = COMUM_FILENAME,
 ): ManifestEntry[] {
   const entries: ManifestEntry[] = [];
   for (const plan of trailerManifest.plans) {
     const entry = "shared" in plan
-      ? resolveSharedPlan(plan.id, comumManifest)
+      ? resolveSharedPlan(plan.id, comumManifest, comumManifestPath)
       : clipEntryFromPlan(trailerManifest.trailer, plan);
     if (entry) {
       entries.push(entry);
@@ -84,10 +85,14 @@ export function resolveTrailerClipEntries(
   return entries;
 }
 
-function resolveSharedPlan(id: string, comumManifest: TrailerManifest | undefined): ManifestEntry | undefined {
+function resolveSharedPlan(
+  id: string,
+  comumManifest: TrailerManifest | undefined,
+  comumManifestPath: string,
+): ManifestEntry | undefined {
   const shared = comumManifest?.plans.find((plan) => plan.id === id);
   if (!shared) {
-    throw new Error(`plano compartilhado "${id}" não encontrado em ${COMUM_FILENAME}`);
+    throw new Error(`plano compartilhado "${id}" não encontrado em ${comumManifestPath}`);
   }
   if ("shared" in shared) {
     throw new Error(`plano compartilhado "${id}" não pode apontar para outro plano shared`);
@@ -108,5 +113,5 @@ export function loadTrailerClipEntries(trailerManifestPath: string, comumManifes
   const trailerManifest = loadTrailerManifest(trailerManifestPath);
   const resolvedComumPath = comumManifestPath ?? join(dirname(trailerManifestPath), COMUM_FILENAME);
   const comumManifest = existsSync(resolvedComumPath) ? loadTrailerManifest(resolvedComumPath) : undefined;
-  return resolveTrailerClipEntries(trailerManifest, comumManifest);
+  return resolveTrailerClipEntries(trailerManifest, comumManifest, resolvedComumPath);
 }

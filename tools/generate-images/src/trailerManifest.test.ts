@@ -167,7 +167,15 @@ describe("resolveTrailerClipEntries", () => {
     const trailerManifest = { trailer: "1-mandato", plans: [{ id: "a2", shared: true as const }] };
 
     expect(() => resolveTrailerClipEntries(trailerManifest, undefined)).toThrow(
-      'plano compartilhado "a2" não encontrado',
+      'plano compartilhado "a2" não encontrado em comum.manifest.json',
+    );
+  });
+
+  it("cita o caminho real de comumManifestPath na mensagem de erro, quando informado", () => {
+    const trailerManifest = { trailer: "1-mandato", plans: [{ id: "a2", shared: true as const }] };
+
+    expect(() => resolveTrailerClipEntries(trailerManifest, undefined, "custom-comum.json")).toThrow(
+      'plano compartilhado "a2" não encontrado em custom-comum.json',
     );
   });
 
@@ -241,5 +249,15 @@ describe("loadTrailerManifest / loadTrailerClipEntries", () => {
     writeFileSync(trailerPath, JSON.stringify({ trailer: "1-mandato", plans: [{ id: "a2", shared: true }] }));
 
     expect(() => loadTrailerClipEntries(trailerPath)).toThrow('plano compartilhado "a2" não encontrado');
+  });
+
+  it("loadTrailerClipEntries cita o comumManifestPath customizado na mensagem de erro, quando passado", () => {
+    const trailerPath = join(dir, "1-mandato.manifest.json");
+    writeFileSync(trailerPath, JSON.stringify({ trailer: "1-mandato", plans: [{ id: "a2", shared: true }] }));
+    const comumPath = join(dir, "custom-comum.json");
+
+    expect(() => loadTrailerClipEntries(trailerPath, comumPath)).toThrow(
+      `plano compartilhado "a2" não encontrado em ${comumPath}`,
+    );
   });
 });
