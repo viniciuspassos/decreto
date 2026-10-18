@@ -1,17 +1,32 @@
 # Prompts de geração de imagem
 
-Workflows do ComfyUI (formato API) que geram as imagens de `assets/images/`. Cada arquivo em
-`prompts/<categoria>/<nome>.json` gera `images/<categoria>/<nome>.png` — mesmo caminho, mesmo nome.
+Geram as imagens de `assets/images/<categoria>/<nome>.png` a partir de um workflow do ComfyUI
+reutilizável — um único template, um prompt por imagem.
+
+- **`_base.api.json`** — o template, no formato API do ComfyUI. Tem um só nó de prompt positivo
+  (texto `"{{PROMPT}}"`), um negative prompt fixo (bloqueia violência gráfica/sangue, roteiro §6) e
+  os parâmetros padrão da tabela abaixo. Não editar o prompt deste arquivo diretamente — ele é
+  sempre clonado e preenchido pelo script.
+- **`_base.workflow.json`** — o mesmo pipeline no **formato UI** do ComfyUI (nodes/links/posições),
+  para abrir e editar visualmente no ComfyUI Desktop (arraste o arquivo para a janela do app, ou
+  File → Open Workflow). Use para testar prompts manualmente antes de colocá-los no manifest.
+- **`manifest.json`** — lista as imagens a gerar: `{ "category", "name", "prompt", "seed"? }` por
+  entrada. `seed` é opcional (mantém a do template se omitido). Cada entrada gera
+  `images/<category>/<name>.png`.
 
 As imagens aparecem após eventos marcantes (roteiro §8). Tom de "simulação séria": repressão
-aparece de forma sóbria, sem violência gráfica, sangue ou ferimentos (roteiro §6) — o negative
-prompt de cada workflow já bloqueia isso; mantenha ao criar novos.
+aparece de forma sóbria, sem violência gráfica, sangue ou ferimentos (roteiro §6) — por isso o
+negative prompt é fixo no template e **não** faz parte do manifest.
 
-## Modelo
+## Pré-requisitos
 
-- **Checkpoint:** `RealVisXL_V5.0_Lightning_fp16.safetensors` (SDXL destilado, ~6,9 GB)
-  — https://huggingface.co/SG161222/RealVisXL_V5.0_Lightning
-- Colocar em `models/checkpoints/` do ComfyUI. Não precisa de VAE, LoRA nem nós customizados.
+1. **ComfyUI rodando** em `127.0.0.1:8188` (ComfyUI Desktop ou `comfy launch`).
+2. **Checkpoint instalado**: baixe `RealVisXL_V5.0_Lightning_fp16.safetensors` (SDXL destilado,
+   ~6,9 GB) de https://huggingface.co/SG161222/RealVisXL_V5.0_Lightning e coloque em
+   `models/checkpoints/` do ComfyUI. Não precisa de VAE, LoRA nem nós customizados. Se o ComfyUI já
+   estava aberto antes do download, reinicie-o (ele só lê a pasta de checkpoints na inicialização).
+3. **Dependências do repo instaladas**: `pnpm install` na raiz (instala o pacote
+   `tools/generate-images`).
 
 ## Parâmetros (padrão de todos os workflows)
 
@@ -22,19 +37,80 @@ prompt de cada workflow já bloqueia isso; mantenha ao criar novos.
 | CFG | 1,5 |
 | Sampler / scheduler | `dpmpp_sde` / `karras` |
 
-## Como rodar
+## Gerar imagens
 
-Com o ComfyUI aberto em `127.0.0.1:8188`:
+### 1. Adicionar entradas ao manifest
 
-```bash
-comfy run --workflow assets/prompts/eventos/prisao-oposicao.json
+Edite `assets/prompts/manifest.json` e acrescente uma entrada por imagem:
+
+```json
+{
+  "category": "eventos",
+  "name": "golpe-militar",
+  "prompt": "cinematic video game screenshot, Unreal Engine 5, photorealistic. ..."
+}
 ```
 
-Ou arraste o `.json` para a interface do ComfyUI. A saída vai para
-`output/decreto/<categoria>/<nome>_00001_.png`; copie para `assets/images/<categoria>/<nome>.png`.
+- `category`/`name`: minúsculo, só letras/números/hífen (`[a-z0-9-]+`) — definem o destino
+  `assets/images/<category>/<name>.png`.
+- `prompt`: só o prompt **positivo**. O negative prompt (bloqueia violência gráfica/sangue, roteiro
+  §6) já é fixo no template e não deve ser repetido aqui.
+- `seed` (opcional): número fixo para reproduzir uma geração específica; se omitido, usa a seed do
+  template (`_base.api.json`).
 
-Para variações, troque `seed` no nó `KSampler` (ou `batch_size` em `EmptyLatentImage` para gerar
-várias de uma vez e escolher a melhor).
+Para gerar as 100 imagens do roteiro, basta ter 100 entradas no array — o script processa todas,
+uma a uma.
+
+### 2. (opcional) Testar o prompt no ComfyUI Desktop antes de rodar o lote
+
+Abra `assets/prompts/_base.workflow.json` no ComfyUI Desktop (arraste o arquivo para a janela do
+app, ou File → Open Workflow), edite o texto do nó "Prompt positivo", clique em "Run" e confira o
+resultado. É o mesmo pipeline do template usado pelo script — só em formato visual, para testar
+seed/prompt rapidamente sem editar o manifest.
+
+### 3. Rodar o script
+
+Com o ComfyUI aberto (pré-requisito 1):
+
+```bash
+pnpm --filter @decreto/generate-images generate
+```
+
+Lê `assets/prompts/manifest.json`, e para cada entrada: clona `_base.api.json`, troca o
+prompt/seed/destino, envia para a fila do ComfyUI (`POST /prompt`), espera terminar (`GET
+/history/<id>`) e baixa o PNG (`GET /view`) direto para `assets/images/<categoria>/<nome>.png` — sem
+passo manual de copiar arquivo. Entradas cujo arquivo de destino já existe são puladas (log
+`[skipped] ...`); as novas saem como `[generated] ...`.
+
+Como o ComfyUI local roda um job por vez, o script gera as imagens **em sequência** (não em
+paralelo) — para 100 entradas, espere algo como 100 × tempo por imagem (ver tabela "Máquina"
+abaixo).
+
+Flags:
+
+| Flag | Efeito |
+|---|---|
+| `--only <nome>` | gera só a entrada com esse `name`, ignora as demais |
+| `--force` | regera mesmo que o arquivo de destino já exista |
+| `--comfy-url <url>` | usa outro ComfyUI (padrão: `http://127.0.0.1:8188`, ou a env `COMFYUI_URL`) |
+| `--manifest <caminho>` | usa outro arquivo de manifest (padrão: `assets/prompts/manifest.json`) |
+
+```bash
+# gera (ou regera) só uma entrada, mesmo que o arquivo já exista
+pnpm --filter @decreto/generate-images generate -- --only golpe-militar --force
+
+# aponta para outro ComfyUI (ex.: outra máquina na rede)
+pnpm --filter @decreto/generate-images generate -- --comfy-url http://192.168.1.10:8188
+```
+
+### Erros comuns
+
+- `ComfyUI recusou o prompt: ...` — ComfyUI não está rodando em `127.0.0.1:8188`, ou o checkpoint
+  não está instalado/visível (reinicie o ComfyUI após colocar o arquivo em `models/checkpoints/`).
+- `tempo esgotado esperando o prompt ...` — geração demorou mais que 5 minutos (padrão); confira a
+  fila no próprio ComfyUI, pode haver outro job pesado rodando na frente.
+- `ComfyUI não retornou imagem para "<nome>"` — o workflow rodou mas o nó `SaveImage` não produziu
+  saída; confira o log do ComfyUI para o erro real.
 
 ## Máquina
 
