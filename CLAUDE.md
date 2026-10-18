@@ -137,6 +137,15 @@ condições de utopia/fim de jogo).
 - Hooks devem ser instalados automaticamente via script `prepare` do gerenciador de pacotes, não
   manualmente.
 
+### Code review antes do PR
+
+- Antes de abrir um PR (`gh pr create`), invocar o agente/skill de code review sobre o diff.
+- A review deve buscar bugs e também **código desnecessário e overengineering** (abstrações,
+  camadas, parâmetros ou configurações que a tarefa não pede).
+- Débitos de severidade **alta e média** são resolvidos no mesmo PR, antes de abri-lo.
+- Débitos de severidade **baixa** viram issue no repo (`gh issue create`), com o link citado na
+  descrição do PR.
+
 ## Documentação
 
 Quando o repo crescer, dividir em:
