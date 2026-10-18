@@ -3,7 +3,9 @@ import { createDb, type Db } from "./client.js";
 import { eventImages } from "./schema.js";
 
 const initialEventImages = [
-  { eventName: "prisao-oposicao", fileLocation: "eventos/prisao-oposicao.png" },
+  { eventName: "prisao-oposicao", fileLocation: "prisao-oposicao/prisao-oposicao.png" },
+  { eventName: "posse", fileLocation: "posse/juramento.png" },
+  { eventName: "comicio", fileLocation: "comicio/palanque.png" },
 ];
 
 export async function seedEventImages(db: ReturnType<typeof createDb>): Promise<void> {

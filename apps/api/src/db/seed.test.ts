@@ -33,7 +33,7 @@ describe("main", () => {
     await expect(main(db)).resolves.toBeUndefined();
 
     const rows = await db.select().from(eventImages).where(eq(eventImages.eventName, seededEventName));
-    expect(rows).toEqual([expect.objectContaining({ fileLocation: "eventos/prisao-oposicao.png" })]);
+    expect(rows).toEqual([expect.objectContaining({ fileLocation: "prisao-oposicao/prisao-oposicao.png" })]);
   });
 
   it("não duplica a linha quando ela já existe com o mesmo fileLocation", async () => {
@@ -47,12 +47,12 @@ describe("main", () => {
     await clearSeededFixture();
     await db
       .insert(eventImages)
-      .values({ eventName: seededEventName, fileLocation: "eventos/caminho-antigo.png" });
+      .values({ eventName: seededEventName, fileLocation: "prisao-oposicao/caminho-antigo.png" });
 
     await expect(main(db)).resolves.toBeUndefined();
 
     const rows = await db.select().from(eventImages).where(eq(eventImages.eventName, seededEventName));
-    expect(rows).toEqual([expect.objectContaining({ fileLocation: "eventos/prisao-oposicao.png" })]);
+    expect(rows).toEqual([expect.objectContaining({ fileLocation: "prisao-oposicao/prisao-oposicao.png" })]);
   });
 });
 
