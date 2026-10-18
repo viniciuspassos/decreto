@@ -1,5 +1,5 @@
 import { MAX_ACTIONS, POLICY_REACTION } from "@decreto/game-content";
-import type { EngineState } from "../state.js";
+import type { EngineState } from "../types.js";
 import { nodeStatus } from "../availability.js";
 import { queueCost, taxRateCost } from "../cost.js";
 import { treeOf } from "../trees.js";

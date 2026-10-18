@@ -1,6 +1,6 @@
 import type { EventEffects } from "@decreto/game-content";
 import type { SemesterContent } from "../content.js";
-import type { EngineState } from "../state.js";
+import type { EngineState } from "../types.js";
 import { cloneState, displayedIndicators, type StepCtx } from "./common.js";
 import { applyEventEffects } from "./effects.js";
 import { approvalOf } from "./groups.js";

@@ -4,7 +4,7 @@ import {
 import type { GroupState, IndicatorId, Indicators } from "@decreto/shared-types";
 import type { SemesterContent } from "../content.js";
 import type { Rng } from "../rng.js";
-import type { EngineState } from "../state.js";
+import type { EngineState } from "../types.js";
 
 /**
  * Contexto de cada passo do semestre. `endSemester` clona o estado de entrada uma vez e os passos

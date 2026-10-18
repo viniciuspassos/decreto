@@ -1,6 +1,6 @@
 import { LEVEL_INDICATORS, MEDIA_NEGATIVE_EVENT_MULTIPLIER, type EventEffects, type LevelIndicatorId } from "@decreto/game-content";
 import type { IndicatorId, RiskId } from "@decreto/shared-types";
-import type { EngineState } from "../state.js";
+import type { EngineState } from "../types.js";
 import { addSize, clamp, clampIndicator } from "./common.js";
 
 const isLevel = (id: IndicatorId): id is LevelIndicatorId => (LEVEL_INDICATORS as IndicatorId[]).includes(id);

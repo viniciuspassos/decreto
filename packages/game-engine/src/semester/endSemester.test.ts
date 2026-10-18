@@ -1,7 +1,7 @@
 import { defaultContent } from "../content.js";
 import { newGame } from "../newGame.js";
 import { createRng } from "../rng.js";
-import type { EngineState } from "../state.js";
+import type { EngineState } from "../types.js";
 import { cloneState, displayedIndicators } from "./common.js";
 import { capitalGain, endSemester, InvalidQueueError } from "./endSemester.js";
 

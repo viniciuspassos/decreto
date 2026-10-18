@@ -2,7 +2,7 @@ import { CAPITAL_PER_APPROVAL } from "@decreto/game-content";
 import type { CountryEvent, RiskId, SemesterReport } from "@decreto/shared-types";
 import type { SemesterContent } from "../content.js";
 import { createRng } from "../rng.js";
-import type { EngineState } from "../state.js";
+import type { EngineState } from "../types.js";
 import { updateMoods } from "./actors.js";
 import { resolveDefaultChoices, refresh } from "./choices.js";
 import { cloneState, type SemesterCtx } from "./common.js";

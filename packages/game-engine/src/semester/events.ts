@@ -2,7 +2,7 @@ import {
   EVENT_COUNT_ODDS, type Condition, type ConditionType, type GameEventDefinition, type EventTrigger, type IndicatorScale,
 } from "@decreto/game-content";
 import type { CountryEvent } from "@decreto/shared-types";
-import type { EngineState } from "../state.js";
+import type { EngineState } from "../types.js";
 import { depthOf } from "../trees.js";
 import { groupOf, isActive, type SemesterCtx, type StepCtx } from "./common.js";
 import { applyEventEffects } from "./effects.js";

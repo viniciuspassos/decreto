@@ -6,7 +6,7 @@ import type { SemesterContent } from "./content.js";
 import { updateMoods } from "./semester/actors.js";
 import { capitalGain } from "./semester/endSemester.js";
 import { approvalOf, loyaltyOf } from "./semester/groups.js";
-import type { EngineState } from "./state.js";
+import type { EngineState } from "./types.js";
 
 export interface NewGameOptions {
   country: string;

@@ -4,7 +4,7 @@ import { newGame } from "../newGame.js";
 import type { Rng } from "../rng.js";
 import { createRng } from "../rng.js";
 import { canAfford, resolveDefaultChoices, resolveEventChoice } from "./choices.js";
-import { drawEvents, eventWeight, rollEventCount } from "./events.js";
+import { conditionMet, drawEvents, eventWeight, rollEventCount } from "./events.js";
 
 const game = () => newGame({ country: "Vessária", president: "Helena Duarte", situation: "unstable", seed: 1 }, defaultContent);
 const def = (id: string) => defaultContent.events.find((e) => e.id === id) as GameEventDefinition;
@@ -50,6 +50,16 @@ describe("eventWeight", () => {
     expect(weight("capital-flight", (s) => { s.taxRate = 60; })).toBe(4);
     expect(weight("investment-boom", (s) => { s.taxRate = 20; })).toBe(3);
     expect(weight("climate-award", (s) => { s.indicators.pollution = 20; })).toBe(3);
+  });
+});
+
+describe("conditionMet", () => {
+  it("aprovação acima e nível de recessão mínimo", () => {
+    const state = game();
+    expect(conditionMet({ type: "approvalAbove", threshold: 40 }, state)).toBe(true);
+    expect(conditionMet({ type: "recessionAtLeast", threshold: 1 }, state)).toBe(false);
+    state.recessionLevel = 2;
+    expect(conditionMet({ type: "recessionAtLeast", threshold: 1 }, state)).toBe(true);
   });
 });
 

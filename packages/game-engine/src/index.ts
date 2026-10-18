@@ -8,7 +8,7 @@ export { createRng } from "./rng.js";
 export type { Rng } from "./rng.js";
 export { defaultContent } from "./content.js";
 export type { SemesterContent } from "./content.js";
-export type { EngineState, PendingChoice, Defeat } from "./state.js";
+export type { EngineState, PendingChoice, Defeat } from "./types.js";
 export { newGame } from "./newGame.js";
 export type { NewGameOptions } from "./newGame.js";
 export { endSemester, InvalidQueueError, capitalGain } from "./semester/endSemester.js";

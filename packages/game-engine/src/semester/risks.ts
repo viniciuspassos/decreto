@@ -1,6 +1,6 @@
 import { COUP_MOOD_BASE, REVOLUTION_MOOD_MULTIPLIER } from "@decreto/game-content";
 import type { CountryEvent, RiskId } from "@decreto/shared-types";
-import type { Defeat } from "../state.js";
+import type { Defeat } from "../types.js";
 import { clamp, countActive, effectTotal, over, sizeOf, type SemesterCtx, type StepCtx } from "./common.js";
 import { systemEvent } from "./system-events.js";
 
