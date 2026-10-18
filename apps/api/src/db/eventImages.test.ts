@@ -1,22 +1,19 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
-import { createDb, type Db } from "./client.js";
+import { createTestDb } from "./testDb.js";
 import { seedEventImages } from "./seed.js";
 import { findImageForEvent } from "./eventImages.js";
 import { eventImages } from "./schema.js";
+import type { Db } from "./client.js";
 
-const dirname = path.dirname(fileURLToPath(import.meta.url));
 let db: Db;
+let close: () => Promise<void>;
 
 beforeAll(async () => {
-  db = createDb();
-  await migrate(db, { migrationsFolder: path.resolve(dirname, "../../drizzle") });
+  ({ db, close } = await createTestDb());
   await seedEventImages(db);
 });
 
 afterAll(async () => {
-  await db.$client.end();
+  await close();
 });
 
 describe("findImageForEvent", () => {
