@@ -84,6 +84,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@decreto/game-content':
+        specifier: workspace:*
+        version: link:../../packages/game-content
       '@decreto/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types

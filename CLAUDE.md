@@ -119,6 +119,14 @@ condições de utopia/fim de jogo).
   radicalidade/custo e a cascata de "desfazer" tendem a crescer em `if`s — quebrar em funções
   menores em vez de aumentar os limites.
 
+## Código mínimo
+
+- Implementar toda mudança com a **menor quantidade de código novo** possível: reutilizar o que já
+  existe antes de criar algo, e não adicionar abstrações que a tarefa não pede.
+- **Remover o código que a mudança torna obsoleto** no mesmo PR.
+- Se a remoção de código obsoleto for **grande** (fora do escopo da tarefa), não fazer na hora:
+  avisar o usuário e abrir uma issue no repo (`gh issue create`) para implementar depois.
+
 ## Git hooks e CI
 
 - **`pre-commit`:** typecheck → lint → complexidade → testes.
