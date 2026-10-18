@@ -1,17 +1,22 @@
 # Prompts de geração de imagem
 
-Workflows do ComfyUI (formato API) que geram as imagens de `assets/images/`. Cada arquivo em
-`prompts/<categoria>/<nome>.json` gera `images/<categoria>/<nome>.png` — mesmo caminho, mesmo nome.
+Geram as imagens de `assets/images/<categoria>/<nome>.png` a partir de um workflow do ComfyUI
+reutilizável — um único template, um prompt por imagem.
 
-`_base.workflow.json` é o mesmo pipeline (checkpoint → prompt positivo/negativo → KSampler →
-VAEDecode → SaveImage), mas no **formato UI** do ComfyUI (nodes/links/posições), para abrir e editar
-visualmente no ComfyUI Desktop — arraste o arquivo para a janela do app, ou use File → Open
-Workflow. Use-o como ponto de partida para montar um novo evento: edite os prompts, exporte de volta
-(Workflow → Export (API)) para um `.json` em `prompts/<categoria>/<nome>.json` e rode como abaixo.
+- **`_base.api.json`** — o template, no formato API do ComfyUI. Tem um só nó de prompt positivo
+  (texto `"{{PROMPT}}"`), um negative prompt fixo (bloqueia violência gráfica/sangue, roteiro §6) e
+  os parâmetros padrão da tabela abaixo. Não editar o prompt deste arquivo diretamente — ele é
+  sempre clonado e preenchido pelo script.
+- **`_base.workflow.json`** — o mesmo pipeline no **formato UI** do ComfyUI (nodes/links/posições),
+  para abrir e editar visualmente no ComfyUI Desktop (arraste o arquivo para a janela do app, ou
+  File → Open Workflow). Use para testar prompts manualmente antes de colocá-los no manifest.
+- **`manifest.json`** — lista as imagens a gerar: `{ "category", "name", "prompt", "seed"? }` por
+  entrada. `seed` é opcional (mantém a do template se omitido). Cada entrada gera
+  `images/<category>/<name>.png`.
 
 As imagens aparecem após eventos marcantes (roteiro §8). Tom de "simulação séria": repressão
-aparece de forma sóbria, sem violência gráfica, sangue ou ferimentos (roteiro §6) — o negative
-prompt de cada workflow já bloqueia isso; mantenha ao criar novos.
+aparece de forma sóbria, sem violência gráfica, sangue ou ferimentos (roteiro §6) — por isso o
+negative prompt é fixo no template e **não** faz parte do manifest.
 
 ## Modelo
 
@@ -30,17 +35,29 @@ prompt de cada workflow já bloqueia isso; mantenha ao criar novos.
 
 ## Como rodar
 
-Com o ComfyUI aberto em `127.0.0.1:8188`:
+Com o ComfyUI aberto em `127.0.0.1:8188`, para gerar todo o lote do `manifest.json` (pula imagens
+que já existem em `assets/images/`):
 
 ```bash
-comfy run --workflow assets/prompts/eventos/prisao-oposicao.json
+pnpm --filter @decreto/generate-images generate
 ```
 
-Ou arraste o `.json` para a interface do ComfyUI. A saída vai para
-`output/decreto/<categoria>/<nome>_00001_.png`; copie para `assets/images/<categoria>/<nome>.png`.
+Flags úteis:
 
-Para variações, troque `seed` no nó `KSampler` (ou `batch_size` em `EmptyLatentImage` para gerar
-várias de uma vez e escolher a melhor).
+```bash
+# gera (ou regera) só uma entrada, mesmo que o arquivo já exista
+pnpm --filter @decreto/generate-images generate -- --only golpe-militar --force
+
+# aponta para outro ComfyUI (ex.: outra máquina na rede)
+pnpm --filter @decreto/generate-images generate -- --comfy-url http://192.168.1.10:8188
+```
+
+O script lê `manifest.json`, para cada entrada clona `_base.api.json`, troca o prompt/seed/destino,
+envia para a fila do ComfyUI (`/prompt`), espera terminar (`/history`) e grava o PNG direto em
+`assets/images/<categoria>/<nome>.png` — sem passo manual de copiar arquivo.
+
+Para testar um prompt novo antes de colocá-lo no manifest, use `_base.workflow.json` no ComfyUI
+Desktop (veja acima) ou rode manualmente com `comfy run --workflow <arquivo API>`.
 
 ## Máquina
 
