@@ -5,6 +5,7 @@ import type { RunBatchResult } from "./runBatch.js";
 const loadBaseWorkflowMock = jest.fn<(path: string) => Record<string, unknown>>();
 const runBatchMock = jest.fn<(...args: unknown[]) => Promise<RunBatchResult[]>>();
 const loadManifestMock = jest.fn<(path: string) => ManifestEntry[]>();
+const loadTrailerClipEntriesMock = jest.fn<(trailerPath: string, comumPath?: string) => ManifestEntry[]>();
 
 jest.unstable_mockModule("./runBatch.js", () => ({
   loadBaseWorkflow: loadBaseWorkflowMock,
@@ -12,6 +13,9 @@ jest.unstable_mockModule("./runBatch.js", () => ({
 }));
 jest.unstable_mockModule("./manifest.js", () => ({
   loadManifest: loadManifestMock,
+}));
+jest.unstable_mockModule("./trailerManifest.js", () => ({
+  loadTrailerClipEntries: loadTrailerClipEntriesMock,
 }));
 
 const { parseArgs, run } = await import("./cli.js");
@@ -62,6 +66,13 @@ describe("parseArgs", () => {
   it.each(["abc", "0", "-5"])("rejeita --timeout-min inválido (%s)", (value) => {
     expect(() => parseArgs(["--timeout-min", value])).toThrow("--timeout-min deve ser um número");
   });
+
+  it("lê --trailer e --comum-manifest", () => {
+    const args = parseArgs(["--trailer", "assets/trailers/1-mandato.manifest.json", "--comum-manifest", "c.json"]);
+
+    expect(args.trailerManifestPath).toBe("assets/trailers/1-mandato.manifest.json");
+    expect(args.comumManifestPath).toBe("c.json");
+  });
 });
 
 describe("run", () => {
@@ -93,6 +104,22 @@ describe("run", () => {
     );
     expect(logSpy).toHaveBeenCalledWith(
       expect.stringMatching(/ \[generated\] eventos\/a -> assets\/images\/eventos\/a\.png$/),
+    );
+  });
+
+  it("usa o manifest do trailer quando --trailer é passado, em vez do manifest bancada", async () => {
+    loadBaseWorkflowMock.mockReturnValue({});
+    loadTrailerClipEntriesMock.mockReturnValue([{ category: "1-mandato", name: "1-01-s42", prompt: "x" }]);
+    runBatchMock.mockResolvedValue([]);
+
+    await run(["--trailer", "assets/trailers/1-mandato.manifest.json", "--comum-manifest", "c.json"]);
+
+    expect(loadTrailerClipEntriesMock).toHaveBeenCalledWith("assets/trailers/1-mandato.manifest.json", "c.json");
+    expect(loadManifestMock).not.toHaveBeenCalled();
+    expect(runBatchMock).toHaveBeenCalledWith(
+      {},
+      [{ category: "1-mandato", name: "1-01-s42", prompt: "x" }],
+      expect.anything(),
     );
   });
 });

@@ -1,5 +1,6 @@
 import { loadManifest } from "./manifest.js";
 import { loadBaseWorkflow, runBatch } from "./runBatch.js";
+import { loadTrailerClipEntries } from "./trailerManifest.js";
 
 export interface CliArgs {
   manifestPath: string;
@@ -10,6 +11,8 @@ export interface CliArgs {
   only?: string;
   extension?: string;
   timeoutMin?: number;
+  trailerManifestPath?: string;
+  comumManifestPath?: string;
 }
 
 const DEFAULTS = {
@@ -25,7 +28,9 @@ type StringField =
   | "imagesDir"
   | "comfyUrl"
   | "extension"
-  | "timeoutMin";
+  | "timeoutMin"
+  | "trailerManifestPath"
+  | "comumManifestPath";
 
 const VALUE_FLAGS: Record<string, StringField> = {
   "--only": "only",
@@ -35,6 +40,8 @@ const VALUE_FLAGS: Record<string, StringField> = {
   "--comfy-url": "comfyUrl",
   "--ext": "extension",
   "--timeout-min": "timeoutMin",
+  "--trailer": "trailerManifestPath",
+  "--comum-manifest": "comumManifestPath",
 };
 
 interface ParsedFlags {
@@ -79,6 +86,8 @@ export function parseArgs(argv: string[]): CliArgs {
     only: values.only,
     extension: values.extension,
     timeoutMin: parseTimeoutMin(values.timeoutMin),
+    trailerManifestPath: values.trailerManifestPath,
+    comumManifestPath: values.comumManifestPath,
   };
 }
 
@@ -93,11 +102,17 @@ function parseTimeoutMin(value: string | undefined): number | undefined {
   return minutes;
 }
 
-/** Roda o lote completo a partir dos argumentos de CLI e imprime cada entrada assim que termina. */
+/**
+ * Roda o lote completo a partir dos argumentos de CLI e imprime cada entrada assim que termina.
+ * Com `--trailer`, lê o manifest ordenado do trailer (planos "clip", resolvendo os "shared" em
+ * comum.manifest.json); sem ele, lê o manifest "bancada" apontado por `--manifest`.
+ */
 export async function run(argv: string[]): Promise<void> {
   const args = parseArgs(argv);
   const base = loadBaseWorkflow(args.basePath);
-  const entries = loadManifest(args.manifestPath);
+  const entries = args.trailerManifestPath
+    ? loadTrailerClipEntries(args.trailerManifestPath, args.comumManifestPath)
+    : loadManifest(args.manifestPath);
 
   await runBatch(base, entries, {
     comfyUrl: args.comfyUrl,
