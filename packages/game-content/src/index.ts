@@ -4,3 +4,6 @@
  */
 
 export * from "./historical-figures";
+export * from "./policy-trees";
+export * from "./voter-groups";
+export * from "./utopias";
