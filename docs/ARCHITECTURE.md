@@ -40,6 +40,21 @@ separados e mantém o custo de CI baixo conforme o projeto cresce. `apps/web` e 
 pacotes independentes dentro dele — nenhuma mudança num deveria forçar rebuild/retest do outro, a
 não ser que um pacote compartilhado tenha mudado.
 
+## Metadados de arquivo (imagens de evento) no Postgres, não em `game-content`
+
+`apps/api` guarda em Postgres (tabela `event_images`, via Drizzle ORM) só a localização física das
+imagens geradas para cada evento (`event_name` → `file_location`). Isso é diferente do conteúdo de
+design do item anterior: não é uma regra de jogo nem dado de balanceamento, é metadado operacional
+de onde um arquivo binário está — e no futuro vai variar em runtime (mais de uma imagem por evento,
+possivelmente escolha aleatória/rotativa), o que pede uma tabela consultável em vez de um módulo TS
+estático. `event_name` referencia o `nodeId` de uma árvore de política (`packages/game-content`),
+mas não é uma foreign key para uma tabela de "eventos" — o catálogo de conteúdo continua vivendo só
+em TS tipado; o Postgres não duplica esse catálogo.
+
+Escolhemos **Drizzle ORM** (+ driver `pg`) em vez de Prisma ou SQL cru: migrations em SQL geradas a
+partir de um schema TypeScript, sem um codegen/schema-language paralelo ao TS, e com tipagem forte
+sem `any` — alinhado à regra do `CLAUDE.md`.
+
 ## i18n desde o primeiro componente
 
 O jogo é pt-BR e inglês desde a v0.4 do roteiro (não é um caso de "traduzir depois"). Introduzir

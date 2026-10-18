@@ -71,6 +71,17 @@ Para derrubar e remover os volumes (reseta o banco):
 docker compose down -v
 ```
 
+O `api` não aplica migrations automaticamente ao subir. Depois do `db` estar de pé (local ou via
+Docker), rode uma vez:
+
+```bash
+pnpm --filter @decreto/api run db:migrate
+pnpm --filter @decreto/api run db:seed
+```
+
+Rodar `pnpm test`/os git hooks localmente também exige um Postgres acessível em `DATABASE_URL` —
+ver [`docs/INFRASTRUCTURE.md`](./docs/INFRASTRUCTURE.md#postgres-appsapi).
+
 ## Documentação
 
 - [`roteiro-do-jogo.md`](./roteiro-do-jogo.md) — fonte da verdade do **design** do jogo: regras,

@@ -1,11 +1,19 @@
 import request from "supertest";
 import { createApp } from "./app.js";
+import { createDb } from "./db/client.js";
 
 describe("GET /health", () => {
   it("responde com status ok", async () => {
-    const response = await request(createApp()).get("/health");
+    const db = createDb("postgresql://decreto:decreto@localhost:5432/decreto");
+    const app = createApp({ db, assetsDir: "/tmp" });
 
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({ status: "ok", version: "0.1.0" });
+    try {
+      const response = await request(app).get("/health");
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ status: "ok", version: "0.1.0" });
+    } finally {
+      await db.$client.end();
+    }
   });
 });

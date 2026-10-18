@@ -83,8 +83,24 @@ principal e para todos os worktrees que compartilham o mesmo `.git`.
 - `pnpm install --frozen-lockfile` → `pnpm turbo run typecheck lint test build` → 
   `pnpm diff-coverage origin/main` (mesmo gate do `pre-push`, agora bloqueante de merge).
 - Cache do Turborepo via `actions/cache` (chave por `github.sha`, fallback por `runner.os`).
-- `apps/api` ainda não usa o Postgres do `docker-compose.yml` (só expõe `/health`) — quando isso
-  mudar, decidir container de banco de teste no pipeline vs. serviço gerenciado.
+- O job `ci` sobe um `services.postgres` (`postgres:16-alpine`, mesmas credenciais do
+  `.env.example`) e expõe `DATABASE_URL=postgresql://decreto:decreto@localhost:5432/decreto` no
+  `env` do job; um step "Apply DB migrations" (`pnpm --filter @decreto/api run db:migrate`) roda
+  antes de `pnpm turbo run typecheck lint test build`, já que os testes do `apps/api` que tocam
+  `src/db/**` rodam contra um Postgres real (sem mocks).
+
+## Postgres (`apps/api`)
+
+- ORM: **Drizzle** (`drizzle-orm` + driver `pg`). Schema tipado em `apps/api/src/db/schema.ts`;
+  migrations SQL geradas (nunca escritas à mão) em `apps/api/drizzle/` via
+  `pnpm --filter @decreto/api run db:generate` sempre que o schema mudar.
+- Scripts do pacote: `db:generate` (gera migration a partir do schema), `db:migrate` (aplica
+  migrations pendentes, lê `DATABASE_URL`), `db:seed` (popula dados iniciais de forma idempotente,
+  ex. `event_images`).
+- **Pré-requisito local**: como o `pre-commit`/`pre-push` roda `test` e os testes do `apps/api`
+  conectam a um Postgres real (sem mocks), é preciso ter `docker compose up -d db` rodando e
+  `DATABASE_URL` exportada no shell (mesmo valor do `.env.example`, trocando `db` por `localhost`)
+  antes de commitar/pushar — senão os hooks falham por falta de banco, não por erro de código.
 
 ## Deploy (a decidir)
 

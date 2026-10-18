@@ -13,6 +13,22 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: decreto
+          POSTGRES_USER: decreto
+          POSTGRES_PASSWORD: decreto
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U decreto"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://decreto:decreto@localhost:5432/decreto
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,6 +53,9 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
+
+      - name: Apply DB migrations
+        run: pnpm --filter @decreto/api run db:migrate
 
       - run: pnpm turbo run typecheck lint test build
 

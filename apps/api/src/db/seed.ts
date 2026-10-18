@@ -1,0 +1,41 @@
+import { eq } from "drizzle-orm";
+import { createDb, type Db } from "./client.js";
+import { eventImages } from "./schema.js";
+
+const initialEventImages = [
+  { eventName: "prisao-oposicao", fileLocation: "eventos/prisao-oposicao.png" },
+];
+
+export async function seedEventImages(db: ReturnType<typeof createDb>): Promise<void> {
+  for (const row of initialEventImages) {
+    const [existing] = await db
+      .select({ id: eventImages.id, fileLocation: eventImages.fileLocation })
+      .from(eventImages)
+      .where(eq(eventImages.eventName, row.eventName))
+      .limit(1);
+
+    if (!existing) {
+      await db.insert(eventImages).values(row);
+    } else if (existing.fileLocation !== row.fileLocation) {
+      await db
+        .update(eventImages)
+        .set({ fileLocation: row.fileLocation })
+        .where(eq(eventImages.id, existing.id));
+    }
+  }
+}
+
+export async function main(db: Db = createDb()): Promise<void> {
+  await seedEventImages(db);
+  console.log("[db] seed de event_images aplicado");
+}
+
+export function handleCliError(error: unknown): void {
+  console.error("[db] falha ao aplicar seed", error);
+  process.exitCode = 1;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  /* istanbul ignore next -- bootstrap de CLI, não roda sob o import dos testes */
+  main().catch(handleCliError);
+}
