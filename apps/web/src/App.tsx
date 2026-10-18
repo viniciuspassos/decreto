@@ -25,9 +25,11 @@ export function App() {
     return <Home onStart={(g) => { setGame(g); setScreen({ name: "main" }); }} />;
   }
 
-  const afterTurn = (g: GameState): Screen => {
+  /** `won` só vem preenchido logo após uma eleição. */
+  const afterTurn = (g: GameState, won?: boolean): Screen => {
     const reason = checkEnd(g);
     if (reason) return { name: "end", result: endGame(g, reason) };
+    if (won !== undefined) return won ? { name: "main" } : { name: "election", lost: true };
     return isElectionTurn(g) ? { name: "election", lost: false } : { name: "main" };
   };
   const finishSemester = () => {
@@ -38,9 +40,7 @@ export function App() {
   const vote = (promises: CampaignPromise[]) => {
     const { state, won } = runElection(game, promises);
     setGame(state);
-    const reason = checkEnd(state);
-    if (reason) setScreen({ name: "end", result: endGame(state, reason) });
-    else setScreen(won ? { name: "main" } : { name: "election", lost: true });
+    setScreen(afterTurn(state, won));
   };
   const back = () => setScreen({ name: "main" });
 

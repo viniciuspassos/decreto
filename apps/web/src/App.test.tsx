@@ -1,15 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import "./i18n/index";
-import { App } from "./App";
-import { newGame } from "./api/mockApi";
-import { Election } from "./screens/Election";
-import { polar, ringRadius, spokeAngle } from "./components/RadialMap";
-import { semesterOf, turnInTerm, yearOf } from "./components/TopBar";
-import { formatIndicator, signed } from "./components/format";
+import "./i18n/index.js";
+import { App } from "./App.js";
+import { newGame } from "./api/mockApi.js";
+import { Election } from "./screens/Election.js";
+import { polar, ringRadius, spokeAngle } from "./components/RadialMap.js";
+import { semesterOf, turnInTerm, yearOf } from "./components/TopBar.js";
+import { formatIndicator, signed } from "./components/format.js";
 
 describe("App (v0 com backend mockado)", () => {
   it("toma posse, enfileira uma política, encerra o semestre e vê o resumo", () => {
     render(<App />);
+    fireEvent.change(screen.getByDisplayValue("República de Vessária"), { target: { value: "Vessária" } });
     fireEvent.change(screen.getByPlaceholderText("Seu nome"), { target: { value: "Helena" } });
     fireEvent.click(screen.getByText("Tomar posse"));
     fireEvent.click(screen.getByText("Registro obrigatório"));
@@ -24,9 +25,40 @@ describe("App (v0 com backend mockado)", () => {
     fireEvent.click(screen.getByText("Continuar"));
     fireEvent.click(screen.getByText("Grupos de eleitores"));
     expect(screen.getByText("Opinião pública")).toBeTruthy();
+    fireEvent.click(screen.getByText("Religiosos"));
+    expect(screen.getByText("Liberdades individuais")).toBeTruthy();
     fireEvent.click(screen.getByText(/Voltar à rede/));
     fireEvent.click(screen.getByText("Regimes e utopias"));
     expect(screen.getByText("Utopias")).toBeTruthy();
+  });
+
+  it("joga uma partida inteira: evento, eleições com promessas e fim de jogo", () => {
+    const clickIf = (re: RegExp) => {
+      const [el] = screen.queryAllByText(re);
+      if (el) fireEvent.click(el);
+      return el !== undefined;
+    };
+    render(<App />);
+    fireEvent.click(screen.getByText("Continuar"));
+    fireEvent.click(screen.getByText("+5 indicadores ▾"));
+    expect(screen.getByText("Corrupção")).toBeTruthy();
+    fireEvent.click(screen.getByText("Prender opositores"));
+    fireEvent.click(screen.getByText("Adicionar ao turno · 48"));
+    fireEvent.click(screen.getByText(/Encerrar semestre/));
+    fireEvent.click(screen.getByText(/Iniciar próximo semestre/));
+    expect(screen.getByText("≈ Emílio Garrastazu Médici")).toBeTruthy();
+    fireEvent.click(screen.getByText("Continuar"));
+    for (let i = 0; i < 400 && !screen.queryByText("Nova partida"); i++) {
+      if (screen.queryByText("Escolha até 3 promessas")) {
+        clickIf(/^Remédios gratuitos$/);
+        fireEvent.click(screen.getByText(/Ir às urnas/));
+      } else if (!clickIf(/Encerrar semestre/) && !clickIf(/Iniciar próximo semestre/)) {
+        clickIf(/^Continuar$/);
+      }
+    }
+    expect(screen.getByText("Você governou com semelhanças com")).toBeTruthy();
+    fireEvent.click(screen.getByText("Nova partida"));
+    expect(screen.getByText("Tomar posse")).toBeTruthy();
   });
 });
 
