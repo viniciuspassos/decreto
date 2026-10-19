@@ -15,7 +15,6 @@
     "test": "turbo run test",
     "diff-coverage": "tsx tools/diff-coverage/src/bin.ts",
     "generate:trailer-clips": "tsx tools/generate-images/src/bin.ts --manifest assets/trailers/clips.json --base assets/trailers/_base.api.json --images-dir assets/trailers/clips --ext mp4 --timeout-min 60",
-    "record:trailer-demo": "tsx tools/trailer-demo/src/bin.ts",
     "prepare": "husky"
   },
   "devDependencies": {
