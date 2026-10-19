@@ -39,7 +39,8 @@ Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame fina
 - **Mesmo começo, mesmo fim.** A abertura (A1–A3) e o encerramento (e1a–e1b) são idênticos em todos os
   trailers: o primeiro e o último frame são os mesmos. São gerados uma vez só.
 - **Orçamento de tempo.** Abertura 6 s + miolo + encerramento 5 s, no máximo **60 s**. Cada clipe
-  fica 2 s na tela. O trailer 1 tem 42 s (miolo de 31 s).
+  fica 2 s na tela, ou 3 s com câmera lenta 1,5×. O trailer 1 tem 42 s (miolo de 31 s); o trailer 2,
+  43 s (miolo de 32 s).
 
 A coluna **Interface** só descreve o que aparece na tela do jogo, no monitor. "—" = sem monitor no
 plano.
@@ -73,7 +74,7 @@ Método, modelos, regras de prompt, script de geração e acompanhamento: **[pro
 
 1. **Clipes** com Wan 2.2 T2V A14B (texto → vídeo), 832×480, 2 s por clipe, ~15 min cada, gerados
    em lote pela CLI (`pnpm generate:trailer-clips`).
-2. **Pós-produção** com ffmpeg: 24 fps e 1080p. Cada clipe fica 2 s na tela, sem câmera lenta.
-   Planos mais longos viram 2 ou 3 clipes encadeados por cortes.
+2. **Pós-produção** com ffmpeg: 24 fps e 1080p. Cada clipe fica 2 s na tela, ou 3 s com câmera
+   lenta 1,5×. Planos mais longos viram 2 ou 3 clipes encadeados por cortes.
 3. **Edição:** gravação de tela do jogo sobre o monitor (versões pt-BR e en da interface), frame
    final nos dois idiomas, trilha e som (o Wan não gera áudio).
