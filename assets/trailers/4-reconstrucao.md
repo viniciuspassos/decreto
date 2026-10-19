@@ -1,6 +1,6 @@
 # Trailer 4: "Reconstrução"
 
-Roteiro do miolo (6–43 s). Linguagem comum, abertura (a1–a3), encerramento (e1a–e1b) e produção em
+Roteiro do miolo (6–48 s). Linguagem comum, abertura (a1–a3), encerramento (e1a–e1b) e produção em
 [comum.md](comum.md). Trilha e som em [4-reconstrucao.trilha.md](4-reconstrucao.trilha.md).
 
 Variação do [trailer 1](1-mandato.md) com o arco invertido: **uma crescente só**. O jogador herda um
@@ -9,78 +9,83 @@ termina a um clique da tirania; este termina com a mão **saindo do quadro**, lo
 trailer 1 quase clicou. A única sombra é esse nó intocado, seguido da tagline comum: ele podia, e
 não fez.
 
-**Espelhos.** Cada imagem da crise volta transformada mais adiante, para a recuperação aparecer na
-imagem e não em texto:
+**Um trajeto só, da escuridão ao sol.** Em vez de uma colagem de cortes, o trailer é um único
+movimento. São 14 planos de 3 s (câmera lenta), e a câmera **sempre avança**. Cada lugar da crise
+é curado **no mesmo enquadramento**, por fade. Só há três cortes secos, e eles são os golpes:
+
+1. **O clique no escuro (15–21 s):** a lâmpada do mercado morre, silêncio, o clique, e as luzes do
+   hospital acendem no ritmo.
+2. **Portão → cortina (27 s):** corte no mesmo gesto lateral. A música passa a Ré maior e o sol
+   estoura na lente.
+3. **O vale com o sol nascendo (39 s):** o clímax, resolvido.
+
+O fecho é calmo, para a tagline cair sobre o silêncio.
+
+**Ao contrário dos outros trailers, os planos não encurtam:** ficam todos com 3 s e se alongam na
+sensação, por fades, à medida que o país sara (ver [linguagem comum](comum.md#linguagem-comum)).
+
+**Perspectiva central.** Corredor, mercado e portão têm o ponto de fuga no centro do quadro e o
+mesmo avanço de câmera. Mesmo com seeds diferentes no Wan, os dois lados do fade se sobrepõem
+como se fossem um plano só.
+
+**Espelhos, todos dentro do próprio trailer:**
 
 | Crise | Volta como |
 |---|---|
-| Prateleiras vazias (4-01) | Prateleiras cheias sendo abastecidas (4-07) |
-| Fila na chuva diante de um portão de fábrica fechado, alguns casacos **laranja** (4-02) | O mesmo portão abrindo para operários de laranja (4-08) |
-| Monitor vermelho sobre mãos jovens (4-03) | Monitor ao sol; a mão idosa solta o mouse e sai do quadro (4-16a–b) |
-| Hospital escuro acendendo (4-05) | O mesmo corredor de dia (4-14b) |
-| Sala de aula lotada, gente de pé (4-06) | A mesma sala de dia, todos sentados, carteiras sobrando (4-14a) |
+| A lâmpada que morre (4-03) | As luzes que acendem (4-05) |
+| O mercado vazio (4-03) | O mesmo mercado cheio (4-06), num fade com o ponto de fuga parado |
+| O portão fechado na chuva (4-02) | O mesmo portão abrindo ao sol (4-07) |
+| A chuva na janela (4-01) | A cortina aberta e o sol (4-08) |
+| O grafo cinza e vermelho sob mãos jovens (4-01) | O grafo aceso, com o nó intocado, sob a mão idosa que se retira (4-13/4-14) |
 
-**A luz sobe.** O gabinete começa escuro e chuvoso, como na abertura comum. A chuva para no 2º ato
-(amanhecer) e, no 3º, a janela se abre e o sol entra até a mesa. Os prompts mudam de estilo junto:
-frio e escuro → luz de amanhecer → luz do dia. O bar da eleição (4-10a–b) é o último escuro; na
-correção de cor, esquentar o 4-10b e deixar 4-04 a 4-06 frios.
+**A luz e a câmera sobem.** A luz vai da noite com chuva ao sol pleno. A câmera vai de mesa → rua →
+mercado → janela → praça → rio → cidade → país e volta à mesa.
 
 **Vida imperfeita, não utopia.** O 3º ato não pode lembrar a nação simétrica do
-[trailer 2](2-ordem-e-futuro.md): cidade vivida, irregular, cada pessoa fazendo uma coisa, roupa no
-varal. Nada de grade, simetria ou câmera subindo sem parar, e nenhum rótulo de utopia na tela.
+[trailer 2](2-ordem-e-futuro.md). A cidade é vivida e irregular, cada pessoa faz uma coisa e há
+roupa no varal. Nenhum rótulo de utopia aparece na tela.
 
-**A câmera sobe** (ver [linguagem comum](comum.md#linguagem-comum)): mercado (4-01) → portão
-(4-02) → mesa (4-03) → praça (4-12) → cidade (4-13) → país (4-15). O fecho volta à mesa.
+**Passagem do tempo:** a mão, com a **aliança que nunca some**, é jovem (4-01, 4-04), mais velha
+(4-08) e idosa (4-13); na tela, "Ano 20".
 
-**Recurso de tempo:** como no trailer 1, as mãos envelhecem de plano em plano. A diferença: a
-**aliança nunca some** (4-03, 4-04, 4-11, 4-16a–b).
-
-**Reaproveitamento do trailer 1.** Seis planos são os mesmos clipes do trailer 1, com o mesmo
-prompt e a mesma seed no manifest. Antes do lote, copie os arquivos (o script pula clipes que já
+**Reaproveitamento do trailer 1:** 4-04 e 4-05 são os clipes 1-02a e 1-01, com o mesmo prompt e a
+mesma seed no manifest, agora em câmera lenta. Antes do lote, copie-os (o script pula clipes que já
 existem):
-
-| Plano | Clipe do trailer 1 |
-|---|---|
-| 4-04 | `clips/1-mandato/1-02a-s42.mp4` |
-| 4-05 | `clips/1-mandato/1-01-s42.mp4` |
-| 4-06 | `clips/1-mandato/1-02b-s42.mp4` |
-| 4-09 | `clips/1-mandato/1-05a-s42.mp4` |
-| 4-10a | `clips/1-mandato/1-03a-s42.mp4` |
-| 4-10b | `clips/1-mandato/1-03b-s42.mp4` |
 
 ```sh
 mkdir -p assets/trailers/clips/4-reconstrucao && cd assets/trailers/clips && \
-for par in 4-04:1-02a 4-05:1-01 4-06:1-02b 4-09:1-05a 4-10a:1-03a 4-10b:1-03b; do \
+for par in 4-04:1-02a 4-05:1-01; do \
   cp "1-mandato/${par#*:}-s42.mp4" "4-reconstrucao/${par%%:*}-s42.mp4"; done
 ```
 
-**Duração por clipe:** como no trailer 1, cada clipe fica **2 s** na tela (`seconds: 2`), e a
-montagem 4-14 usa 1 s de cada. Com a abertura (6 s) e o encerramento (5 s), o trailer tem **48 s**.
-Os prompts ficam em [`4-reconstrucao.manifest.json`](4-reconstrucao.manifest.json).
+**Duração:** cada clipe usa o padrão de 3 s na tela (câmera lenta 1,5×). Com a abertura (6 s) e o
+encerramento (5 s), o trailer tem **53 s**. Os prompts ficam em
+[`4-reconstrucao.manifest.json`](4-reconstrucao.manifest.json). A coluna **Entra** é a transição
+do plano (`transition` no manifest).
 
-| # | Tipo | Tempo | Plano | Interface |
-|---|---|---|---|---|
-| 4-01 | clip | 2 s | Corredor de mercado à noite, prateleiras vazias, uma lâmpada fluorescente piscando. | — |
-| 4-02 | clip | 2 s | Fila longa de guarda-chuvas na chuva diante de um portão de fábrica fechado, vista de trás; alguns casacos **laranja**. | — |
-| 4-03 | clip | 2 s | Mãos jovens, com a **aliança**, paradas na mesa; o monitor as banha de luz vermelha. Chuva na janela. | Grafo cinza; todos os indicadores em vermelho; alerta **Recessão** |
-| 4-04 | clip | 2 s | Close na mão no mouse: **aliança e relógio** visíveis. Clique. *(= 1-02a)* | — |
-| 4-05 | clip | 2 s | Corte: luzes quentes de um corredor de hospital se acendem, uma a uma. *(= 1-01)* | Nó **Ampliação da rede pública** acende |
-| 4-06 | clip | 2 s | Corte: sala de aula lotada, gente de pé no fundo. *(= 1-02b)* | Nó **Universidade gratuita** acende |
-| 4-07 | clip | 2 s | Mãos de um repositor enchem uma prateleira de pão; o corredor atrás já está cheio. | — |
-| 4-08 | clip | 2 s | Amanhecer: o portão de 4-02 **abre**; os operários de laranja esperam, de costas. | — |
-| 4-09 | clip | 2 s | Turbinas eólicas girando ao nascer do sol. *(= 1-05a)* | Nó **Metas de emissão** acende |
-| 4-10a | clip | 2 s | Noite de eleição, bar lotado olhando a TV. *(= 1-03a)* | — |
-| 4-10b | clip | 2 s | Corte seco: explosão de confete. *(= 1-03b)* | — |
-| 4-11 | clip | 2 s | Na janela do gabinete, de manhã: uma mão mais velha, com a aliança, abre a cortina; o sol entra. | — |
-| 4-12 | clip | 2 s | Praça ensolarada e vivida: famílias, crianças correndo, uma feira, roupa nas varandas. | — |
-| 4-13 | clip | 2 s | Plano aéreo da cidade de dia: telhados irregulares, parques cheios, ruas arborizadas. | — |
-| 4-14a | clip | 1 s | Montagem: a sala de aula de 4-06, de dia, todos sentados, algumas carteiras sobrando. | — |
-| 4-14b | clip | 1 s | Montagem: o corredor de 4-05, de dia, uma enfermeira passando. | — |
-| 4-14c | clip | 1 s | Montagem: jovens pulam num rio limpo. | — |
-| 4-15 | clip | 2 s | O país: vale verde ao nascer do sol, uma cidade pequena, um trem cruzando a ponte. | — |
-| 4-16a | clip | 2 s | Gabinete ao sol, janela aberta, cortina ao vento. O monitor e a mão idosa, **com a aliança**, parada no mouse. | Grafo todo aceso; **um único nó cinza no centro: Reeleição ilimitada**, com um leve pulso; cursor longe dele; **Ano 20** pequeno no canto |
-| 4-16b | clip | 2 s | Mesmo quadro: a mão solta o mouse e sai por baixo do quadro. Sobra o mouse sozinho na mesa. | idem |
-| | | **37 s** | → Encerramento compartilhado | |
+| # | Tipo | Tempo | Entra | Plano | Interface |
+|---|---|---|---|---|---|
+| 4-01 | clip | 3 s | Corte (a tela azul de a3 vira vermelha) | Mãos jovens, com a aliança, paradas na mesa; o monitor as banha de vermelho; chuva na janela. A câmera avança por cima das mãos, em direção à janela. | Grafo todo cinza; indicadores em vermelho; alerta **Recessão** |
+| 4-02 | clip | 3 s | Fade, pela chuva | Lá fora, a câmera avança ao longo de uma fila de guarda-chuvas até um portão de fábrica fechado, centralizado; alguns casacos **laranja**. | — |
+| 4-03 | clip | 3 s | Corte no movimento | Corredor de mercado vazio, à noite, ponto de fuga no centro. A lâmpada fluorescente pisca e **apaga**; o corredor fica quase preto. | — |
+| 4-04 | clip | 3 s | **Corte seco, no escuro** | Close na mão no mouse, com aliança e relógio; **clique**, em câmera lenta. *(= 1-02a)* | — |
+| 4-05 | clip | 3 s | **Corte seco, no clique** | As luzes do corredor de hospital acendem uma a uma, empurrando o escuro; a câmera avança. *(= 1-01)* | — |
+| 4-06 | clip | 3 s | Fade, mesmo ponto de fuga | O mercado de 4-03, agora **cheio**, com luz quente de começo de manhã; alguns clientes de costas ao fundo. | — |
+| 4-07 | clip | 3 s | Fade | Nascer do sol: a câmera avança para o portão de 4-02, que **desliza aberto da esquerda para a direita**; os operários de laranja esperam, de costas. | — |
+| 4-08 | clip | 3 s | **Corte no gesto (portão → cortina)** | No gabinete, uma mão **mais velha**, com a aliança, puxa a cortina da esquerda para a direita; o sol inunda a lente. | — |
+| 4-09 | clip | 3 s | Fade, a partir do branco do sol | Praça vivida e ensolarada; a câmera avança na altura dos olhos, com crianças correndo à frente; feira, varais. | — |
+| 4-10 | clip | 3 s | Corte na ação (correr → saltar) | Câmera lenta, vista lateral: jovens correm pelo píer e saltam num rio limpo; a água estoura ao sol. | — |
+| 4-11 | clip | 3 s | Corte casado na água | Plano aéreo subindo e avançando sobre o rio que corta a cidade vivida. | — |
+| 4-12 | clip | 3 s | Fade, a câmera segue em frente | O voo passa a crista do morro e revela o vale, com **o sol nascendo no centro do quadro**; vila, campos, trem na ponte. **Clímax.** | — |
+| 4-13 | clip | 3 s | Fade, de sol para sol | Gabinete ao sol, janela aberta atrás do monitor (o sol no mesmo ponto do quadro), cortina ao vento; a mão idosa, com a aliança, parada no mouse. | Grafo todo aceso; **um único nó cinza no centro: Reeleição ilimitada**, pulsando de leve; cursor longe; **Ano 20** pequeno |
+| 4-14 | clip | 3 s | Fade (a pausa para decidir) | Mesmo quadro: a mão solta o mouse e sai por baixo; sobra o mouse sozinho ao sol. | idem |
+| | | **42 s** | | → Encerramento compartilhado (48–53 s) | |
 
-Clipes de IA: 20, sendo 6 reaproveitados do trailer 1 e **14 novos** (~3,5 h de lote). A montagem
-4-14 tem 3 clipes de 1 s.
+**Notas de produção:**
+- **Sentido dos gestos.** O Wan não garante o sentido do movimento (portão e cortina para a
+  direita, crianças correndo). Se vier invertido, espelhe o clipe na pós (`hflip` no ffmpeg). Não
+  há texto em quadro, então espelhar é seguro.
+- **A lâmpada (4-03):** se o Wan não a apagar, escureça o último 0,5 s na edição.
+- **4-13 → 4-14:** são duas gerações; o fade de 0,5 s esconde a diferença de enquadramento.
+
+Clipes de IA: 14, sendo 2 reaproveitados do trailer 1 e **12 novos** (~3 h de lote).
