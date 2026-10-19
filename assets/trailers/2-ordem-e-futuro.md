@@ -28,11 +28,3 @@ de trabalho: **"A Nação Concórdia"**. Visual: perfeição limpa, simétrica e
 | | **45 s** | → Encerramento compartilhado | |
 
 Clipes de IA: 10.
-
-## Demo v0 (sem IA)
-
-Versão de demonstração de **10 s** com os planos 2.1–2.10 comprimidos, desenhada em HTML/SVG
-([`tools/trailer-demo/pages/2-ordem-e-futuro.html`](../../tools/trailer-demo/pages/2-ordem-e-futuro.html))
-e gravada quadro a quadro (30 fps, 1080p) com Playwright + ffmpeg. Sem trilha. Abra o HTML no
-navegador para ver em loop (`?lang=en` para inglês) ou grave os MP4 em pt-BR e en com
-`pnpm record:trailer-demo`, que salva em `assets/trailers/clips/2-ordem-e-futuro/demo-v0-{lang}.mp4`.
