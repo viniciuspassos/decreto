@@ -24,7 +24,7 @@ janela aberta, no lugar da chuva. O `c-hit-final`, grave e atonal, logo depois d
 | Primeiro clique | 12–18 s | 4-04 – 4-06 | `1-m-leito` (trailer 1) começa; `1-m-piano` limpo: Ré–Lá (4-04), Sol–Fá (4-05); cordas em 4-06. | 3 → 4 |
 | Reconstrução | 18–28 s | 4-07 – 4-10b | A chuva some em 18,0 s. Ostinato e pulso do `1-m-leito`; `1-riser` em 4-10a; `1-hit-vitoria` no confete (26 s). | 5 → 7 |
 | Nação modelo | 28–37 s | 4-11 – 4-14c | **Ré maior** em 28,0 s, com o sol: entra `4-m-leito-maior`. Metais e tambores; um `1-hit-montagem` por corte (34, 35, 36 s). | 8 → 9 |
-| Clímax | 37–39 s | 4-15 | Acorde de Ré maior, cheio, **resolvido**. | 10 |
+| Clímax | 37–39 s | 4-15 | Acorde de Ré maior, cheio, **resolvido**, com o 4º `1-hit-montagem` em 37,0 s. | 10 |
 | Fecho | 39–43 s | 4-16a – 4-16b | Orquestra se desfaz; `4-m-piano-final` resolve na tônica; pássaros e vento. Tudo some em 43,0 s. | 4 → 1 |
 | Encerramento | 43–48 s | e1a–e1b | Igual ao trailer 1: silêncio, caneta (43,5 s), `c-hit-final` em 46,0 s. | 0 → 4 |
 
