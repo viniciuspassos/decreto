@@ -23,7 +23,8 @@ Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame fina
   1. **A câmera sobe:** cada ato começa mais longe da mesa (mesa → janela → praça → cidade → país).
   2. **O grafo acende:** a cada corte para o monitor há mais nós ativos; a barra de capital político
      enche.
-  3. **Os cortes encurtam:** 2 s → 1 s → 0,5 s até o clímax, com a trilha subindo junto.
+  3. **Os cortes encurtam:** 2 s → 1 s → 0,5 s até o clímax, com a trilha subindo junto. Exceção:
+     o trailer 4 faz o inverso (planos de 3 s ligados por fades), porque é uma crescente fluida.
 - **Interface do jogo, conteúdo livre.** O monitor é gerado com a tela apenas brilhando; na edição
   entra a interface do `apps/web` (`pnpm dev:mocked`) aplicada sobre ela. O Wan não gera texto
   legível, então telas e placas dentro das cenas (TV, telão, cartazes) não têm texto legível. Os
