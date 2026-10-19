@@ -1,6 +1,6 @@
 # Trailers do Decreto: base comum
 
-Três trailers de **no máximo 60 s**, horizontais (16:9), sem versão para redes sociais, gerados no
+Quatro trailers de **no máximo 60 s**, horizontais (16:9), sem versão para redes sociais, gerados no
 ComfyUI (Wan 2.2 T2V A14B, clipes de 2 s; ver [produção](producao.md)) e montados na edição.
 Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame final)
 
@@ -9,6 +9,7 @@ Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame fina
 - [Trailer 1: "Mandato"](1-mandato.md)
 - [Trailer 2: "Ordem e Futuro"](2-ordem-e-futuro.md)
 - [Trailer 3: "Decreto"](3-decreto.md)
+- [Trailer 4: "Reconstrução"](4-reconstrucao.md)
 
 ## Linguagem comum
 
@@ -18,7 +19,7 @@ Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame fina
 - **Primeira pessoa, sem rosto.** O jogador é um par de mãos numa mesa, diante de um monitor. O jogo é
   esse computador. O rosto nunca aparece (nem em retratos, estátuas ou reflexos — sempre de costas,
   contra a luz ou fora de foco), para o espectador ocupar o lugar do governante.
-- **Poder crescente.** Três recursos se repetem nos três trailers, em escalada:
+- **Poder crescente.** Três recursos se repetem nos trailers, em escalada:
   1. **A câmera sobe:** cada ato começa mais longe da mesa (mesa → janela → praça → cidade → país).
   2. **O grafo acende:** a cada corte para o monitor há mais nós ativos; a barra de capital político
      enche.
@@ -34,7 +35,7 @@ Tagline comum: **"Ninguém nasce tirano. Basta um decreto."** (só no frame fina
   resolvida na edição, com um corte entre dois keyframes.
 - **Sem violência gráfica (roteiro §S6).** Repressão e morte aparecem por som fora de quadro,
   sombras, objetos e reação das pessoas — nunca sangue, ferimento ou corpo.
-- **Mesmo começo, mesmo fim.** A abertura (A1–A3) e o encerramento (e1a–e1b) são idênticos nos três
+- **Mesmo começo, mesmo fim.** A abertura (A1–A3) e o encerramento (e1a–e1b) são idênticos em todos os
   trailers: o primeiro e o último frame são os mesmos. São gerados uma vez só.
 - **Orçamento de tempo.** Abertura 6 s + miolo + encerramento 5 s, no máximo **60 s**. Cada clipe
   fica 2 s na tela. O trailer 1 tem 42 s (miolo de 31 s).
@@ -55,7 +56,7 @@ plano.
 | # | Tempo | Plano | Tela |
 |---|---|---|---|
 | e1a | 3 s | Preto. Som de caneta assinando papel (eco de A1). | — |
-| e1b | 2 s | **Frame final**, igual nos três (`cartelas/final-{lang}.png`), com um *hit* grave. | *"Ninguém nasce tirano. Basta um decreto."* + **DECRETO** |
+| e1b | 2 s | **Frame final**, igual em todos (`cartelas/final-{lang}.png`), com um *hit* grave. | *"Ninguém nasce tirano. Basta um decreto."* + **DECRETO** |
 
 ## Produção
 
