@@ -9,8 +9,8 @@ export default {
   transform: {
     "^.+\\.ts$": ["ts-jest", { useESM: true }],
   },
-  // Paralelismo padrão do Jest é seguro aqui: cada arquivo de teste cria sua própria
-  // instância PGlite isolada (ver src/db/testDb.ts), sem banco/estado compartilhado entre eles.
+  // Várias instâncias PGlite em paralelo deixam os testes de HTTP instáveis em máquinas locais e no CI.
+  maxWorkers: 1,
   collectCoverage: true,
   coverageDirectory: "coverage",
   coverageReporters: ["json", "text-summary"],

@@ -108,3 +108,70 @@ export interface EndGameResult {
   ranking: { figureId: string; similarity: number }[];
   topTrees: string[];
 }
+
+export type GamePhase = "playing" | "election" | "ended";
+
+export interface GameNodeView {
+  status: NodeStatus;
+  cost: number | null;
+}
+
+/** Estado exposto pela API; a fila pertence ao cliente e a seed fica apenas no servidor. */
+export interface GameView extends Omit<GameState, "queue"> {
+  version: number;
+  phase: GamePhase;
+  maxActions: number;
+  nodes: Record<string, GameNodeView>;
+}
+
+export interface QueuePreview {
+  nodes: Record<string, GameNodeView>;
+  totalCost: number;
+  remaining: number;
+  errors: { code: string; nodeId?: string }[];
+}
+
+export interface CreateGameRequest {
+  country: string;
+  president: string;
+  situation: InitialSituation;
+}
+
+export interface PreviewQueueRequest {
+  queue: string[];
+}
+
+export interface EndSemesterRequest extends PreviewQueueRequest {
+  expectedVersion: number;
+}
+
+export interface ElectionPreviewRequest {
+  promises: string[];
+}
+
+export interface ElectionRequest extends ElectionPreviewRequest {
+  expectedVersion: number;
+}
+
+export interface EndSemesterResponse {
+  game: GameView;
+  report: SemesterReport;
+  events: CountryEvent[];
+  end: EndGameResult | null;
+}
+
+export interface CampaignResponse {
+  options: CampaignPromise[];
+  maxPromises: number;
+}
+
+export interface ElectionPreviewResponse {
+  votes: number;
+  honeymoon: boolean;
+}
+
+export interface ElectionResponse {
+  game: GameView;
+  won: boolean;
+  end: EndGameResult | null;
+}
