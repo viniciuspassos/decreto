@@ -104,7 +104,7 @@ export interface CampaignPromise {
 
 export interface EndGameResult {
   outcome: "victory" | "defeat";
-  reason: "twentyYears" | "coup" | "fortyYears";
+  reason: "twentyYears" | "coup" | "attack" | "revolution" | "fortyYears";
   ranking: { figureId: string; similarity: number }[];
   topTrees: string[];
 }

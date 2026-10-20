@@ -1,5 +1,5 @@
 import {
-  EXCLUSIVE_NODE_PAIRS, EXTRA_PREREQS, events, nodeEffects, policyTrees, systemEvents, taxRateEffects, voterGroups,
+  EXCLUSIVE_NODE_PAIRS, EXTRA_PREREQS, events, nodeEffects, nodeFigures, policyTrees, systemEvents, taxRateEffects, voterGroups,
   type GameEventDefinition, type NodeEffect, type SystemEventDefinition, type TaxRate, type VoterGroup,
 } from "@decreto/game-content";
 import type { GameContent } from "./trees.js";
@@ -11,10 +11,11 @@ export interface SemesterContent extends GameContent {
   taxRateEffects: Record<TaxRate, NodeEffect>;
   events: GameEventDefinition[];
   systemEvents: SystemEventDefinition[];
+  nodeFigures: Record<string, string>;
 }
 
 /** O conteúdo real do jogo, de `@decreto/game-content`. */
 export const defaultContent: SemesterContent = {
   policyTrees, extraPrereqs: EXTRA_PREREQS, exclusiveNodePairs: EXCLUSIVE_NODE_PAIRS,
-  voterGroups, nodeEffects, taxRateEffects, events, systemEvents,
+  voterGroups, nodeEffects, taxRateEffects, events, systemEvents, nodeFigures,
 };

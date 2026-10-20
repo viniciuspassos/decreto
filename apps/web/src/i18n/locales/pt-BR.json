@@ -384,6 +384,8 @@
     "reason": {
       "twentyYears": "20 anos no poder",
       "coup": "golpe militar",
+      "attack": "atentado fatal",
+      "revolution": "revolução",
       "fortyYears": "40 anos sem vencer"
     },
     "year": "Ano {{year}} de 40",
