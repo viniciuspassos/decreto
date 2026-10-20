@@ -8,6 +8,8 @@ export const MAX_ACTIONS = 6;
 export const TURNS_PER_TERM = 8;
 /** Mandatos seguidos no poder para vencer por tempo (20 anos). */
 export const TERMS_TO_WIN = 5;
+/** Nós de regime que cancelam as eleições (S4): o mandato vira sem urna e o poder segue (roteiro §8). */
+export const ELECTION_SUSPENDING_NODES = ["election-postponement", "end-of-elections"];
 /** Turno em que a partida termina sem vitória (40 anos). */
 export const LAST_TURN = 80;
 /** Abaixo desta aprovação, risco de golpe vira derrota (ver `game-design` §3.7). */
@@ -45,5 +47,7 @@ export const INITIAL_CAPITAL = 60;
 export const INITIAL_SUPPORT = 50;
 /** Capital ganho por semestre = aprovação × este fator (roteiro §4.21: só a aprovação conta). */
 export const CAPITAL_PER_APPROVAL = 0.5;
+/** Apoio perdido por promessa de campanha não cumprida, pelos grupos que gostaram dela (roteiro §7). */
+export const BROKEN_PROMISE_PENALTY = 6;
 /** Reação de grupo por ação de política que ele gosta (+) ou não gosta (−). */
 export const POLICY_REACTION = 4;

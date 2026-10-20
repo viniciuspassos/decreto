@@ -13,6 +13,7 @@ import { loyaltyOf, updateSizes, updateSupport } from "./groups.js";
 import { updateBase } from "./movement.js";
 import { applyQueue, validateQueue, type QueueError } from "./queue.js";
 import { risksOf, rollRisks } from "./risks.js";
+import { skipElectionIfSuspended } from "./term.js";
 
 export class InvalidQueueError extends Error {
   constructor(readonly errors: QueueError[]) {
@@ -45,6 +46,7 @@ function closeSemester(ctx: SemesterCtx, before: EngineState): void {
   });
   state.turn += 1;
   state.turnsInPower += 1;
+  skipElectionIfSuspended(state);
   state.seed = ctx.rng.seed();
 }
 
