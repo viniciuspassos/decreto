@@ -8,6 +8,13 @@
       "when": 1792336967592,
       "tag": "0000_fine_garia",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792534616990,
+      "tag": "0001_lethal_nightcrawler",
+      "breakpoints": true
     }
   ]
 }
