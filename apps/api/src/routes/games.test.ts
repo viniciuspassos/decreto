@@ -100,4 +100,12 @@ describe("games routes", () => {
     expect(preview).toMatchObject({ status: 400, body: { code: "validation_error" } });
     expect(tooMany).toMatchObject({ status: 400, body: { code: "validation_error" } });
   });
+
+  it("rejeita promessa indisponível ao votar", async () => {
+    const state = newGame({ country: "Vessária", president: "Helena", situation: "stable", seed: 5 }, defaultContent);
+    const election = await persistGame(db, { ...state, turn: 9 });
+    const response = await request(app()).post(`/games/${election.id}/election`).send({ promises: ["inexistente"], expectedVersion: election.version });
+
+    expect(response).toMatchObject({ status: 400, body: { code: "validation_error" } });
+  });
 });
