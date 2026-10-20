@@ -4,7 +4,8 @@ import { nodeStatus } from "./availability.js";
 import type { SemesterContent } from "./content.js";
 import { clamp } from "./semester/common.js";
 import { endSemester } from "./semester/endSemester.js";
-import { approvalOf } from "./semester/groups.js";
+import { isElectionDue } from "./semester/term.js";
+import { approvalOf, loyaltyOf } from "./semester/groups.js";
 import { treeOf } from "./trees.js";
 import type { EngineState } from "./types.js";
 
@@ -46,7 +47,8 @@ function ballotGroups(state: EngineState, promises: CampaignPromise[], content: 
     if (g.support === null) return g;
     const delta = POLICY_REACTION * (countFor(promises, "gains", g.id) - countFor(promises, "loses", g.id))
       - BROKEN_PROMISE_PENALTY * countFor(broken, "gains", g.id);
-    return { ...g, support: clamp(g.support + delta, 0, 100) };
+    const support = clamp(g.support + delta, 0, 100);
+    return { ...g, support, loyalty: loyaltyOf(support) };
   });
 }
 
@@ -58,9 +60,10 @@ export function projectVotes(state: EngineState, nodeIds: string[], content: Sem
 /** O governo seguinte (IA) roda um mandato sem fila e sem tocar nos nós do jogador; derrubá-lo não é derrota do jogador. */
 function opposition(state: EngineState, content: SemesterContent): EngineState {
   const away = Array.from({ length: TURNS_PER_TERM }).reduce<EngineState>(
-    (current) => ({ ...endSemester(current, content).state, defeat: null }), { ...state, termsInRow: 0 },
+    (current) => ({ ...endSemester(current, content).state, defeat: null }), state,
   );
-  return { ...away, capital: state.capital, turnsInPower: 0, term: state.term + 1 };
+  // Eventos e crise do governo da IA não passam para o jogador; sem mandato seguido ao voltar.
+  return { ...away, capital: state.capital, turnsInPower: 0, term: state.term + 1, termsInRow: 0, pendingChoices: [], crisis: false };
 }
 
 /**
@@ -68,6 +71,7 @@ function opposition(state: EngineState, content: SemesterContent): EngineState {
  * ativa a lua de mel. Perder avança um mandato inteiro sob o governo da IA; o jogador pode concorrer de novo.
  */
 export function runElection(state: EngineState, nodeIds: string[], content: SemesterContent): ElectionResult {
+  if (state.defeat || !isElectionDue(state)) throw new Error("no election due");
   const groups = ballotGroups(state, validPromises(state, nodeIds, content), content);
   const approval = approvalOf(groups);
   const margin = 2 * approval - 100;

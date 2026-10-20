@@ -121,6 +121,18 @@ describe("runElection", () => {
     });
   });
 
+  it("só roda com eleição devida e jogo em andamento", () => {
+    expect(() => runElection(game({ turn: 8 }), [], defaultContent)).toThrow("no election due");
+    expect(() => runElection(game({ defeat: "coup" }), [], defaultContent)).toThrow("no election due");
+    expect(() => runElection(game({ activeNodes: ["end-of-elections"] }), [], defaultContent)).toThrow("no election due");
+  });
+
+  it("atualiza a lealdade e não herda escolhas pendentes do governo da IA", () => {
+    expect(runElection(withSupport(59), [], defaultContent).state.groups[0]?.loyalty).toBe("medium");
+    expect(runElection(withSupport(60), [], defaultContent).state.groups[0]?.loyalty).toBe("high");
+    expect(runElection(withSupport(30), [], defaultContent).state.pendingChoices).toEqual([]);
+  });
+
   it("o jogador volta a concorrer depois de perder e pode vencer", () => {
     const lost = runElection(withSupport(30), [], defaultContent).state;
     lost.groups.forEach((g) => { if (g.support !== null) g.support = 65; });
