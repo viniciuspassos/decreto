@@ -118,6 +118,7 @@ export interface GameNodeView {
 
 /** Estado exposto pela API; a fila pertence ao cliente e a seed fica apenas no servidor. */
 export interface GameView extends Omit<GameState, "queue"> {
+  id: string;
   version: number;
   phase: GamePhase;
   maxActions: number;
