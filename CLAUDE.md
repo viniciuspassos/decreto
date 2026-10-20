@@ -148,6 +148,7 @@ condições de utopia/fim de jogo).
 ### Code review antes do PR
 
 - Antes de abrir um PR (`gh pr create`), invocar o agente/skill de code review sobre o diff.
+- Alterações exclusivamente de documentação não exigem code review.
 - A review deve buscar bugs e também **código desnecessário e overengineering** (abstrações,
   camadas, parâmetros ou configurações que a tarefa não pede).
 - Débitos de severidade **alta e média** são resolvidos no mesmo PR, antes de abri-lo.
