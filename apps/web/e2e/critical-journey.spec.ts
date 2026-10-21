@@ -60,9 +60,9 @@ async function closeFirstSemester(page: Page, gameId: string, expectedCost: numb
   return result;
 }
 
-async function advanceToElection(request: APIRequestContext, game: GameView): Promise<GameView> {
+async function advanceToCampaign(request: APIRequestContext, game: GameView): Promise<GameView> {
   let current = game;
-  for (let semester = 2; semester <= 8; semester += 1) {
+  for (let semester = 2; semester <= 7; semester += 1) {
     const response = await request.post(`/api/games/${current.id}/end-semester`, {
       data: { queue: [], expectedVersion: current.version },
     });
@@ -71,27 +71,39 @@ async function advanceToElection(request: APIRequestContext, game: GameView): Pr
     current = outcome.game;
     expect(current.phase, `semester ${semester} ended the game unexpectedly`).not.toBe("ended");
   }
-  expect(current.phase).toBe("election");
+  expect(current.phase).toBe("campaign");
   return current;
 }
 
-async function reviewEvents(page: Page, outcome: EndSemesterResponse): Promise<void> {
+async function reviewEvents(page: Page, outcome: EndSemesterResponse, electionFollows = false): Promise<void> {
   expect(outcome.events.length).toBeGreaterThan(0);
-  await expect(page.getByText("Evento marcante")).toBeVisible();
   await page.getByRole("button", { name: /Iniciar próximo semestre/ }).click();
   for (let index = 0; index < outcome.events.length; index += 1) {
-    await expect(page.getByText("Evento marcante")).toBeVisible();
+    await expect(page.getByText(outcome.events[index]?.image ? "Evento marcante" : "Notícia do turno")).toBeVisible();
     await expect(page.locator(".event")).toBeVisible();
     await page.getByRole("button", { name: "Continuar" }).click();
   }
-  await expect(page.getByRole("button", { name: /Encerrar semestre/ })).toBeVisible();
+  if (electionFollows) await expect(page.getByRole("heading", { name: "Escolha até 3 promessas" })).toBeVisible();
+  else await expect(page.getByRole("button", { name: /Encerrar semestre/ })).toBeVisible();
+}
+
+async function selectCampaignAndPlay(page: Page, gameId: string): Promise<void> {
+  await page.reload();
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Escolha até 3 promessas" })).toBeVisible();
+  await page.locator(".cards .card").first().click();
+  const saved = page.waitForResponse((response) => response.url().endsWith(`/api/games/${gameId}/campaign`) && response.request().method() === "POST");
+  await page.getByRole("button", { name: /Confirmar 1 promessa/ }).click();
+  expect((await saved).ok()).toBeTruthy();
+  const finalTurn = page.waitForResponse((response) => response.url().endsWith(`/api/games/${gameId}/end-semester`) && response.request().method() === "POST");
+  await page.getByRole("button", { name: /Encerrar semestre/ }).click();
+  const response = await finalTurn;
+  expect(response.ok()).toBeTruthy();
+  await reviewEvents(page, await response.json() as EndSemesterResponse, true);
 }
 
 async function voteAtElection(page: Page, gameId: string, expectedVersion: number): Promise<void> {
   await expect(page.getByRole("heading", { name: "Escolha até 3 promessas" })).toBeVisible();
-  const campaignCard = page.locator(".cards .card").first();
-  await expect(campaignCard).toBeVisible();
-  await campaignCard.click();
   await expect(page.getByRole("button", { name: "Ir às urnas · 1 promessa" })).toBeVisible();
   const voted = page.waitForResponse((response) => response.url().endsWith(`/api/games/${gameId}/election`) && response.request().method() === "POST");
   await page.getByRole("button", { name: "Ir às urnas · 1 promessa" }).click();
@@ -112,8 +124,9 @@ test("new game, policy preview, semester summary, and election use the real API"
   const preview = await queuePolicy(page, created.id);
   const first = await closeFirstSemester(page, created.id, preview.totalCost);
   await reviewEvents(page, first);
-  const electionGame = await advanceToElection(request, first.game);
-  await page.reload();
-  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  const campaignGame = await advanceToCampaign(request, first.game);
+  await selectCampaignAndPlay(page, campaignGame.id);
+  const electionGame = await request.get(`/api/games/${created.id}`).then((response) => response.json() as Promise<GameView>);
+  expect(electionGame.phase).toBe("election");
   await voteAtElection(page, created.id, electionGame.version);
 });

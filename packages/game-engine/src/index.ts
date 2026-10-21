@@ -16,7 +16,7 @@ export { validateQueue, queueTotalCost } from "./semester/queue.js";
 export type { QueueError, QueueErrorCode } from "./semester/queue.js";
 export { resolveEventChoice } from "./semester/choices.js";
 export type { ChoiceOption } from "./semester/choices.js";
-export { isElectionDue } from "./semester/term.js";
+export { isCampaignDue, isElectionDue } from "./semester/term.js";
 export { campaignOptions, projectVotes, runElection } from "./election.js";
 export type { ElectionResult } from "./election.js";
 export { checkEnd } from "./endConditions.js";

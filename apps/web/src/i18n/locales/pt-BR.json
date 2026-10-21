@@ -284,6 +284,7 @@
     "photo": "foto duotone · imagem sóbria (sem violência)",
     "when": "Ano {{year}} · {{semester}}º semestre",
     "label": "Evento marcante",
+    "newsLabel": "Notícia do turno",
     "headline": "{{policy}}: o governo coloca a medida em prática",
     "body": "A decisão repercute em {{country}}. Apoiadores comemoram; críticos falam em ruptura.",
     "consequences": "Consequências",
@@ -358,7 +359,10 @@
     "honeymoon": "Lua de mel possível: com margem de 20 pontos ou mais, até 2 ações no 1º semestre custam metade. Margem projetada: {{margin}}.",
     "ifLose": "Se perder, você acompanha o novo governo e pode concorrer de novo na próxima eleição.",
     "vote_one": "Ir às urnas · {{count}} promessa",
-    "vote_other": "Ir às urnas · {{count}} promessas"
+    "vote_other": "Ir às urnas · {{count}} promessas",
+    "saveCampaign_one": "Confirmar {{count}} promessa e jogar o último turno",
+    "saveCampaign_other": "Confirmar {{count}} promessas e jogar o último turno",
+    "selectedCampaign": "promessa confirmada"
   },
   "regimes": {
     "title": "Regimes e utopias",

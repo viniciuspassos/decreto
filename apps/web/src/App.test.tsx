@@ -36,6 +36,11 @@ class FakeGameServer {
     if (path === "/api/games/deleted-game" && this.delaySavedGet)
       return new Promise<Response>((resolve) => { this.resolveSavedGet = resolve; });
     if (path.endsWith("/campaign")) {
+      if (init?.method === "POST") {
+        const body = JSON.parse(String(init.body ?? "{}")) as { promises?: string[] };
+        this.game = { ...this.game, phase: "playing", campaignPromises: body.promises ?? [], version: this.game.version + 1 };
+        return this.respond({ game: this.game });
+      }
       if (this.failCampaign) return this.respond({ code: "network_error" }, 503);
       return this.respond({ options: this.campaignOptions, maxPromises: 3 });
     }
@@ -124,7 +129,7 @@ describe("App with API", () => {
   it("shows every server event after the report and then returns to play", async () => {
     const server = new FakeGameServer();
     server.events = [
-      { id: "good-harvest", turn: 1, pending: false },
+      { id: "good-harvest", turn: 1, pending: false, image: true },
       { id: "coup-rumors", turn: 1, pending: true },
     ];
     global.fetch = server.fetch;
@@ -133,11 +138,14 @@ describe("App with API", () => {
     fireEvent.click(await screen.findByText("Continuar"));
     fireEvent.click(await screen.findByText(/Encerrar semestre/));
     await screen.findByText("Semestre encerrado");
-    expect(screen.getByText("Safra recorde alivia os preços dos alimentos")).toBeTruthy();
+    expect(screen.queryByText("Safra recorde alivia os preços dos alimentos")).toBeNull();
     fireEvent.click(screen.getByText(/Iniciar próximo semestre/));
     expect(screen.getByText("Safra recorde alivia os preços dos alimentos")).toBeTruthy();
+    expect(screen.getByAltText("foto duotone · imagem sóbria (sem violência)")).toBeTruthy();
+    expect(screen.getByText("Evento marcante")).toBeTruthy();
     fireEvent.click(screen.getByText("Continuar"));
     expect(screen.getByText("Rumores de golpe circulam nos quartéis")).toBeTruthy();
+    expect(screen.getByText("Notícia do turno")).toBeTruthy();
     expect(screen.getByText("Decisão pendente.")).toBeTruthy();
     fireEvent.click(screen.getByText("Continuar"));
     expect(screen.getByText("Ações deste semestre")).toBeTruthy();
@@ -192,6 +200,32 @@ describe("App with API", () => {
     expect(server.requests).toContain("/api/games/game-1/campaign");
     expect(server.requests).toContain("/api/games/game-1/election/preview");
     expect(server.requests).toContain("/api/games/game-1/election");
+  });
+
+  it("saves campaign promises before playing the final turn", async () => {
+    const server = new FakeGameServer();
+    server.game = { ...server.game, phase: "campaign", turn: 8 };
+    global.fetch = server.fetch;
+    localStorage.setItem("decreto.gameId", "game-1");
+    render(<App />);
+    fireEvent.click(await screen.findByText("Continuar"));
+    fireEvent.click(await screen.findByText("Privatizações"));
+    const confirm = await screen.findByRole("button", { name: "Confirmar 1 promessa e jogar o último turno" });
+    await waitFor(() => expect(confirm).not.toBeDisabled());
+    fireEvent.click(confirm);
+    await screen.findByText("Ações deste semestre");
+    expect(server.requests).toContain("/api/games/game-1/campaign");
+  });
+
+  it("shows campaign promises that became active during the final semester", async () => {
+    const server = new FakeGameServer();
+    server.game = { ...server.game, phase: "election", turn: 9, campaignPromises: ["strategic-state-company"] };
+    global.fetch = server.fetch;
+    localStorage.setItem("decreto.gameId", "game-1");
+    render(<App />);
+    fireEvent.click(await screen.findByText("Continuar"));
+    await screen.findByText("Estatal estratégica");
+    expect(screen.getByText("promessa confirmada")).toBeTruthy();
   });
 
   it("shows a saved end result from the API", async () => {

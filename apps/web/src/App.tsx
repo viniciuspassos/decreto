@@ -37,6 +37,10 @@ export function App() {
     setScreen(response.end ? { name: "end", result: response.end } : { name: "main" });
   }
 
+  async function saveCampaign(promises: string[]): Promise<void> {
+    if (await session.saveCampaign(promises)) setScreen({ name: "main" });
+  }
+
   function next(events: CountryEvent[], index: number, end: EndGameResult | null): void {
     if (index < events.length) setScreen({ name: "event", events, index, end });
     else if (end) setScreen({ name: "end", result: end });
@@ -49,8 +53,9 @@ export function App() {
       onResume={async () => { if (await session.resume()) setScreen({ name: "main" }); }} /></>;
   }
 
-  if (game.phase === "election" && screen.name === "main") {
-    return <>{banner}<Election key={game.version} game={game} lost={lost} pending={session.pending} onVote={vote} /></>;
+  if (isCampaignScreen(game.phase, screen)) {
+    return <>{banner}<Election key={game.version} game={game} lost={lost} pending={session.pending}
+      campaignOnly={game.phase === "campaign"} onCampaign={saveCampaign} onVote={vote} /></>;
   }
   if (game.phase === "ended" && screen.name === "main" && game.end) {
     return <>{banner}<EndGame game={game} result={game.end}
@@ -64,6 +69,10 @@ export function App() {
     onBack={() => setScreen({ name: "main" })} onNext={next}
     onToggleQueue={(id) => void session.toggleQueue(id)} onClose={() => void closeSemester()}
     onOpen={(name) => setScreen({ name })} onRestart={() => { session.restart(); setScreen({ name: "home" }); }} /></>;
+}
+
+function isCampaignScreen(phase: NonNullable<ReturnType<typeof useGame>["game"]>["phase"], screen: Screen): boolean {
+  return (phase === "campaign" || phase === "election") && screen.name === "main";
 }
 
 function GameScreens({ game, screen, pending, onBack, onNext, onToggleQueue, onClose, onOpen, onRestart }: {

@@ -120,6 +120,23 @@ describe("games routes", () => {
     expect(election).toMatchObject({ status: 200, body: { game: { version: game.version + 1 }, won: expect.any(Boolean) } });
   });
 
+  it("collects and persists promises at the start of the final turn", async () => {
+    const state = newGame({ country: "Vessária", president: "Helena", situation: "stable", seed: 5 }, defaultContent);
+    const game = await persistGame(db, { ...state, turn: 8 });
+    const campaign = await request(app()).get(`/games/${game.id}/campaign`);
+    const selected = campaign.body.options[0].nodeId as string;
+    const invalid = await request(app()).post(`/games/${game.id}/campaign`).send({ promises: ["inexistente"], expectedVersion: game.version });
+    const saved = await request(app()).post(`/games/${game.id}/campaign`).send({ promises: [selected], expectedVersion: game.version });
+    const close = await request(app()).post(`/games/${game.id}/end-semester`).send({ queue: [], expectedVersion: game.version + 1 });
+    const mismatch = await request(app()).post(`/games/${game.id}/election`).send({ promises: [], expectedVersion: game.version + 2 });
+
+    expect(campaign).toMatchObject({ status: 200, body: { options: expect.any(Array) } });
+    expect(invalid).toMatchObject({ status: 400, body: { code: "validation_error" } });
+    expect(saved).toMatchObject({ status: 200, body: { game: { phase: "playing", campaignPromises: [selected] } } });
+    expect(close).toMatchObject({ status: 200, body: { game: { phase: "election", campaignPromises: [selected] } } });
+    expect(mismatch).toMatchObject({ status: 400, body: { code: "validation_error" } });
+  });
+
   it("rejects too many promises and elections in the wrong phase", async () => {
     const playing = await createGame();
     const preview = await request(app()).post(`/games/${playing.id}/election/preview`).send({ promises: [] });

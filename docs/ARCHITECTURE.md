@@ -38,6 +38,13 @@ authoritative state after a conflict. The MVP has no accounts, so possession of 
 access to that save; [issue #18](https://github.com/viniciuspassos/decreto/issues/18) tracks
 ownership and authentication before public deployment.
 
+## Campaign and election timing
+
+On the final turn of a term, the API enters the campaign phase and persists the selected promises.
+The player then completes that semester; event screens appear before the election phase opens.
+Promise choices stay fixed through the vote, including when the final semester activates one of
+the promised policies. Regimes that suspend elections skip the campaign window.
+
 ## Randomness is reproducible on the server
 
 The API generates the initial seed in production. Nonproduction requests may supply a seed for
