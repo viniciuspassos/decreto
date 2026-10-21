@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { CreateGameRequest, GameView, InitialSituation } from "@decreto/shared-types";
 import { semesterOf, turnInTerm, yearOf } from "../components/TopBar.js";
+import { formatPercent } from "../components/format.js";
 
 const SITUATIONS: InitialSituation[] = ["stable", "unstable", "crisis"];
 const LANGS = ["pt-BR", "en"] as const;
@@ -30,7 +31,7 @@ export function Home({ save, hasSave, pending, onStart, onResume }: Props) {
         {save && <><h2>{save.country}</h2><p className="muted">{t("home.pres", { name: save.president })}</p>
           <dl className="grid2"><dt>{t("home.year")}</dt><dd>{t("home.yearOf", { year: yearOf(save.turn) })}</dd>
             <dt>{t("home.term")}</dt><dd>{t("home.termOf", { term: save.term, turn: turnInTerm(save.turn), semester: semesterOf(save.turn) })}</dd>
-            <dt>{t("home.approval")}</dt><dd>{save.approval}%</dd></dl></>}
+            <dt>{t("home.approval")}</dt><dd>{formatPercent(save.approval)}</dd></dl></>}
         <button className="btn" disabled={pending} onClick={onResume}>{t("home.continueBtn")}</button>
       </section>}
       <section className="panel"><small className="eyebrow accent">{t("home.new")}</small>

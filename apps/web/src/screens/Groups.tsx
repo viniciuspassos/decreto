@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { voterGroups } from "@decreto/game-content";
 import type { GameState } from "@decreto/shared-types";
 import { TopBar } from "../components/TopBar.js";
-import { signed } from "../components/format.js";
+import { formatPercent, signed } from "../components/format.js";
 
 export function Groups({ game, onBack }: { game: GameState; onBack: () => void }) {
   const { t } = useTranslation();
@@ -26,8 +26,8 @@ export function Groups({ game, onBack }: { game: GameState; onBack: () => void }
               {game.groups.map((g) => (
                 <tr key={g.id} className={g.id === selected ? "on" : ""} onClick={() => setSelected(g.id)}>
                   <td>{t(`group.${g.id}`)}</td>
-                  <td>{g.size ? `${g.size}%` : "—"}</td>
-                  <td><Bar value={g.support} /> {g.support === null ? "—" : `${g.support}%`}</td>
+                  <td>{g.size ? formatPercent(g.size) : "—"}</td>
+                  <td><Bar value={g.support} /> {g.support === null ? "—" : formatPercent(g.support)}</td>
                   <td>{g.support === null ? "—" : signed(g.delta)}</td>
                   <td>{g.support === null ? "—" : t(`level.${g.loyalty}`)}</td>
                   <td className="muted">{g.memory ? t(`node.${g.memory}`) : "—"}</td>
@@ -39,7 +39,7 @@ export function Groups({ game, onBack }: { game: GameState; onBack: () => void }
         <aside className="col side">
           <small className="eyebrow accent">{t("groups.selected")}</small>
           <h2>{t(`group.${selected}`)}</h2>
-          {group && <p className="muted">{t("groups.summary", { size: group.size, support: group.support ?? "—", loyalty: t(`level.${group.loyalty}`) })}</p>}
+          {group && <p className="muted">{t("groups.summary", { size: Math.round(group.size), support: group.support === null ? "—" : Math.round(group.support), loyalty: t(`level.${group.loyalty}`) })}</p>}
           <div className="grid2 panel">
             <small className="eyebrow">{t("groups.likes")}</small>
             <small className="eyebrow">{t("groups.dislikes")}</small>
@@ -50,7 +50,7 @@ export function Groups({ game, onBack }: { game: GameState; onBack: () => void }
           <p>{group?.memory ? t(`node.${group.memory}`) : "—"}</p>
           <div className="spacer" />
           {revolutionaries && revolutionaries.size > 0 && (
-            <div className="panel dashed">{t("groups.alert", { size: revolutionaries.size })}</div>
+            <div className="panel dashed">{t("groups.alert", { size: Math.round(revolutionaries.size) })}</div>
           )}
         </aside>
       </div>

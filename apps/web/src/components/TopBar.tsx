@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { GameState } from "@decreto/shared-types";
 import { TURNS_PER_TERM } from "@decreto/game-content";
+import { formatPercent } from "./format.js";
 
 export const turnInTerm = (turn: number) => ((turn - 1) % TURNS_PER_TERM) + 1;
 export const yearOf = (turn: number) => Math.ceil(turn / 2);
@@ -36,7 +37,7 @@ export function TopBar({ game, title, onBack, children }: Props) {
       </div>
       {title && <span className="sep title">{title}</span>}
       <div className="spacer" />
-      <Stat label={t("top.approval")} value={`${game.approval}%`} />
+      <Stat label={t("top.approval")} value={formatPercent(game.approval)} />
       <Stat label={t("top.capital")} value={String(game.capital)} />
       {children}
       {onBack && (
