@@ -6,6 +6,7 @@ import { errorCode } from "../api/useGame.js";
 import { treeOf, type PlayableGame } from "../api/gameView.js";
 import { ErrorBanner } from "../components/ErrorBanner.js";
 import { TopBar } from "../components/TopBar.js";
+import { formatPercent } from "../components/format.js";
 
 interface Props {
   game: PlayableGame;
@@ -68,9 +69,9 @@ export function Election({ game, lost, pending, onVote, campaignOnly, onCampaign
       <PreviousPromises game={game} options={options} campaignOnly={campaignOnly} />
     </section><aside className="col side">
       <small className="eyebrow">{t("election.projection")}</small>
-      <div className="row"><span>{game.president}</span><b className="big">{votes}%</b></div>
+      <div className="row"><span>{game.president}</span><b className="big">{formatPercent(votes)}</b></div>
       <span className="bar"><i style={{ width: `${votes}%` }} /></span>
-      <div className="row muted"><span>{t("election.opposition")}</span><b>{100 - votes}%</b></div>
+      <div className="row muted"><span>{t("election.opposition")}</span><b>{formatPercent(100 - votes)}</b></div>
       <ElectionControls projection={projection} votes={votes} campaignOnly={campaignOnly} chosenCount={chosenIds.length}
         disabled={pending || loading || previewPending || !projection} onCampaign={() => onCampaign(chosenIds)} onVote={() => onVote(chosenIds)} />
     </aside></div>
@@ -125,7 +126,7 @@ function ElectionControls({ projection, votes, campaignOnly, chosenCount, disabl
 }) {
   const { t } = useTranslation();
   return <>
-    {projection?.honeymoon && <div className="panel">{t("election.honeymoon", { margin: votes * 2 - 100 })}</div>}
+    {projection?.honeymoon && <div className="panel">{t("election.honeymoon", { margin: Math.round(votes * 2 - 100) })}</div>}
     <div className="spacer" />
     {!campaignOnly && <small className="muted">{t("election.ifLose")}</small>}
     <button className="btn primary" disabled={disabled} onClick={campaignOnly ? onCampaign : onVote}>

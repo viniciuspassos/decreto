@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { historicalFigures } from "@decreto/game-content";
 import type { EndGameResult, GameState } from "@decreto/shared-types";
 import { yearOf } from "../components/TopBar.js";
+import { formatIndicator, formatPercent } from "../components/format.js";
 
 const figureName = (id: string) => historicalFigures.find((f) => f.id === id)?.figure ?? id;
 
@@ -19,8 +20,8 @@ export function EndGame({ game, result, onRestart }: { game: GameState; result: 
         <h1 className="hero">{top ? figureName(top.figureId) : "—"}</h1>
         <div className="cols4">
           <div><small className="eyebrow">{t("end.terms")}</small><b>{game.term}</b></div>
-          <div><small className="eyebrow">{t("end.approval")}</small><b>{game.approval}%</b></div>
-          <div><small className="eyebrow">{t("indicator.gdp")}</small><b>{game.indicators.gdp}%</b></div>
+          <div><small className="eyebrow">{t("end.approval")}</small><b>{formatPercent(game.approval)}</b></div>
+          <div><small className="eyebrow">{t("indicator.gdp")}</small><b>{formatIndicator("gdp", game.indicators.gdp)}</b></div>
           <div><small className="eyebrow">{t("end.policies")}</small><b>{game.activeNodes.length}</b></div>
         </div>
         <small className="eyebrow">{t("end.timeline")}</small>
@@ -36,7 +37,7 @@ export function EndGame({ game, result, onRestart }: { game: GameState; result: 
         <small className="eyebrow">{t("end.similarity")}</small>
         {result.ranking.map((r) => (
           <div key={r.figureId}>
-            <div className="row"><b>{figureName(r.figureId)}</b><b>{r.similarity}%</b></div>
+            <div className="row"><b>{figureName(r.figureId)}</b><b>{formatPercent(r.similarity)}</b></div>
             <span className="bar"><i style={{ width: `${r.similarity}%` }} /></span>
           </div>
         ))}

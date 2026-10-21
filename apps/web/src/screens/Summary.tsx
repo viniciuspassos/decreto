@@ -3,7 +3,7 @@ import type { RiskId, SemesterReport } from "@decreto/shared-types";
 import type { PlayableGame } from "../api/gameView.js";
 import { TURNS_PER_TERM } from "@decreto/game-content";
 import { TopBar, turnInTerm } from "../components/TopBar.js";
-import { INDICATORS, formatIndicator, signed } from "../components/format.js";
+import { INDICATORS, formatIndicator, formatPercent, signed } from "../components/format.js";
 import { Bar } from "./Groups.js";
 
 const RISKS: RiskId[] = ["coup", "attack", "revolution", "rebels"];
@@ -28,7 +28,7 @@ export function Summary({ game, report, onContinue }: { game: PlayableGame; repo
             </p>
           </div>
           <div className="big-stats">
-            <span>{report.approvalBefore} → {game.approval}%</span>
+            <span>{formatPercent(report.approvalBefore)} → {formatPercent(game.approval)}</span>
             <span>{report.capitalBefore} → {game.capital}</span>
           </div>
         </div>

@@ -5,7 +5,7 @@ import type { CampaignPromise, CountryEvent, EndGameResult } from "@decreto/shar
 import { gameFixture } from "./test/gameFixture.js";
 import { TREE_ANGLES, polar, ringRadius } from "./components/RadialMap.js";
 import { semesterOf, turnInTerm, yearOf } from "./components/TopBar.js";
-import { formatIndicator, signed } from "./components/format.js";
+import { formatIndicator, formatPercent, signed } from "./components/format.js";
 
 class FakeGameServer {
   readonly requests: string[] = [];
@@ -393,7 +393,13 @@ describe("UI helpers", () => {
     expect([yearOf(3), semesterOf(3), turnInTerm(3)]).toEqual([2, 1, 3]);
   });
   it("formats indicators", () => {
-    expect(formatIndicator("gdp", 1.8)).toBe("+1.8%");
+    expect(formatIndicator("gdp", 1.8)).toBe("+2%");
+    expect(formatIndicator("gdp", -1.6)).toBe("-2%");
+    expect(formatIndicator("gdp", -1.5)).toBe("-2%");
+    expect(formatIndicator("inflation", 2.49)).toBe("2%");
+    expect(formatPercent(42.5)).toBe("43%");
+    expect(formatPercent(42.49)).toBe("42%");
     expect(signed(-3)).toBe("▼3");
+    expect(signed(0.4)).toBe("0");
   });
 });
