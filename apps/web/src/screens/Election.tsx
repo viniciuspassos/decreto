@@ -22,6 +22,7 @@ export function Election({ game, lost, pending, onVote }: Props) {
   const [chosenIds, setChosenIds] = useState<string[]>([]);
   const [projection, setProjection] = useState<ElectionPreviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [previewPending, setPreviewPending] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,13 +38,16 @@ export function Election({ game, lost, pending, onVote }: Props) {
 
   useEffect(() => {
     let active = true;
+    setPreviewPending(true);
     gameApi.electionPreview(game.id, chosenIds).then((result) => {
-      if (active) setProjection(result);
-    }).catch((cause: unknown) => { if (active) setError(errorCode(cause)); });
+      if (active) { setProjection(result); setPreviewPending(false); }
+    }).catch((cause: unknown) => { if (active) { setError(errorCode(cause)); setPreviewPending(false); } });
     return () => { active = false; };
   }, [game.id, chosenIds]);
 
   function toggle(id: string): void {
+    setProjection(null);
+    setPreviewPending(true);
     setChosenIds((selected) => selected.includes(id) ? selected.filter((value) => value !== id)
       : selected.length < maxPromises ? [...selected, id] : selected);
   }
@@ -74,7 +78,7 @@ export function Election({ game, lost, pending, onVote }: Props) {
       <div className="row muted"><span>{t("election.opposition")}</span><b>{100 - votes}%</b></div>
       {projection?.honeymoon && <div className="panel">{t("election.honeymoon", { margin: votes * 2 - 100 })}</div>}
       <div className="spacer" /><small className="muted">{t("election.ifLose")}</small>
-      <button className="btn primary" disabled={pending || loading || !projection} onClick={() => onVote(chosenIds)}>
+      <button className="btn primary" disabled={pending || loading || previewPending || !projection} onClick={() => onVote(chosenIds)}>
         {t("election.vote", { count: chosenIds.length })}</button>
     </aside></div>
   </div>;

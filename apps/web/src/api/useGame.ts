@@ -17,9 +17,9 @@ export function useGame() {
     if (!initialSaveId) return;
     let active = true;
     gameApi.get(initialSaveId).then((loaded) => {
-      if (active) setGame((current) => current ?? playableGame(loaded));
+      if (active && loadGameId() === initialSaveId) setGame((current) => current ?? playableGame(loaded));
     }).catch((cause: unknown) => {
-      if (!active) return;
+      if (!active || loadGameId() !== initialSaveId) return;
       if (cause instanceof ApiError && cause.code === "game_not_found") {
         clearGameId();
         setSaveId(null);
