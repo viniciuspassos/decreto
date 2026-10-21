@@ -584,6 +584,8 @@ approval >/<; group support <; military mood ∈ {...}; recession level ≥; `al
 - `event.<id>.option.a` / `event.<id>.option.b`: button label, up to ~40 characters.
 - Available interpolation: `{{country}}`, `{{president}}`.
 - `marcante` events use the image `assets/events/<id>` (restrained; S6).
+- Event headlines appear on the end-of-semester event screens; only marked events request their
+  registered image from the API.
 - The UI shows numeric consequences (deltas) calculated by the engine, not fixed descriptive text.
 
 New type in `shared-types`: `CountryEvent { id; turn; option?: "a" | "b"; pending: boolean }`;

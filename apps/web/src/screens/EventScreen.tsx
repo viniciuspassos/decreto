@@ -6,7 +6,8 @@ export function EventScreen({ event, onContinue }: { event: CountryEvent; onCont
   const { t } = useTranslation();
   return <div className="screen event">
     <aside className="col side">
-      <small className="eyebrow"><span className="tag">{t("event.when", { year: yearOf(event.turn), semester: semesterOf(event.turn) })}</span> {t("event.label")}</small>
+      <small className="eyebrow"><span className="tag">{t("event.when", { year: yearOf(event.turn), semester: semesterOf(event.turn) })}</span> {t(event.image ? "event.label" : "event.newsLabel")}</small>
+      {event.image && <img className="event-image" src={`/api/events/${encodeURIComponent(event.id)}/image`} alt={t("event.photo")} />}
       <h1>{t(`event.${event.id}.title`, { defaultValue: event.id })}</h1>
       <p>{t(`event.${event.id}.body`, { defaultValue: "" })}</p>
       {event.pending && <p className="muted">{t("event.pending")}</p>}

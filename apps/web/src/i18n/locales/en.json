@@ -284,6 +284,7 @@
     "photo": "duotone photo · sober image (no violence)",
     "when": "Year {{year}} · semester {{semester}}",
     "label": "Major event",
+    "newsLabel": "Turn news",
     "headline": "{{policy}}: the government puts it into practice",
     "body": "The decision echoes across {{country}}. Supporters celebrate; critics speak of a rupture.",
     "consequences": "Consequences",
@@ -358,7 +359,10 @@
     "honeymoon": "Honeymoon possible: with a margin of 20 points or more, up to 2 actions in the 1st semester cost half. Projected margin: {{margin}}.",
     "ifLose": "If you lose, you follow the new government and can run again at the next election.",
     "vote_one": "Go to the polls · {{count}} promise",
-    "vote_other": "Go to the polls · {{count}} promises"
+    "vote_other": "Go to the polls · {{count}} promises",
+    "saveCampaign_one": "Confirm {{count}} promise and play the final turn",
+    "saveCampaign_other": "Confirm {{count}} promises and play the final turn",
+    "selectedCampaign": "campaign promise"
   },
   "regimes": {
     "title": "Regimes & utopias",

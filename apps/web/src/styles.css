@@ -123,6 +123,7 @@ tr.on, tr:hover { background: var(--bg-raised); cursor: pointer; }
 
 /* Event and end game */
 .event { flex-direction: row; }
+.event-image { display: block; width: 100%; max-height: 58vh; object-fit: cover; border: 1px solid var(--line); margin: 16px 0; }
 .event > :first-child { flex: 1.6; }
 .event > .side { flex: 1; padding: 32px; }
 .photo { margin: 32px; display: grid; place-items: center; border: 1px solid var(--line);

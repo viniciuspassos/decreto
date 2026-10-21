@@ -6,6 +6,8 @@ import { ApiError, gameApi } from "./client.js";
 import { playableGame, type PlayableGame } from "./gameView.js";
 import { clearGameId, loadGameId, storeGameId } from "./save.js";
 
+type ApiOperation = <T>(operation: () => Promise<T>) => Promise<T | null>;
+
 export function useGame() {
   const [game, setGame] = useState<PlayableGame | null>(null);
   const [pending, setPending] = useState(false);
@@ -44,7 +46,7 @@ export function useGame() {
   async function create(request: CreateGameRequest): Promise<boolean> {
     const created = await run(() => gameApi.create(request));
     if (!created) return false;
-    acceptGame(created);
+    acceptGame(created, setGame, setSaveId);
     return true;
   }
 
@@ -70,21 +72,19 @@ export function useGame() {
   async function finishSemester(): Promise<EndSemesterResponse | null> {
     if (!game) return null;
     const response = await run(() => gameApi.endSemester(game, game.queue));
-    if (response) acceptGame(response.game);
+    if (response) acceptGame(response.game, setGame, setSaveId);
     return response;
   }
 
   async function vote(promises: string[]): Promise<ElectionResponse | null> {
     if (!game) return null;
     const response = await run(() => gameApi.vote(game, promises));
-    if (response) acceptGame(response.game);
+    if (response) acceptGame(response.game, setGame, setSaveId);
     return response;
   }
 
-  function acceptGame(next: GameView): void {
-    storeGameId(next.id);
-    setSaveId(next.id);
-    setGame(playableGame(next));
+  async function saveCampaign(promises: string[]): Promise<boolean> {
+    return persistCampaignSelection(game, promises, run, (next) => acceptGame(next, setGame, setSaveId));
   }
 
   function restart(): void {
@@ -94,7 +94,27 @@ export function useGame() {
     setError(null);
   }
 
-  return { game, saveId, pending, error, setError, create, resume, toggleQueue, finishSemester, vote, restart };
+  return { game, saveId, pending, error, setError, create, resume, toggleQueue, finishSemester, saveCampaign, vote, restart };
+}
+
+async function persistCampaignSelection(
+  game: PlayableGame | null,
+  promises: string[],
+  run: ApiOperation,
+  acceptGame: (next: GameView) => void,
+): Promise<boolean> {
+  if (!game) return false;
+  const response = await run(() => gameApi.saveCampaign(game, promises));
+  if (!response) return false;
+  acceptGame(response.game);
+  return true;
+}
+
+function acceptGame(next: GameView, setGame: Dispatch<SetStateAction<PlayableGame | null>>,
+  setSaveId: Dispatch<SetStateAction<string | null>>): void {
+  storeGameId(next.id);
+  setSaveId(next.id);
+  setGame(playableGame(next));
 }
 
 export function errorCode(cause: unknown): string {

@@ -62,12 +62,8 @@ export function Summary({ game, report, onContinue }: { game: PlayableGame; repo
             ))}
           </section>
         </div>
-        {report.events.length > 0 && <section className="panel">
-          <small className="eyebrow">{t("event.label")}</small>
-          {report.events.map((event, index) => <p key={`${event.id}-${index}`}>{t(`event.${event.id}.title`, { defaultValue: event.id })}</p>)}
-        </section>}
         <div className="row footer">
-          <span className="muted">{t("summary.toElection", { count: toElection })}</span>
+          {game.phase !== "election" && <span className="muted">{t("summary.toElection", { count: toElection })}</span>}
           <button className="btn primary" onClick={onContinue}>{t("summary.next")} →</button>
         </div>
       </div>

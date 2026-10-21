@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import type { Db } from "../db/client.js";
-import { campaign, closeSemester, createNewGame, electionPreview, findGame, previewQueue, vote } from "../services/gameService.js";
+import { campaign, closeSemester, createNewGame, electionPreview, findGame, previewQueue, saveCampaign, vote } from "../services/gameService.js";
 
 const createSchema = z.object({
   country: z.string().min(1), president: z.string().min(1), situation: z.enum(["stable", "unstable", "crisis"]),
@@ -38,6 +38,12 @@ export function createGamesRouter(db: Db): Router {
   });
   router.get("/games/:id/campaign", async (req, res, next) => {
     try { res.json(await campaign(db, req.params.id)); } catch (error) { next(error); }
+  });
+  router.post("/games/:id/campaign", async (req, res, next) => {
+    try {
+      const request = parse(versionedPromisesSchema, req.body);
+      res.json({ game: await saveCampaign(db, req.params.id, request.promises, request.expectedVersion) });
+    } catch (error) { next(error); }
   });
   router.post("/games/:id/election/preview", async (req, res, next) => {
     try { res.json(await electionPreview(db, req.params.id, parse(promisesSchema, req.body).promises)); } catch (error) { next(error); }

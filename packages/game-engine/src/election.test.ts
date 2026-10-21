@@ -1,7 +1,7 @@
 import { defaultContent } from "./content.js";
 import { campaignOptions, projectVotes, runElection } from "./election.js";
 import { newGame } from "./newGame.js";
-import { isElectionDue } from "./semester/term.js";
+import { isCampaignDue, isElectionDue } from "./semester/term.js";
 import { endSemester } from "./semester/endSemester.js";
 import type { EngineState } from "./types.js";
 
@@ -34,6 +34,14 @@ describe("isElectionDue", () => {
     expect(next.term).toBe(2);
     expect(next.termsInRow).toBe(2);
     expect(next.history).toEqual([{ term: 1, inPower: true }]);
+  });
+});
+
+describe("isCampaignDue", () => {
+  it("opens the campaign on the final turn and skips it when elections are suspended", () => {
+    expect(isCampaignDue(game({ turn: 7 }))).toBe(false);
+    expect(isCampaignDue(game({ turn: 8 }))).toBe(true);
+    expect(isCampaignDue(game({ turn: 8, activeNodes: ["election-postponement"] }))).toBe(false);
   });
 });
 
@@ -82,6 +90,14 @@ describe("runElection", () => {
     expect(state.history).toEqual([{ term: 1, inPower: true }]);
     expect(supportOf(state, "workers")).toBe(59);
     expect(supportOf(state, "business")).toBe(55);
+  });
+
+  it("keeps a final-turn campaign valid when its policy was activated before the vote", () => {
+    const state = withSupport(70, { activeNodes: ["privatizations"], campaignPromises: ["privatizations"] });
+    const { state: result, won } = runElection(state, ["privatizations"], defaultContent);
+    expect(won).toBe(true);
+    expect(result.promises).toEqual(["privatizations"]);
+    expect(result.campaignPromises).toBeUndefined();
   });
 
   it("a margin of 20 points or more triggers the honeymoon", () => {

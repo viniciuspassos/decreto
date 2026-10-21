@@ -66,6 +66,8 @@ export interface GameState {
   groups: GroupState[];
   actors: { media: ActorMood; military: ActorMood };
   promises: string[];
+  /** Promises selected at the start of the final turn, awaiting the election. */
+  campaignPromises?: string[];
   history: TermRecord[];
 }
 
@@ -109,7 +111,7 @@ export interface EndGameResult {
   topTrees: string[];
 }
 
-export type GamePhase = "playing" | "election" | "ended";
+export type GamePhase = "playing" | "campaign" | "election" | "ended";
 
 export interface GameNodeView {
   status: NodeStatus;

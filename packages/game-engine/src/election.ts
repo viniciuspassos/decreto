@@ -37,6 +37,13 @@ function validPromises(state: EngineState, nodeIds: string[], content: SemesterC
   return promises as CampaignPromise[];
 }
 
+function ballotPromises(state: EngineState, nodeIds: string[], content: SemesterContent): CampaignPromise[] {
+  const campaign = state.campaignPromises;
+  if (!campaign) return validPromises(state, nodeIds, content);
+  if (nodeIds.length !== campaign.length || nodeIds.some((id, index) => id !== campaign[index])) throw new Error("promises differ from final-turn campaign");
+  return campaign.map((id) => promiseFor(id, content));
+}
+
 const countFor = (promises: CampaignPromise[], key: "gains" | "loses", groupId: string) =>
   promises.filter((p) => p[key].includes(groupId)).length;
 
@@ -54,7 +61,7 @@ function ballotGroups(state: EngineState, promises: CampaignPromise[], content: 
 
 /** Projected votes (weighted support %) for the selected promises, without changing the state. */
 export function projectVotes(state: EngineState, nodeIds: string[], content: SemesterContent): number {
-  return approvalOf(ballotGroups(state, validPromises(state, nodeIds, content), content));
+  return approvalOf(ballotGroups(state, ballotPromises(state, nodeIds, content), content));
 }
 
 /** The next government (AI) runs a term without a queue and without changing the player's nodes; ending it is not a player defeat. */
@@ -72,12 +79,12 @@ function opposition(state: EngineState, content: SemesterContent): EngineState {
  */
 export function runElection(state: EngineState, nodeIds: string[], content: SemesterContent): ElectionResult {
   if (state.defeat || !isElectionDue(state)) throw new Error("no election due");
-  const groups = ballotGroups(state, validPromises(state, nodeIds, content), content);
+  const groups = ballotGroups(state, ballotPromises(state, nodeIds, content), content);
   const approval = approvalOf(groups);
   const margin = 2 * approval - 100;
   const won = margin > 0;
   const voted = { ...state, groups, approval, history: [...state.history, { term: state.term, inPower: won }] };
-  if (!won) return { state: opposition({ ...voted, promises: [], queue: [], queuedTaxRate: null }, content), won };
-  const next = { ...voted, promises: nodeIds, term: state.term + 1, termsInRow: state.termsInRow + 1 };
+  if (!won) return { state: opposition({ ...voted, promises: [], campaignPromises: undefined, queue: [], queuedTaxRate: null }, content), won };
+  const next = { ...voted, promises: nodeIds, campaignPromises: undefined, term: state.term + 1, termsInRow: state.termsInRow + 1 };
   return { state: { ...next, honeymoon: margin >= HONEYMOON.minMargin }, won };
 }

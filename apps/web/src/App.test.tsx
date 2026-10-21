@@ -124,7 +124,7 @@ describe("App with API", () => {
   it("shows every server event after the report and then returns to play", async () => {
     const server = new FakeGameServer();
     server.events = [
-      { id: "good-harvest", turn: 1, pending: false },
+      { id: "good-harvest", turn: 1, pending: false, image: true },
       { id: "coup-rumors", turn: 1, pending: true },
     ];
     global.fetch = server.fetch;
@@ -133,11 +133,14 @@ describe("App with API", () => {
     fireEvent.click(await screen.findByText("Continuar"));
     fireEvent.click(await screen.findByText(/Encerrar semestre/));
     await screen.findByText("Semestre encerrado");
-    expect(screen.getByText("Safra recorde alivia os preços dos alimentos")).toBeTruthy();
+    expect(screen.queryByText("Safra recorde alivia os preços dos alimentos")).toBeNull();
     fireEvent.click(screen.getByText(/Iniciar próximo semestre/));
     expect(screen.getByText("Safra recorde alivia os preços dos alimentos")).toBeTruthy();
+    expect(screen.getByAltText("foto duotone · imagem sóbria (sem violência)")).toBeTruthy();
+    expect(screen.getByText("Evento marcante")).toBeTruthy();
     fireEvent.click(screen.getByText("Continuar"));
     expect(screen.getByText("Rumores de golpe circulam nos quartéis")).toBeTruthy();
+    expect(screen.getByText("Notícia do turno")).toBeTruthy();
     expect(screen.getByText("Decisão pendente.")).toBeTruthy();
     fireEvent.click(screen.getByText("Continuar"));
     expect(screen.getByText("Ações deste semestre")).toBeTruthy();
