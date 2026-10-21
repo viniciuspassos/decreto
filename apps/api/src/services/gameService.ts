@@ -15,7 +15,7 @@ export class GameEndedError extends Error {}
 export class InvalidGamePhaseError extends Error {}
 export class InvalidPromiseError extends Error {}
 
-function publicState(state: StoredGame["state"]): Omit<GameView, "id" | "version" | "phase" | "maxActions" | "nodes"> {
+function publicState(state: StoredGame["state"]): Omit<GameView, "id" | "version" | "phase" | "end" | "maxActions" | "nodes"> {
   return {
     country: state.country, president: state.president, turn: state.turn, term: state.term, approval: state.approval,
     capital: state.capital, capitalPerTurn: state.capitalPerTurn, activeNodes: state.activeNodes, indicators: state.indicators,
@@ -26,9 +26,19 @@ function publicState(state: StoredGame["state"]): Omit<GameView, "id" | "version
 function nodeViews(state: StoredGame["state"]): Record<string, GameNodeView> {
   return defaultContent.policyTrees.filter((tree) => !tree.intensity).flatMap((tree) => tree.nodes).reduce<Record<string, GameNodeView>>((nodes, nodeId) => {
     const status = nodeStatus(nodeId, { state, content: defaultContent });
-    nodes[nodeId] = { status, cost: status === "available" ? nodeCost(nodeId, { state, content: defaultContent }) : null };
+    const cost = status === "queued" ? queuedNodeCost(state, nodeId)
+      : status === "available" ? nodeCost(nodeId, { state, content: defaultContent }) : null;
+    nodes[nodeId] = { status, cost };
     return nodes;
   }, {});
+}
+
+function queuedNodeCost(state: StoredGame["state"], nodeId: string): number {
+  const index = state.queue.indexOf(nodeId);
+  const before = { ...state, queue: state.queue.slice(0, index) };
+  const through = { ...state, queue: state.queue.slice(0, index + 1) };
+  return queueTotalCost({ state: through, content: defaultContent })
+    - queueTotalCost({ state: before, content: defaultContent });
 }
 
 function phaseOf(game: StoredGame): GameView["phase"] {
@@ -37,7 +47,7 @@ function phaseOf(game: StoredGame): GameView["phase"] {
 }
 
 export function gameView(game: StoredGame): GameView {
-  return { ...publicState(game.state), id: game.id, version: game.version, phase: phaseOf(game), maxActions: MAX_ACTIONS, nodes: nodeViews(game.state) };
+  return { ...publicState(game.state), id: game.id, version: game.version, phase: phaseOf(game), end: game.result, maxActions: MAX_ACTIONS, nodes: nodeViews(game.state) };
 }
 
 async function requiredGame(db: Db, gameId: string): Promise<StoredGame> {
@@ -67,7 +77,7 @@ function queueState(game: StoredGame, queue: string[]): StoredGame["state"] {
 }
 
 export async function createNewGame(db: Db, request: CreateGameRequest): Promise<GameView> {
-  const seed = randomBytes(4).readUInt32BE();
+  const seed = request.seed ?? randomBytes(4).readUInt32BE();
   const state = newGame({ ...request, seed }, defaultContent);
   return gameView(await createGame(db, state));
 }

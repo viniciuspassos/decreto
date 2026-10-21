@@ -9,6 +9,8 @@ node_modules/
 dist/
 .turbo/
 coverage/
+apps/web/test-results/
+apps/web/playwright-report/
 
 # Env
 .env

@@ -91,6 +91,11 @@ to all worktrees sharing the same `.git`.
   `.env.example`) and runs an "Apply DB migrations" step (`pnpm --filter @decreto/api run db:migrate`),
   but tests no longer require this — see "Postgres (`apps/api`)" below. Removing these from the
   workflow is tracked in [issue #42](https://github.com/viniciuspassos/decreto/issues/42).
+- A separate, initially non-blocking `e2e` job starts the full application with
+  `NODE_ENV=test docker compose up -d --build --wait`, installs Chromium, and runs
+  `pnpm --filter @decreto/web test:e2e`. It saves Playwright traces and screenshots on failure.
+  Locally, start Compose with `NODE_ENV=test` first, then run the same `test:e2e` command. The browser uses
+  `http://localhost:8080` by default; set `E2E_BASE_URL` to target another Compose port.
 
 ## Postgres (`apps/api`)
 

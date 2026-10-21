@@ -19,6 +19,48 @@ TypeScript), rather than duplicated or trusted only on the client, for two reaso
 In practice, the frontend never reimplements game rules. It displays the state returned by the
 backend and sends player intents (for example, "activate node X") for server-side validation.
 
+## The client owns the pending queue; the server validates each turn
+
+Selecting a policy only changes the browser's pending queue. `POST /games/:id/preview` computes
+node status, total cost, remaining capital, and validation errors without saving a turn. When the
+player closes the semester, `POST /games/:id/end-semester` receives that queue and validates it
+again against the current game state. This keeps quick previews responsive without writing to
+Postgres on every click, while ensuring that a stale or manipulated preview cannot bypass the
+engine's rules. The queue is intentionally omitted from the persisted state and `GameView`.
+
+## Saves use optimistic concurrency
+
+Each game is one `games` row: its engine state is stored as `jsonb`, alongside a version, status,
+and optional end result. A turn or election update succeeds only when `expectedVersion` matches
+the stored version; the update increments it atomically. This prevents two tabs from silently
+overwriting one another. The browser keeps only the game ID for continuation and reloads the
+authoritative state after a conflict. The MVP has no accounts, so possession of the ID grants
+access to that save; [issue #18](https://github.com/viniciuspassos/decreto/issues/18) tracks
+ownership and authentication before public deployment.
+
+## Randomness is reproducible on the server
+
+The API generates the initial seed in production. Nonproduction requests may supply a seed for
+repeatable browser tests. The engine advances and persists it with each semester, so
+the same saved state and queue produce the same outcome during replay or diagnosis. `GameView`
+omits the seed: the client receives the resulting events and indicators, never the random state.
+
+## The simulation moves in layers
+
+Active policy nodes contribute ongoing effects, while indicator trends and instability continue
+to move the country between player decisions. Frequent events add shocks and choices to that
+baseline. This follows the detailed movement and event rules in
+[`movement-effects-events.md`](./game-design/movement-effects-events.md), which intentionally
+extend the original S1–S7 outline in [`game-design.md`](../game-design.md). Keeping these layers
+in the engine lets the UI render outcomes without reproducing political or economic formulas.
+
+## Web and API share an origin
+
+The web client calls `/api/*`. Vite forwards that path to the API during development; Nginx does
+the same in Compose and removes the `/api` prefix. The browser therefore uses one origin for
+both the UI and API and needs no CORS configuration. Deployment details and proxy commands are
+documented in [`INFRASTRUCTURE.md`](./INFRASTRUCTURE.md).
+
 ## Game content lives in typed data
 
 Policy trees, voter groups, cost weights, regime stages, utopia requirements, and the historical
@@ -60,8 +102,3 @@ without `any`, in line with `CLAUDE.md`.
 The game supports Brazilian Portuguese and English from version 0.4 of the design document; this
 is not a "translate later" case. Introducing i18next from the start avoids the later work of
 extracting hard-coded UI strings. "Decreto" is the only string that is never translated.
-
-## Open decisions
-
-None so far. Add new architecture decisions here as they are made, including the reason, not only
-the outcome.

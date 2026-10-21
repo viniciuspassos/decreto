@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-import type { GameState, RiskId, SemesterReport } from "@decreto/shared-types";
-import { TURNS_PER_TERM } from "../api/mockApi.js";
+import type { RiskId, SemesterReport } from "@decreto/shared-types";
+import type { PlayableGame } from "../api/gameView.js";
+import { TURNS_PER_TERM } from "@decreto/game-content";
 import { TopBar, turnInTerm } from "../components/TopBar.js";
 import { INDICATORS, formatIndicator, signed } from "../components/format.js";
 import { Bar } from "./Groups.js";
@@ -8,7 +9,7 @@ import { Bar } from "./Groups.js";
 const RISKS: RiskId[] = ["coup", "attack", "revolution", "rebels"];
 const riskLevel = (v: number) => (v === 0 ? "none" : v < 30 ? "low" : v < 60 ? "medium" : "high");
 
-export function Summary({ game, report, onContinue }: { game: GameState; report: SemesterReport; onContinue: () => void }) {
+export function Summary({ game, report, onContinue }: { game: PlayableGame; report: SemesterReport; onContinue: () => void }) {
   const { t } = useTranslation();
   const change = game.approval - report.approvalBefore;
   const headline = change > 0 ? "up" : change < 0 ? "down" : "flat";
@@ -61,6 +62,10 @@ export function Summary({ game, report, onContinue }: { game: GameState; report:
             ))}
           </section>
         </div>
+        {report.events.length > 0 && <section className="panel">
+          <small className="eyebrow">{t("event.label")}</small>
+          {report.events.map((event, index) => <p key={`${event.id}-${index}`}>{t(`event.${event.id}.title`, { defaultValue: event.id })}</p>)}
+        </section>}
         <div className="row footer">
           <span className="muted">{t("summary.toElection", { count: toElection })}</span>
           <button className="btn primary" onClick={onContinue}>{t("summary.next")} →</button>

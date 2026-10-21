@@ -1,6 +1,8 @@
 import { useState } from "react";
-import type { CampaignPromise, EndGameResult, GameEvent, GameState, SemesterReport } from "@decreto/shared-types";
-import { checkEnd, endGame, endSemester, isElectionTurn, runElection } from "./api/mockApi.js";
+import type { CountryEvent, EndGameResult, SemesterReport } from "@decreto/shared-types";
+import { useGame } from "./api/useGame.js";
+import { ErrorBanner } from "./components/ErrorBanner.js";
+import { EndedNotice } from "./components/EndedNotice.js";
 import { Election } from "./screens/Election.js";
 import { EndGame } from "./screens/EndGame.js";
 import { EventScreen } from "./screens/EventScreen.js";
@@ -12,58 +14,77 @@ import { Summary } from "./screens/Summary.js";
 
 type Screen =
   | { name: "home" | "main" | "groups" | "regimes" }
-  | { name: "summary"; report: SemesterReport; event: GameEvent | null }
-  | { name: "event"; event: GameEvent }
-  | { name: "election"; lost: boolean }
+  | { name: "summary"; report: SemesterReport; events: CountryEvent[]; end: EndGameResult | null }
+  | { name: "event"; events: CountryEvent[]; index: number; end: EndGameResult | null }
   | { name: "end"; result: EndGameResult };
 
 export function App() {
-  const [game, setGame] = useState<GameState | null>(null);
+  const session = useGame();
   const [screen, setScreen] = useState<Screen>({ name: "home" });
+  const [lost, setLost] = useState(false);
+  const game = session.game;
+  const banner = <ErrorBanner code={session.error} onDismiss={() => session.setError(null)} />;
 
-  if (!game || screen.name === "home") {
-    return <Home onStart={(g) => { setGame(g); setScreen({ name: "main" }); }} />;
+  async function closeSemester(): Promise<void> {
+    const response = await session.finishSemester();
+    if (response) setScreen({ name: "summary", report: response.report, events: response.events, end: response.end });
   }
 
-  /** `won` is only populated immediately after an election. */
-  const afterTurn = (g: GameState, won?: boolean): Screen => {
-    const reason = checkEnd(g);
-    if (reason) return { name: "end", result: endGame(g, reason) };
-    if (won !== undefined) return won ? { name: "main" } : { name: "election", lost: true };
-    return isElectionTurn(g) ? { name: "election", lost: false } : { name: "main" };
-  };
-  const finishSemester = () => {
-    const { state, report, event } = endSemester(game);
-    setGame(state);
-    setScreen({ name: "summary", report, event });
-  };
-  const vote = (promises: CampaignPromise[]) => {
-    const { state, won } = runElection(game, promises);
-    setGame(state);
-    setScreen(afterTurn(state, won));
-  };
-  const back = () => setScreen({ name: "main" });
+  async function vote(promises: string[]): Promise<void> {
+    const response = await session.vote(promises);
+    if (!response) return;
+    setLost(!response.won);
+    setScreen(response.end ? { name: "end", result: response.end } : { name: "main" });
+  }
 
+  function next(events: CountryEvent[], index: number, end: EndGameResult | null): void {
+    if (index < events.length) setScreen({ name: "event", events, index, end });
+    else if (end) setScreen({ name: "end", result: end });
+    else setScreen({ name: "main" });
+  }
+
+  if (!game || screen.name === "home") {
+    return <>{banner}<Home save={game} hasSave={Boolean(session.saveId)} pending={session.pending}
+      onStart={async (request) => { if (await session.create(request)) setScreen({ name: "main" }); }}
+      onResume={async () => { if (await session.resume()) setScreen({ name: "main" }); }} /></>;
+  }
+
+  if (game.phase === "election" && screen.name === "main") {
+    return <>{banner}<Election key={game.version} game={game} lost={lost} pending={session.pending} onVote={vote} /></>;
+  }
+  if (game.phase === "ended" && screen.name === "main" && game.end) {
+    return <>{banner}<EndGame game={game} result={game.end}
+      onRestart={() => { session.restart(); setScreen({ name: "home" }); }} /></>;
+  }
+
+  if (game.phase === "ended" && screen.name === "main") {
+    return <>{banner}<EndedNotice onRestart={() => { session.restart(); setScreen({ name: "home" }); }} /></>;
+  }
+  return <>{banner}<GameScreens game={game} screen={screen} pending={session.pending}
+    onBack={() => setScreen({ name: "main" })} onNext={next}
+    onToggleQueue={(id) => void session.toggleQueue(id)} onClose={() => void closeSemester()}
+    onOpen={(name) => setScreen({ name })} onRestart={() => { session.restart(); setScreen({ name: "home" }); }} /></>;
+}
+
+function GameScreens({ game, screen, pending, onBack, onNext, onToggleQueue, onClose, onOpen, onRestart }: {
+  game: NonNullable<ReturnType<typeof useGame>["game"]>;
+  screen: Screen;
+  pending: boolean;
+  onBack: () => void;
+  onNext: (events: CountryEvent[], index: number, end: EndGameResult | null) => void;
+  onToggleQueue: (id: string) => void;
+  onClose: () => void;
+  onOpen: (name: "groups" | "regimes") => void;
+  onRestart: () => void;
+}) {
   switch (screen.name) {
-    case "groups":
-      return <Groups game={game} onBack={back} />;
-    case "regimes":
-      return <Regimes game={game} onBack={back} />;
-    case "summary":
-      return (
-        <Summary
-          game={game}
-          report={screen.report}
-          onContinue={() => setScreen(screen.event ? { name: "event", event: screen.event } : afterTurn(game))}
-        />
-      );
-    case "event":
-      return <EventScreen game={game} event={screen.event} onContinue={() => setScreen(afterTurn(game))} />;
-    case "election":
-      return <Election key={game.turn} game={game} lost={screen.lost} onVote={vote} />;
-    case "end":
-      return <EndGame game={game} result={screen.result} onRestart={() => setScreen({ name: "home" })} />;
-    default:
-      return <Main game={game} onChange={setGame} onEndSemester={finishSemester} onOpen={(name) => setScreen({ name })} />;
+    case "groups": return <Groups game={game} onBack={onBack} />;
+    case "regimes": return <Regimes game={game} onBack={onBack} />;
+    case "summary": return <Summary game={game} report={screen.report} onContinue={() => onNext(screen.events, 0, screen.end)} />;
+    case "event": return <EventScreen event={screen.events[screen.index]!}
+      onContinue={() => onNext(screen.events, screen.index + 1, screen.end)} />;
+    case "end": return <EndGame game={game} result={screen.result} onRestart={onRestart} />;
+    default: return <Main game={game} pending={pending} onToggleQueue={onToggleQueue}
+      onEndSemester={onClose} onOpen={onOpen} />;
   }
 }

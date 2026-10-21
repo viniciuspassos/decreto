@@ -9,7 +9,6 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:db": "docker compose up -d --wait db",
-    "dev:mocked": "turbo run dev --filter=@decreto/web",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",

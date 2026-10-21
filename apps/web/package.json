@@ -9,7 +9,8 @@
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@decreto/game-content": "workspace:*",
@@ -30,6 +31,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "ts-jest": "^29.2.5",
     "typescript": "^5.7.2",
-    "vite": "^6.0.6"
+    "vite": "^6.0.6",
+    "@playwright/test": "^1.56.1"
   }
 }
