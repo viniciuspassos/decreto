@@ -3,8 +3,8 @@ import type { EngineState } from "../types.js";
 
 export const termEnded = (state: EngineState) => state.turn > state.term * TURNS_PER_TERM;
 
-/** Campaign begins on the final turn of the term, before its semester is played. */
-export const isCampaignDue = (state: EngineState) => state.turn === state.term * TURNS_PER_TERM && !electionsSuspended(state);
+/** Campaign begins after the final semester, when the term's election becomes due. */
+export const isCampaignDue = (state: EngineState) => termEnded(state) && !electionsSuspended(state);
 
 const electionsSuspended = (state: EngineState) => ELECTION_SUSPENDING_NODES.some((n) => state.activeNodes.includes(n));
 

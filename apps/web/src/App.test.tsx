@@ -38,8 +38,9 @@ class FakeGameServer {
     if (path.endsWith("/campaign")) {
       if (init?.method === "POST") {
         const body = JSON.parse(String(init.body ?? "{}")) as { promises?: string[] };
-        this.game = { ...this.game, phase: "playing", campaignPromises: body.promises ?? [], version: this.game.version + 1 };
-        return this.respond({ game: this.game });
+        this.game = { ...this.game, phase: this.voteEnd ? "ended" : "playing", turn: this.voteWon ? 9 : 17, term: this.voteWon ? 2 : 3, promises: this.voteWon ? body.promises ?? [] : [],
+          campaignPromises: undefined, version: this.game.version + 1 };
+        return this.respond({ game: this.game, won: this.voteWon, promises: body.promises ?? [], end: this.voteEnd });
       }
       if (this.failCampaign) return this.respond({ code: "network_error" }, 503);
       return this.respond({ options: this.campaignOptions, maxPromises: 3 });
@@ -52,8 +53,10 @@ class FakeGameServer {
       return this.respond({ votes: 55, honeymoon: false });
     }
     if (path.endsWith("/election")) {
-      this.game = { ...this.game, phase: this.voteEnd ? "ended" : this.voteWon ? "playing" : "election", version: 2, term: 2, end: this.voteEnd };
-      return this.respond({ game: this.game, won: this.voteWon, end: this.voteEnd });
+      const body = JSON.parse(String(init?.body ?? "{}")) as { promises?: string[] };
+      this.game = { ...this.game, phase: this.voteEnd ? "ended" : "playing", version: 2, turn: this.voteWon ? 9 : 17, term: this.voteWon ? 2 : 3,
+        promises: this.voteWon ? body.promises ?? [] : [], end: this.voteEnd };
+      return this.respond({ game: this.game, won: this.voteWon, promises: body.promises ?? [], end: this.voteEnd });
     }
     if (path.endsWith("/preview")) {
       if (this.failPreview) return this.respond({ code: "invalid_queue" }, 400);
@@ -64,7 +67,9 @@ class FakeGameServer {
         this.game = { ...this.game, version: 2 };
         return this.respond({ code: "version_conflict" }, 409);
       }
-      this.game = { ...this.game, turn: 2, version: 2, phase: this.semesterEnd ? "ended" : "playing",
+      const turn = this.game.turn + 1;
+      const phase = turn > this.game.term * 8 ? "campaign" : "playing";
+      this.game = { ...this.game, turn, version: this.game.version + 1, phase: this.semesterEnd ? "ended" : phase,
         end: this.semesterEnd, activeNodes: ["privatizations"] };
       return this.respond({ game: this.game, report: { applied: ["privatizations"], approvalBefore: 50,
         capitalBefore: 60, indicatorsBefore: this.game.indicators, groupChanges: [],
@@ -196,36 +201,38 @@ describe("App with API", () => {
     const voteButton = screen.getByText("Ir às urnas · 1 promessa");
     await waitFor(() => expect(voteButton).not.toBeDisabled());
     fireEvent.click(voteButton);
-    await screen.findByText("Ações deste semestre");
+    await screen.findByText("Você foi reeleito");
     expect(server.requests).toContain("/api/games/game-1/campaign");
     expect(server.requests).toContain("/api/games/game-1/election/preview");
     expect(server.requests).toContain("/api/games/game-1/election");
   });
 
-  it("saves campaign promises before playing the final turn", async () => {
+  it("finishes the final semester before campaign and shows a read-only election result", async () => {
     const server = new FakeGameServer();
-    server.game = { ...server.game, phase: "campaign", turn: 8 };
+    server.game = { ...server.game, turn: 8 };
     global.fetch = server.fetch;
     localStorage.setItem("decreto.gameId", "game-1");
     render(<App />);
     fireEvent.click(await screen.findByText("Continuar"));
+    expect(await screen.findByText("Ações deste semestre")).toBeTruthy();
+    expect(screen.queryByText("Escolha até 3 promessas")).toBeNull();
+    fireEvent.click(screen.getByText(/Encerrar semestre/));
+    await screen.findByText("Semestre encerrado");
+    fireEvent.click(screen.getByText(/Iniciar próximo semestre/));
+    await screen.findByText("Escolha até 3 promessas");
     fireEvent.click(await screen.findByText("Privatizações"));
-    const confirm = await screen.findByRole("button", { name: "Confirmar 1 promessa e jogar o último turno" });
+    const confirm = await screen.findByRole("button", { name: "Confirmar 1 promessa e fazer a eleição" });
     await waitFor(() => expect(confirm).not.toBeDisabled());
     fireEvent.click(confirm);
-    await screen.findByText("Ações deste semestre");
+    expect(await screen.findByText("Você foi reeleito")).toBeTruthy();
+    expect(screen.getByText("Promessas feitas")).toBeTruthy();
+    expect(screen.getByText("Privatizações")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Privatizações" })).toBeNull();
     expect(server.requests).toContain("/api/games/game-1/campaign");
-  });
-
-  it("shows campaign promises that became active during the final semester", async () => {
-    const server = new FakeGameServer();
-    server.game = { ...server.game, phase: "election", turn: 9, campaignPromises: ["strategic-state-company"] };
-    global.fetch = server.fetch;
-    localStorage.setItem("decreto.gameId", "game-1");
-    render(<App />);
-    fireEvent.click(await screen.findByText("Continuar"));
-    await screen.findByText("Estatal estratégica");
-    expect(screen.getByText("promessa confirmada")).toBeTruthy();
+    expect(server.requests).not.toContain("/api/games/game-1/election");
+    fireEvent.click(screen.getByText("Iniciar próximo semestre"));
+    expect(screen.getByText("Ações deste semestre")).toBeTruthy();
+    expect(screen.queryByText("Escolha até 3 promessas")).toBeNull();
   });
 
   it("shows a saved end result from the API", async () => {
@@ -296,17 +303,20 @@ describe("App with API", () => {
     expect(server.requests).not.toContain("/api/games/game-1/election");
   });
 
-  it("returns to an election after losing one", async () => {
+  it("shows the election result after losing and continues to the next semester", async () => {
     const server = new FakeGameServer();
-    server.game = { ...server.game, phase: "election", turn: 9 };
+    server.game = { ...server.game, phase: "campaign", turn: 9 };
     server.voteWon = false;
     global.fetch = server.fetch;
     localStorage.setItem("decreto.gameId", "game-1");
     render(<App />);
     fireEvent.click(await screen.findByText("Continuar"));
     await screen.findByText("Escolha até 3 promessas");
-    fireEvent.click(await screen.findByText("Ir às urnas · 0 promessa"));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar 0 promessa e fazer a eleição" }));
     expect(await screen.findByText(/Você perdeu a eleição/)).toBeTruthy();
+    expect(screen.getByText("Você não foi eleito")).toBeTruthy();
+    fireEvent.click(screen.getByText("Iniciar próximo semestre"));
+    expect(screen.getByText("Ações deste semestre")).toBeTruthy();
     expect(server.requests.filter((path) => path.endsWith("/campaign"))).toHaveLength(2);
   });
 

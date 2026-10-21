@@ -22,7 +22,7 @@ describe("gameApi", () => {
     await gameApi.create({ country: "Vessária", president: "Helena", situation: "stable" });
     await gameApi.preview("game/1", ["privatizations"]);
     await gameApi.endSemester(gameFixture(), ["privatizations"]);
-    await gameApi.saveCampaign(gameFixture(), ["privatizations"]);
+    await gameApi.submitCampaign(gameFixture(), ["privatizations"]);
     await gameApi.vote(gameFixture(), ["privatizations"]);
     expect(server.requests).toEqual([
       { url: "/api/games", method: "POST", body: { country: "Vessária", president: "Helena", situation: "stable" } },

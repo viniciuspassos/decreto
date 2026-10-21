@@ -360,8 +360,16 @@
     "ifLose": "Se perder, você acompanha o novo governo e pode concorrer de novo na próxima eleição.",
     "vote_one": "Ir às urnas · {{count}} promessa",
     "vote_other": "Ir às urnas · {{count}} promessas",
-    "saveCampaign_one": "Confirmar {{count}} promessa e jogar o último turno",
-    "saveCampaign_other": "Confirmar {{count}} promessas e jogar o último turno",
+    "confirmCampaign_one": "Confirmar {{count}} promessa e fazer a eleição",
+    "confirmCampaign_other": "Confirmar {{count}} promessas e fazer a eleição",
+    "resultTitle": "Resultado da eleição",
+    "resultEyebrow": "Mandato encerrado",
+    "elected": "Você foi eleito",
+    "reelected": "Você foi reeleito",
+    "notElected": "Você não foi eleito",
+    "madePromises": "Promessas feitas",
+    "noPromisesMade": "Você não fez promessas nesta campanha.",
+    "continueAfterResult": "Iniciar próximo semestre",
     "selectedCampaign": "promessa confirmada"
   },
   "regimes": {

@@ -71,7 +71,7 @@
 ### 7. Elections and promises
 
 37. **An election every 8 turns** (4 years).
-38. **Campaign promises:** when running, the player makes promises. If they are not fulfilled during the term, the group that liked them reacts **negatively**.
+38. **Campaign promises:** at the end of the final semester, the player selects promises and confirms to run the election immediately. If the promises are not fulfilled during the next term, the group that liked them reacts **negatively**.
 39. **Losing an election:** time advances; the player follows the indicators and main actions of the current leader, and **can run again** in a future election. The new leader (computer-controlled) **does not undo** the player's policies: they fulfill their main campaign promises, though they may eventually break them.
 
 ### 8. Extreme paths

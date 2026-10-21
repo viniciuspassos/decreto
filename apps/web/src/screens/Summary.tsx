@@ -63,7 +63,7 @@ export function Summary({ game, report, onContinue }: { game: PlayableGame; repo
           </section>
         </div>
         <div className="row footer">
-          {game.phase !== "election" && <span className="muted">{t("summary.toElection", { count: toElection })}</span>}
+          {game.phase === "playing" && <span className="muted">{t("summary.toElection", { count: toElection })}</span>}
           <button className="btn primary" onClick={onContinue}>{t("summary.next")} →</button>
         </div>
       </div>

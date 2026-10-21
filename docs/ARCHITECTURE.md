@@ -40,10 +40,11 @@ ownership and authentication before public deployment.
 
 ## Campaign and election timing
 
-On the final turn of a term, the API enters the campaign phase and persists the selected promises.
-The player then completes that semester; event screens appear before the election phase opens.
-Promise choices stay fixed through the vote, including when the final semester activates one of
-the promised policies. Regimes that suspend elections skip the campaign window.
+After the final semester and its event screens, the API enters the campaign phase. Confirming the
+selected promises immediately runs the election and returns its result with the promises for a
+read-only result screen. The next term begins on the regular semester screen. Regimes that suspend
+elections skip the campaign and ballot. After a loss, the opponent's term is simulated; the player
+resumes at the first semester after that term and makes campaign promises only at its end.
 
 ## Randomness is reproducible on the server
 

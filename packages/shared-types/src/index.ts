@@ -66,7 +66,7 @@ export interface GameState {
   groups: GroupState[];
   actors: { media: ActorMood; military: ActorMood };
   promises: string[];
-  /** Promises selected at the start of the final turn, awaiting the election. */
+  /** Campaign promises awaiting an election in saves created by earlier game versions. */
   campaignPromises?: string[];
   history: TermRecord[];
 }
@@ -180,5 +180,6 @@ export interface ElectionPreviewResponse {
 export interface ElectionResponse {
   game: GameView;
   won: boolean;
+  promises: string[];
   end: EndGameResult | null;
 }
