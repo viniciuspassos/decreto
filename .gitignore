@@ -20,5 +20,8 @@ apps/web/playwright-report/
 # Logs
 *.log
 
+# Local assets
+/assets/
+
 # Generated trailer video clips (see assets/trailers/production.md)
 assets/trailers/clips/

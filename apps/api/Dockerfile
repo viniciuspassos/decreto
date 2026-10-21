@@ -28,7 +28,7 @@ ENV MIGRATIONS_DIR=/repo/apps/api/drizzle
 COPY --from=build /repo/node_modules ./node_modules
 COPY --from=build /repo/packages ./packages
 COPY --from=build /repo/apps/api ./apps/api
-COPY assets/images ./assets/images
+RUN mkdir -p ./assets/images
 USER node
 WORKDIR /repo/apps/api
 EXPOSE 3001
