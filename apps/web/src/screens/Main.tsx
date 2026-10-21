@@ -21,7 +21,7 @@ export function Main({ game, pending, onToggleQueue, onEndSemester, onOpen }: Pr
   const [allIndicators, setAllIndicators] = useState(false);
 
   return (
-    <div className="screen">
+    <div className="screen main-screen">
       <TopBar game={game}>
         <Stat label={t("top.actions")} value={`${game.queue.length}/${game.maxActions}`} />
         <button className="btn" onClick={() => onOpen("groups")}>{t("top.groups")}</button>
