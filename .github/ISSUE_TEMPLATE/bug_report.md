@@ -1,34 +1,34 @@
 ---
-name: Relatório de bug
-about: Reporte um comportamento incorreto no Decreto
+name: Bug report
+about: Report incorrect behavior in Decreto
 title: "[bug] "
 labels: bug
 ---
 
-## Descrição do bug
+## Bug description
 
-<!-- Descreva o que está acontecendo. -->
+<!-- Describe what is happening. -->
 
-## Passos para reproduzir
+## Steps to reproduce
 
 1.
 2.
 3.
 
-## Comportamento esperado
+## Expected behavior
 
-<!-- O que deveria acontecer, segundo `roteiro-do-jogo.md` (aponte a seção se souber,
-ex.: S3, S4). -->
+<!-- What should happen according to `game-design.md` (include a section if you know it,
+for example, S3 or S4). -->
 
-## Comportamento atual
+## Actual behavior
 
-<!-- O que de fato acontece. -->
+<!-- What actually happens. -->
 
-## Ambiente
+## Environment
 
 - Navegador/SO:
 - Commit/branch:
 
-## Contexto adicional
+## Additional context
 
-<!-- Screenshots, logs, ou qualquer outra informação relevante. -->
+<!-- Screenshots, logs, or any other relevant information. -->

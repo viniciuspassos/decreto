@@ -5,7 +5,7 @@ import type { RunBatchResult } from "./runBatch.js";
 const loadBaseWorkflowMock = jest.fn<(path: string) => Record<string, unknown>>();
 const runBatchMock = jest.fn<(...args: unknown[]) => Promise<RunBatchResult[]>>();
 const loadManifestMock = jest.fn<(path: string) => ManifestEntry[]>();
-const loadTrailerClipEntriesMock = jest.fn<(trailerPath: string, comumPath?: string) => ManifestEntry[]>();
+const loadTrailerClipEntriesMock = jest.fn<(trailerPath: string, sharedPath?: string) => ManifestEntry[]>();
 
 jest.unstable_mockModule("./runBatch.js", () => ({
   loadBaseWorkflow: loadBaseWorkflowMock,
@@ -21,7 +21,7 @@ jest.unstable_mockModule("./trailerManifest.js", () => ({
 const { parseArgs, run } = await import("./cli.js");
 
 describe("parseArgs", () => {
-  it("usa os valores padrão quando nenhuma flag é passada", () => {
+  it("uses default values when no flags are passed", () => {
     const args = parseArgs([]);
     expect(args).toEqual({
       manifestPath: "assets/prompts/manifest.json",
@@ -32,7 +32,7 @@ describe("parseArgs", () => {
     });
   });
 
-  it("lê todas as flags suportadas", () => {
+  it("reads all supported flags", () => {
     const args = parseArgs([
       "--manifest",
       "m.json",
@@ -43,7 +43,7 @@ describe("parseArgs", () => {
       "--comfy-url",
       "http://x:1",
       "--only",
-      "golpe-militar",
+      "coup",
       "--ext",
       "mp4",
       "--timeout-min",
@@ -56,22 +56,22 @@ describe("parseArgs", () => {
       basePath: "b.json",
       imagesDir: "out",
       comfyUrl: "http://x:1",
-      only: "golpe-militar",
+      only: "coup",
       extension: "mp4",
       timeoutMin: 60,
       force: true,
     });
   });
 
-  it.each(["abc", "0", "-5"])("rejeita --timeout-min inválido (%s)", (value) => {
-    expect(() => parseArgs(["--timeout-min", value])).toThrow("--timeout-min deve ser um número");
+  it.each(["abc", "0", "-5"])("rejects invalid --timeout-min (%s)", (value) => {
+    expect(() => parseArgs(["--timeout-min", value])).toThrow("--timeout-min must be a number of minutes greater than zero");
   });
 
-  it("lê --trailer e --comum-manifest", () => {
-    const args = parseArgs(["--trailer", "assets/trailers/1-mandato.manifest.json", "--comum-manifest", "c.json"]);
+  it("reads --trailer and --shared-manifest", () => {
+    const args = parseArgs(["--trailer", "assets/trailers/1-mandato.manifest.json", "--shared-manifest", "c.json"]);
 
     expect(args.trailerManifestPath).toBe("assets/trailers/1-mandato.manifest.json");
-    expect(args.comumManifestPath).toBe("c.json");
+    expect(args.sharedManifestPath).toBe("c.json");
   });
 });
 
@@ -80,15 +80,15 @@ describe("run", () => {
     jest.resetAllMocks();
   });
 
-  it("carrega base/manifest, roda o lote e imprime cada entrada concluída", async () => {
+  it("loads base/manifest, runs the batch, and prints each completed entry", async () => {
     const result: RunBatchResult = {
       name: "a",
-      category: "eventos",
+      category: "events",
       status: "generated",
-      destination: "assets/images/eventos/a.png",
+      destination: "assets/images/events/a.png",
     };
     loadBaseWorkflowMock.mockReturnValue({});
-    loadManifestMock.mockReturnValue([{ category: "eventos", name: "a", prompt: "x" }]);
+    loadManifestMock.mockReturnValue([{ category: "events", name: "a", prompt: "x" }]);
     runBatchMock.mockImplementation(async (...args: unknown[]) => {
       (args[2] as { onResult: (r: RunBatchResult) => void }).onResult(result);
       return [result];
@@ -99,20 +99,20 @@ describe("run", () => {
 
     expect(runBatchMock).toHaveBeenCalledWith(
       {},
-      [{ category: "eventos", name: "a", prompt: "x" }],
+      [{ category: "events", name: "a", prompt: "x" }],
       expect.objectContaining({ only: "a", timeoutMs: 3_600_000 }),
     );
     expect(logSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/ \[generated\] eventos\/a -> assets\/images\/eventos\/a\.png$/),
+      expect.stringMatching(/ \[generated\] events\/a -> assets\/images\/events\/a\.png$/),
     );
   });
 
-  it("usa o manifest do trailer quando --trailer é passado, em vez do manifest bancada", async () => {
+  it("uses the trailer manifest when --trailer is passed instead of the workbench manifest", async () => {
     loadBaseWorkflowMock.mockReturnValue({});
     loadTrailerClipEntriesMock.mockReturnValue([{ category: "1-mandato", name: "1-01-s42", prompt: "x" }]);
     runBatchMock.mockResolvedValue([]);
 
-    await run(["--trailer", "assets/trailers/1-mandato.manifest.json", "--comum-manifest", "c.json"]);
+    await run(["--trailer", "assets/trailers/1-mandato.manifest.json", "--shared-manifest", "c.json"]);
 
     expect(loadTrailerClipEntriesMock).toHaveBeenCalledWith("assets/trailers/1-mandato.manifest.json", "c.json");
     expect(loadManifestMock).not.toHaveBeenCalled();

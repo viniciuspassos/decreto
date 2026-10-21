@@ -1,7 +1,7 @@
 /**
- * MOCK do backend para a v0 do frontend. As regras aqui são provisórias e grosseiras: o motor real
- * vive em apps/api + packages/game-engine (ver docs/ARCHITECTURE.md). Ao ligar o backend, trocar
- * este módulo por chamadas HTTP mantendo as assinaturas — os componentes só falam com ele.
+ * Backend mock for frontend v0. These rules are temporary and rough: the real engine
+ * lives in apps/api + packages/game-engine (see docs/ARCHITECTURE.md). When connecting the backend,
+ * replace this module with HTTP calls that keep the same signatures; components only use this module.
  */
 import {
   BASE_INDICATORS,
@@ -41,7 +41,7 @@ export const depthOf = (nodeId: string) => (treeOf(nodeId)?.nodes.indexOf(nodeId
 export const activeCount = (state: GameState, treeId: string) =>
   state.activeNodes.filter((n) => treeOf(n)?.id === treeId).length;
 
-/** S3: 10 × (1 + profundidade + 0,4 × distância). Mock: distância = profundidade − 1 (máx. 3). */
+/** S3: 10 × (1 + depth + 0.4 × distance). Mock: distance = depth − 1 (max 3). */
 export function nodeCost(nodeId: string): number {
   const depth = depthOf(nodeId);
   return Math.round(10 * (1 + depth + 0.4 * Math.min(3, depth - 1)));
@@ -86,7 +86,7 @@ export function newGame(country: string, president: string, situation: InitialSi
   };
 }
 
-/** Save de exemplo exibido em "Continuar partida". */
+/** Example save displayed in "Continue game". */
 export function loadSave(): GameState {
   const base = newGame("República de Vessária", "Helena Duarte", "unstable");
   const activeNodes = ["secret-police", "opposition-surveillance", "strategic-state-company", "public-network-expansion"];

@@ -12,7 +12,7 @@ export interface CliArgs {
   extension?: string;
   timeoutMin?: number;
   trailerManifestPath?: string;
-  comumManifestPath?: string;
+  sharedManifestPath?: string;
 }
 
 const DEFAULTS = {
@@ -30,7 +30,7 @@ type StringField =
   | "extension"
   | "timeoutMin"
   | "trailerManifestPath"
-  | "comumManifestPath";
+  | "sharedManifestPath";
 
 const VALUE_FLAGS: Record<string, StringField> = {
   "--only": "only",
@@ -41,7 +41,7 @@ const VALUE_FLAGS: Record<string, StringField> = {
   "--ext": "extension",
   "--timeout-min": "timeoutMin",
   "--trailer": "trailerManifestPath",
-  "--comum-manifest": "comumManifestPath",
+  "--shared-manifest": "sharedManifestPath",
 };
 
 interface ParsedFlags {
@@ -71,8 +71,8 @@ function collectFlags(argv: string[]): ParsedFlags {
 }
 
 /**
- * Lê flags de linha de comando (--manifest, --base, --images-dir, --comfy-url, --force, --only,
- * --ext, --timeout-min).
+ * Reads command-line flags (--manifest, --base, --images-dir, --comfy-url, --force, --only,
+ * --ext, --timeout-min, --trailer, --shared-manifest).
  */
 export function parseArgs(argv: string[]): CliArgs {
   const { values, force } = collectFlags(argv);
@@ -87,7 +87,7 @@ export function parseArgs(argv: string[]): CliArgs {
     extension: values.extension,
     timeoutMin: parseTimeoutMin(values.timeoutMin),
     trailerManifestPath: values.trailerManifestPath,
-    comumManifestPath: values.comumManifestPath,
+    sharedManifestPath: values.sharedManifestPath,
   };
 }
 
@@ -97,21 +97,21 @@ function parseTimeoutMin(value: string | undefined): number | undefined {
   }
   const minutes = Number(value);
   if (!Number.isFinite(minutes) || minutes <= 0) {
-    throw new Error(`--timeout-min deve ser um número de minutos maior que zero (recebido: "${value}")`);
+    throw new Error(`--timeout-min must be a number of minutes greater than zero (received: "${value}")`);
   }
   return minutes;
 }
 
 /**
- * Roda o lote completo a partir dos argumentos de CLI e imprime cada entrada assim que termina.
- * Com `--trailer`, lê o manifest ordenado do trailer (planos "clip", resolvendo os "shared" em
- * comum.manifest.json); sem ele, lê o manifest "bancada" apontado por `--manifest`.
+ * Runs the full batch from CLI arguments and prints each entry as soon as it completes.
+ * With `--trailer`, reads the trailer's ordered manifest ("clip" plans, resolving "shared" plans in
+ * `shared.manifest.json`); otherwise, reads the "workbench" manifest specified by `--manifest`.
  */
 export async function run(argv: string[]): Promise<void> {
   const args = parseArgs(argv);
   const base = loadBaseWorkflow(args.basePath);
   const entries = args.trailerManifestPath
-    ? loadTrailerClipEntries(args.trailerManifestPath, args.comumManifestPath)
+    ? loadTrailerClipEntries(args.trailerManifestPath, args.sharedManifestPath)
     : loadManifest(args.manifestPath);
 
   await runBatch(base, entries, {
@@ -122,7 +122,7 @@ export async function run(argv: string[]): Promise<void> {
     extension: args.extension,
     timeoutMs: args.timeoutMin === undefined ? undefined : args.timeoutMin * 60 * 1000,
     onResult: (result) => {
-      const time = new Date().toLocaleTimeString("pt-BR");
+      const time = new Date().toLocaleTimeString("en-US");
       console.log(`${time} [${result.status}] ${result.category}/${result.name} -> ${result.destination}`);
     },
   });

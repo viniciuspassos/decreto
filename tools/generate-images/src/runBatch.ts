@@ -9,11 +9,11 @@ export interface RunBatchOptions {
   imagesDir: string;
   force?: boolean;
   only?: string;
-  /** Extensão do arquivo salvo (padrão "png"; "mp4" para clipes de vídeo). */
+  /** Saved file extension (default "png"; "mp4" for video clips). */
   extension?: string;
-  /** Tempo máximo de espera por entrada (padrão do comfyClient: 5 min). */
+  /** Maximum wait time per entry (comfyClient default: 5 min). */
   timeoutMs?: number;
-  /** Chamado a cada entrada concluída, para acompanhar lotes longos. */
+  /** Called after each completed entry to track long batches. */
   onResult?: (result: RunBatchResult) => void;
 }
 
@@ -28,7 +28,7 @@ export function loadBaseWorkflow(path: string): ApiWorkflow {
   return JSON.parse(readFileSync(path, "utf-8")) as ApiWorkflow;
 }
 
-/** Gera, em sequência, uma imagem por entrada do manifest (ComfyUI roda um job por vez). */
+/** Generates one image per manifest entry in sequence (ComfyUI runs one job at a time). */
 export async function runBatch(
   base: ApiWorkflow,
   entries: ManifestEntry[],
@@ -62,7 +62,7 @@ async function runEntry(
     timeoutMs: options.timeoutMs,
   });
   if (!image) {
-    throw new Error(`ComfyUI não retornou imagem para "${entry.name}"`);
+    throw new Error(`ComfyUI returned no image for "${entry.name}"`);
   }
   const bytes = await downloadImage(options.comfyUrl, image);
 

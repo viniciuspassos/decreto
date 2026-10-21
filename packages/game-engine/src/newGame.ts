@@ -12,11 +12,11 @@ export interface NewGameOptions {
   country: string;
   president: string;
   situation: InitialSituation;
-  /** Seed do RNG da partida (guardada no servidor). */
+  /** Game RNG seed (stored on the server). */
   seed: number;
 }
 
-/** Partida nova (game-design §1.5): no turno 1 a base é o próprio valor exibido e o momento é zero. */
+/** New game (design §1.5): on turn 1, the baseline is the displayed value and momentum is zero. */
 export function newGame(options: NewGameOptions, content: SemesterContent): EngineState {
   const indicators = { ...BASE_INDICATORS, ...SITUATIONS[options.situation] };
   const base = Object.fromEntries(LEVEL_INDICATORS.map((id) => [id, indicators[id]])) as Record<LevelIndicatorId, number>;

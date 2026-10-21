@@ -1,7 +1,7 @@
 # Trailer 2: "Ordem e Futuro"
 
 Roteiro do miolo (6–45 s). Linguagem comum, abertura (A1–A3), encerramento (e1a–e1b) e produção em
-[comum.md](comum.md).
+[shared.md](shared.md).
 
 Utopia **inventada para o trailer** (não é uma das 5 do jogo), misturando direita e esquerda. Nome
 de trabalho: **"A Nação Concórdia"**. Visual: perfeição limpa, simétrica e levemente inquietante.
@@ -17,13 +17,13 @@ de trabalho: **"A Nação Concórdia"**. Visual: perfeição limpa, simétrica e
 é branca, clara e simétrica. O incômodo vem da **sincronia**: as pessoas fazem tudo ao mesmo tempo,
 e na montagem 2-09 isso vira o próprio ritmo dos cortes.
 
-**A câmera sobe** (ver [linguagem comum](comum.md#linguagem-comum)): mesa (2-05) → janela (2-06a) →
+**A câmera sobe** (ver [linguagem comum](shared.md#shared-creative-direction)): mesa (2-05) → janela (2-06a) →
 avenida (2-06b) → praça (2-07) → cidade (2-10a) → país (2-10b). O fecho volta às mãos, que não se
 mexem mais: não há o que decidir numa utopia.
 
 **Sem bandeiras:** o hino do 2-04a é cantado com a mão no peito, sem mastro nem bandeira em quadro
 (o Wan transforma bandeiras em bandeiras nacionais reais; ver
-[regras de prompt](producao.md#como-escrever-os-prompts)). O quadro do líder (2-08b) fica todo fora de
+[regras de prompt](production.md#writing-prompts)). O quadro do líder (2-08b) fica todo fora de
 foco, de costas.
 
 **Duração por clipe:** como no trailer 1, cada clipe fica **2 s** na tela (`seconds: 2`), e a

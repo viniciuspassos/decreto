@@ -36,7 +36,7 @@ export function coupRisk(ctx: StepCtx): number {
   return state.actors.military === "loyal" ? Math.min(risk, 3) : risk;
 }
 
-/** Riscos do semestre (§3.7); `rebels` é o tamanho atual do grupo. */
+/** Semester risks (§3.7); `rebels` is the current group size. */
 export function risksOf(ctx: StepCtx): Record<RiskId, number> {
   return { attack: attackRisk(ctx), revolution: revolutionRisk(ctx), coup: coupRisk(ctx), rebels: sizeOf(ctx.state, "rebels") };
 }
@@ -46,7 +46,7 @@ function defeat(ctx: SemesterCtx, reason: Defeat, eventId: string): CountryEvent
   return systemEvent(ctx, eventId);
 }
 
-/** Rola atentado → revolução → golpe; a primeira derrota encerra a rolagem. */
+/** Rolls assassination → revolution → coup; the first defeat ends the roll. */
 export function rollRisks(ctx: SemesterCtx, risks: Record<RiskId, number>): CountryEvent[] {
   const roll = (percent: number) => ctx.rng.next() * 100 < percent;
   const events: CountryEvent[] = [];

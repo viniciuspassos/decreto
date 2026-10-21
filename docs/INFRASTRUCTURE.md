@@ -1,112 +1,109 @@
-# Infraestrutura
+# Infrastructure
 
-**Status: monorepo, containers Docker, lint, testes, git hooks e CI implementados.** Ver
-[`README.md`](../README.md) para os comandos de uso do dia a dia.
+**Status: monorepo, Docker containers, linting, tests, git hooks, and CI are implemented.** See
+[`README.md`](../README.md) for day-to-day commands.
 
 ## Monorepo
 
-- Gerenciador de pacotes: **pnpm** (workspaces).
-- Orquestrador de build/test com cache: **Turborepo**.
-- Pacotes: `apps/web`, `apps/api`, `packages/game-engine`, `packages/game-content`,
-  `packages/shared-types`, `tools/diff-coverage` (ver `CLAUDE.md` → "Estrutura de monorepo").
+- Package manager: **pnpm** (workspaces).
+- Build and test orchestrator with caching: **Turborepo**.
+- Packages: `apps/web`, `apps/api`, `packages/game-engine`, `packages/game-content`,
+  `packages/shared-types`, `tools/diff-coverage` (see `CLAUDE.md` → "Monorepo structure").
 
 ## Scripts
 
-Cada pacote expõe, no mínimo: `dev`, `build`, `typecheck`, `lint`, `test`. Rodar da raiz com
-`pnpm <script>` executa em todos os pacotes via Turborepo, com cache (`pnpm typecheck`,
-`pnpm lint`, `pnpm test`, `pnpm build`). `apps/web` vai adicionar `test:e2e` (Playwright) quando
-necessário — não como gate obrigatório de todo PR.
+Each package exposes at least: `dev`, `build`, `typecheck`, `lint`, `test`. Running `pnpm <script>`
+from the root runs it across all packages via Turborepo, with caching (`pnpm typecheck`, `pnpm lint`,
+`pnpm test`, `pnpm build`). `apps/web` may add `test:e2e` (Playwright) when needed — it is not a
+required gate for every PR.
 
-## Lint e testes
+## Linting and tests
 
-- **ESLint** (`eslint.config.mjs` na raiz, flat config): regras recomendadas de JS/TS
-  (`typescript-eslint`) + React/React Hooks em `apps/web`, com os limites de complexidade do
+- **ESLint** (`eslint.config.mjs` at the root, flat config): recommended JS/TS rules
+  (`typescript-eslint`) plus React/React Hooks in `apps/web`, with the complexity limits from
   `CLAUDE.md` (`complexity` ≤ 10, `max-depth` ≤ 3, `max-params` ≤ 4, `max-lines-per-function` ≤ 80),
-  desativados em arquivos `*.test.ts(x)`. Cada pacote chama `eslint .`, que resolve o config da
-  raiz subindo diretórios.
-- **Jest** em todos os pacotes (ESM via `ts-jest`), com `collectCoverage` ligado e
-  `coverageReporters: ["json", "text-summary"]` — o `coverage/coverage-final.json` de cada pacote
-  alimenta o gate de cobertura diff-aware (ver abaixo). `apps/web` usa `jest-environment-jsdom` +
-  `@testing-library/react` + `@testing-library/jest-dom`.
+  disabled in `*.test.ts(x)` files. Each package runs `eslint .`, which finds the root config by
+  walking up the directory tree.
+- **Jest** in all packages (ESM via `ts-jest`), with `collectCoverage` enabled and
+  `coverageReporters: ["json", "text-summary"]`. Each package's `coverage/coverage-final.json`
+  feeds the diff-aware coverage gate (see below). `apps/web` uses `jest-environment-jsdom`,
+  `@testing-library/react`, and `@testing-library/jest-dom`.
 
-## Containers Docker
+## Docker containers
 
-- `apps/api/Dockerfile` e `apps/web/Dockerfile`: builds multi-stage (instala deps do workspace
-  filtradas por pacote, builda, copia só o necessário para a imagem final). `apps/web` serve o
-  build estático via Nginx; `apps/api` roda o `dist/` compilado direto com Node.
-- `docker-compose.yml` na raiz sobe `db` (Postgres), `api` e `web` juntos — ver README para os
-  comandos.
+- `apps/api/Dockerfile` and `apps/web/Dockerfile` use multi-stage builds (install workspace
+  dependencies filtered by package, build, and copy only what the final image needs). `apps/web`
+  serves the static build via Nginx; `apps/api` runs the compiled `dist/` directly with Node.
+- The root `docker-compose.yml` starts `db` (Postgres), `api`, and `web` together — see the README
+  for commands.
 
-## Gate de cobertura diff-aware (`tools/diff-coverage`)
+## Diff-aware coverage gate (`tools/diff-coverage`)
 
-Pacote próprio (`@decreto/diff-coverage`, testado como qualquer outro) que decide se o `pre-push` e
-o CI passam:
+This package (`@decreto/diff-coverage`, tested like any other package) determines whether `pre-push`
+and CI pass:
 
-1. Lê o `git diff --merge-base <base> -U0` entre `HEAD` e a base (default `origin/main`) e extrai
-   os números de linha adicionados por arquivo (`src/parseDiff.ts`).
-2. Filtra para arquivos de código-fonte (`apps|packages|tools/*/src/**/*.ts(x)`, exceto
-   `*.test.ts(x)`) — `src/gatedFiles.ts`.
-3. Junta os `coverage/coverage-final.json` de todos os pacotes (`istanbul-lib-coverage`) —
-   `src/mergeCoverage.ts`.
-4. Para cada linha alterada: se o arquivo nunca foi executado por nenhum teste, ou se a linha cai
-   num `statement` do Istanbul com contagem zero, o gate falha e lista `arquivo:linha`. Linhas sem
-   `statement` (comentário, linha em branco, declaração de tipo) não são cobradas —
-   `src/findUncovered.ts`.
+1. Reads `git diff --merge-base <base> -U0` between `HEAD` and the base (default `origin/main`) and
+   extracts added line numbers per file (`src/parseDiff.ts`).
+2. Filters to source files (`apps|packages|tools/*/src/**/*.ts(x)`, excluding `*.test.ts(x)`)
+   (`src/gatedFiles.ts`).
+3. Merges all packages' `coverage/coverage-final.json` files using `istanbul-lib-coverage`
+   (`src/mergeCoverage.ts`).
+4. For each changed line, the gate fails and reports `file:line` if no test executed the file or if
+   the line belongs to an Istanbul `statement` with a zero count. Lines without a `statement`
+   (comments, blank lines, type declarations) are not checked (`src/findUncovered.ts`).
 
-**Exceção:** um `index.ts`/`types.ts` **ausente** do coverage (barril de só `export ... from`, ou
-módulo de só tipos) não é marcado — esses arquivos compilam para zero `statement`s, então nunca
-apareceriam no `coverage-final.json` mesmo com teste. Se o mesmo arquivo *aparecer* no coverage
-(tem lógica real) e a linha tiver contagem zero, ele é cobrado normalmente — a exceção é só por
-ausência, nunca pelo nome do arquivo sozinho (`src/findUncovered.ts`, função
+**Exception:** a missing `index.ts`/`types.ts` in coverage (a barrel containing only
+`export ... from`, or a types-only module) is not flagged. Such files compile to zero statements, so
+they never appear in `coverage-final.json`, even when tested. If the same file appears in coverage
+(because it contains real logic) and a line has a zero count, it is checked as usual. The exception
+applies only to missing files, never to a filename alone (`src/findUncovered.ts`,
 `flagMissingFile`/`UNINSTRUMENTABLE_BASENAME`).
 
-Roda via `pnpm diff-coverage [baseRef]` (default `origin/main`).
+Run with `pnpm diff-coverage [baseRef]` (default `origin/main`).
 
 ## Git hooks
 
-Instalados automaticamente pelo script `prepare` do pnpm (`husky`); `pnpm install` já deixa os
-hooks ativos, sem passo manual. Scripts em `.husky/`:
+Hooks are installed automatically by pnpm's `prepare` script (`husky`); `pnpm install` activates
+them without a manual step. Scripts in `.husky/`:
 
-- **`pre-commit`:** `pnpm turbo run typecheck lint test` (a complexidade é uma regra do ESLint,
-  coberta pelo `lint`).
+- **`pre-commit`:** `pnpm turbo run typecheck lint test` (complexity is an ESLint rule covered by
+  `lint`).
 - **`commit-msg`:** `pnpm commitlint --edit` (Conventional Commits, `commitlint.config.js`).
 - **`pre-push`:** `pnpm turbo run typecheck lint test build` + `pnpm diff-coverage origin/main`.
 
-`core.hooksPath` é configuração do repositório Git (`.git/config`), então vale para o checkout
-principal e para todos os worktrees que compartilham o mesmo `.git`.
+`core.hooksPath` is a Git repository setting (`.git/config`), so it applies to the main checkout and
+to all worktrees sharing the same `.git`.
 
 ## CI (`.github/workflows/ci.yml`)
 
-- Dispara em `push`/`pull_request` para `main`.
-- `actions/checkout` com `fetch-depth: 0` + `git fetch origin main`, para o gate de cobertura
-  diff-aware conseguir calcular o merge-base.
-- `pnpm install --frozen-lockfile` → `pnpm turbo run typecheck lint test build` → 
-  `pnpm diff-coverage origin/main` (mesmo gate do `pre-push`, agora bloqueante de merge).
-- Cache do Turborepo via `actions/cache` (chave por `github.sha`, fallback por `runner.os`).
-- O job `ci` ainda sobe um `services.postgres` (`postgres:16-alpine`, mesmas credenciais do
-  `.env.example`) e roda um step "Apply DB migrations"
-  (`pnpm --filter @decreto/api run db:migrate`), mas isso não é mais exigido pelos testes — ver
-  "Postgres (`apps/api`)" abaixo. Removê-los do workflow é cleanup rastreado na
-  [issue #42](https://github.com/viniciuspassos/decreto/issues/42).
+- Runs on `push`/`pull_request` to `main`.
+- `actions/checkout` with `fetch-depth: 0` + `git fetch origin main`, so the diff-aware coverage gate
+  can calculate the merge base.
+- `pnpm install --frozen-lockfile` → `pnpm turbo run typecheck lint test build` →
+  `pnpm diff-coverage origin/main` (the same gate as `pre-push`, now required for merge).
+- Turborepo cache via `actions/cache` (keyed by `github.sha`, with fallback by `runner.os`).
+- The `ci` job still starts `services.postgres` (`postgres:16-alpine`, same credentials as
+  `.env.example`) and runs an "Apply DB migrations" step (`pnpm --filter @decreto/api run db:migrate`),
+  but tests no longer require this — see "Postgres (`apps/api`)" below. Removing these from the
+  workflow is tracked in [issue #42](https://github.com/viniciuspassos/decreto/issues/42).
 
 ## Postgres (`apps/api`)
 
-- ORM: **Drizzle** (`drizzle-orm` + driver `pg`). Schema tipado em `apps/api/src/db/schema.ts`;
-  migrations SQL geradas (nunca escritas à mão) em `apps/api/drizzle/` via
-  `pnpm --filter @decreto/api run db:generate` sempre que o schema mudar.
-- Scripts do pacote: `db:generate` (gera migration a partir do schema), `db:migrate` (aplica
-  migrations pendentes, lê `DATABASE_URL`), `db:seed` (popula dados iniciais de forma idempotente,
-  ex. `event_images`).
-- **Testes**: os testes do `apps/api` que tocam `src/db/**` (e as rotas que dependem do banco)
-  rodam contra **PGlite** (`@electric-sql/pglite`) via `apps/api/src/db/testDb.ts` — o mesmo motor
-  Postgres compilado para WASM, aplicando as migrations reais em um banco isolado e descartável
-  por arquivo de teste (uma instância por `beforeAll`, reaproveitada pelos `it`s do mesmo
-  arquivo), sem mock da camada de query nem servidor externo. Não é preciso `DATABASE_URL` nem
-  `docker compose up -d db` para rodar `pnpm test`, nem para os hooks `pre-commit`/`pre-push`.
-  `DATABASE_URL` só é lida por `createDb()` (produção/dev real) e pelos scripts `db:migrate`/
-  `db:seed`/`db:generate`.
+- ORM: **Drizzle** (`drizzle-orm` + `pg` driver). Typed schema at `apps/api/src/db/schema.ts`;
+  generated SQL migrations in `apps/api/drizzle/` (never write them by hand), using
+  `pnpm --filter @decreto/api run db:generate` whenever the schema changes.
+- Package scripts: `db:generate` (generate a migration from the schema), `db:migrate` (apply pending
+  migrations; reads `DATABASE_URL`), `db:seed` (idempotently populate initial data, e.g.
+  `event_images`).
+- **Tests:** `apps/api` tests that touch `src/db/**` (and routes that depend on the database) run
+  against **PGlite** (`@electric-sql/pglite`) via `apps/api/src/db/testDb.ts`. This is the Postgres
+  engine compiled to WASM, applying the real migrations in an isolated, disposable database per
+  test file (one instance per `beforeAll`, reused by that file's `it`s), with no query-layer mock or
+  external server. `DATABASE_URL` and `docker compose up -d db` are not required for `pnpm test` or
+  the `pre-commit`/`pre-push` hooks. `DATABASE_URL` is read only by `createDb()` (real production/dev
+  use) and the `db:migrate`/`db:seed`/`db:generate` scripts.
 
-## Deploy (a decidir)
+## Deployment (undecided)
 
-Ainda não discutido: onde `apps/web` e `apps/api` serão hospedados, e como o PostgreSQL de
-produção será provisionado. Atualizar esta seção quando essa decisão for tomada.
+Hosting for `apps/web` and `apps/api`, and provisioning for production PostgreSQL, have not been
+discussed. Update this section when those decisions are made.

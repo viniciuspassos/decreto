@@ -17,14 +17,14 @@ afterAll(async () => {
   await close();
 });
 
-// Cada teste reparte o fixture seedado por nome de evento, nunca a tabela inteira
-// — os outros testes deste arquivo rodam contra o mesmo banco em memória.
+// Each test scopes the seeded fixture by event name, never the entire table
+// — the other tests in this file use the same in-memory database.
 async function clearSeededFixture(): Promise<void> {
   await db.delete(eventImages).where(eq(eventImages.eventName, seededEventName));
 }
 
 describe("main", () => {
-  it("insere o seed inicial quando a linha não existe", async () => {
+  it("inserts the initial seed when the row does not exist", async () => {
     await clearSeededFixture();
 
     await expect(main(db)).resolves.toBeUndefined();
@@ -33,18 +33,18 @@ describe("main", () => {
     expect(rows).toEqual([expect.objectContaining({ fileLocation: "prisao-oposicao/prisao-oposicao.png" })]);
   });
 
-  it("não duplica a linha quando ela já existe com o mesmo fileLocation", async () => {
+  it("does not duplicate the row when it already has the same fileLocation", async () => {
     await expect(main(db)).resolves.toBeUndefined();
 
     const rows = await db.select().from(eventImages).where(eq(eventImages.eventName, seededEventName));
     expect(rows).toHaveLength(1);
   });
 
-  it("atualiza o fileLocation em vez de duplicar quando ele mudou", async () => {
+  it("updates fileLocation instead of duplicating when it has changed", async () => {
     await clearSeededFixture();
     await db
       .insert(eventImages)
-      .values({ eventName: seededEventName, fileLocation: "prisao-oposicao/caminho-antigo.png" });
+      .values({ eventName: seededEventName, fileLocation: "prisao-oposicao/old-path.png" });
 
     await expect(main(db)).resolves.toBeUndefined();
 
@@ -54,13 +54,13 @@ describe("main", () => {
 });
 
 describe("handleCliError", () => {
-  it("registra o erro e marca o processo como falho", () => {
+  it("logs the error and marks the process as failed", () => {
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
     const originalExitCode = process.exitCode;
 
-    handleCliError(new Error("falha de teste"));
+    handleCliError(new Error("test failure"));
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith("[db] falha ao aplicar seed", expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith("[db] failed to apply seed", expect.any(Error));
     expect(process.exitCode).toBe(1);
 
     process.exitCode = originalExitCode;

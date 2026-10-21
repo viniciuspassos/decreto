@@ -1,173 +1,164 @@
-# Decreto — Guia do Projeto
+# Decreto — Project Guide
 
-Jogo de política web. O jogador é presidente de um país fictício e
-governa por mandatos de 4 anos, tentando ser reeleito e evitar queda, morte ou estagnação por 40
-anos.
+A web-based political game. The player is president of a fictional country and governs in four-year
+terms, trying to get reelected and avoid being ousted, dying, or stagnating for 40 years.
 
-**Fonte da verdade do design é `roteiro-do-jogo.md`** (raiz do repo). Os números de efeitos das
-políticas, da camada de movimento (tendência, recessão, riscos) e o catálogo de eventos estão em
-`docs/game-design/efeitos-movimento-eventos.md`. Este arquivo não duplica o
-roteiro — resume o que todo código precisa respeitar e aponta de volta para as seções relevantes.
-Qualquer dúvida sobre regra de negócio deve ser resolvida lendo o roteiro primeiro; segundo ele, não
-há dúvidas de negócio em aberto nesta versão (0.4).
+**The source of truth for design is `game-design.md`** (repository root). Policy effect numbers,
+the simulation movement layer (trends, recession, risks), and the event catalog are in
+`docs/game-design/movement-effects-events.md`. This file does not duplicate the design document; it
+summarizes what all code must respect and points back to the relevant sections. Resolve business
+rule questions by reading the design document first; it has no open business questions for version
+0.4.
 
-## Resumo das mecânicas (ver roteiro para detalhes)
+## Mechanics summary (see the design document for details)
 
-- **Turnos:** mandato de 4 anos = 8 turnos semestrais. 0–6 ações por turno, limitadas pelo capital
-  político disponível. Ajustar a intensidade de uma política conta como uma ação.
-- **Árvores de políticas:** cada árvore é unidirecional (do nó moderado ao radical). Um nó só pode
-  ser ativado se o nó anterior da mesma árvore estiver ativo. Árvores opostas no mesmo campo se
-  bloqueiam mutuamente quando uma está ativa (roteiro §3.16.1, S1).
-- **Desfazer políticas:** o presidente em exercício nunca desfaz as próprias políticas (nem em
-  reeleição seguida). Apenas um presidente diferente, ao assumir, pode desfazer políticas do
-  antecessor — e isso derruba em cascata os nós dependentes. Custo de desfazer usa a fórmula
-  invertida (mais radical = mais barato) (roteiro §3.17, S3).
-- **Capital político:** ganho depende só da aprovação (não há Congresso/ministros/impeachment).
-  Sobra acumula entre turnos. Custo de ativar um nó cresce linearmente com radicalidade
-  (profundidade × peso maior + distância da situação atual × peso menor) — fórmula e pesos em S3.
-  Lua de mel (margem de vitória grande) e crises alteram o custo temporariamente.
-- **Efeito das políticas:** crescimento acelerado até impacto total no fim do semestre (mais
-  radical = mais imediato), depois efeito contínuo enquanto ativo, modificável por outras políticas.
-- **País/economia:** indicadores (PIB, desemprego, inflação, dívida, criminalidade, saúde, educação,
-  poluição, liberdade de imprensa, corrupção); orçamento simples (habitantes × % imposto); dívida sem
-  limite, mas gera recessão, que pode gerar rebeldes e golpe.
-- **Eleitores:** grupos (lista completa em S2) com tamanho variável, memória e lealdade; um eleitor
-  pode pertencer a vários grupos. Cada ação de política sobe o apoio de um grupo e desce o de outro.
-- **Eleições:** a cada 8 turnos. Promessas de campanha não cumpridas geram reação negativa do grupo
-  que gostou delas. Perder não é game over: o jogador acompanha o governo seguinte (controlado pela
-  IA, que não desfaz as políticas do jogador) e pode concorrer de novo depois.
-- **Regimes extremos:** autoritarismo e monarquia são formas de continuar no poder, não finais
-  próprios (etapas em S4). Utopias (S5) exigem múltiplas árvores 100% completas + indicadores mínimos
-  + 4 turnos seguidos sem golpe/revolução/atentado — devem ser extremamente difíceis de alcançar.
-- **Repressão:** conteúdo permitido e proibido definido em S6 (sem violência gráfica; sem genocídio).
-- **Fim de jogo:** vitória com 20 anos seguidos no poder (democracia ou regime autoritário/monarquia)
-  ou instalação de utopia. Derrota por atentado fatal, 40 anos sem vencer, ou golpe/revolução. Sem
-  pontuação: comparação final com figuras históricas (S7).
+- **Turns:** a four-year term has 8 six-month turns. Each turn allows 0–6 actions, limited by
+  available political capital. Adjusting a policy's intensity counts as an action.
+- **Policy trees:** each tree runs in one direction, from moderate to radical. A node can only be
+  activated if the previous node in its tree is active. Opposing trees in the same field block one
+  another when either is active (design document §3.16.1, S1).
+- **Undoing policies:** the sitting president can never undo their own policies, even after
+  reelection. Only a different president can undo a predecessor's policies, and dependent nodes
+  then fall in a cascade. Undo costs use the inverse formula (more radical nodes cost less) (design
+  document §3.17, S3).
+- **Political capital:** gains depend only on approval (there is no Congress, ministers, or
+  impeachment). Unspent capital carries between turns. Node activation cost grows linearly with
+  radicalism (tree depth × higher weight + distance from the current situation × lower weight); see
+  S3 for the formula and weights. A landslide honeymoon and crises temporarily change costs.
+- **Policy effects:** effects ramp up to full impact by the end of the semester (more radical means
+  more immediate), then continue while active and can be modified by other policies.
+- **Country/economy:** indicators include GDP, unemployment, inflation, debt, crime, health,
+  education, pollution, press freedom, and corruption. The simple budget is population × tax rate.
+  Debt has no cap, but can cause recession, which can lead to rebels and a coup.
+- **Voters:** groups (full list in S2) have variable size, memory, and loyalty; a voter can belong to
+  multiple groups. Each policy action raises one group's support and lowers another's.
+- **Elections:** every 8 turns. Unfulfilled campaign promises cause a negative reaction from the
+  group that liked them. Losing is not game over: the player follows the next government (controlled
+  by the AI, which does not undo the player's policies) and can run again later.
+- **Extreme regimes:** authoritarianism and monarchy are ways to stay in power, not endings of their
+  own (stages in S4). Utopias (S5) require several fully completed trees, minimum indicators, and 4
+  consecutive turns without a coup, revolution, or assassination; they should be extremely hard to
+  reach.
+- **Repression:** permitted and prohibited content is defined in S6 (no graphic violence; no
+  genocide).
+- **End game:** win by staying in power for 20 consecutive years (democracy, authoritarian regime,
+  or monarchy) or installing a utopia. Lose to a fatal assassination, 40 years without winning, a
+  coup, or a revolution. There is no score: the final comparison is with historical figures (S7).
 
-## Dados de conteúdo
+## Content data
 
-Árvores de políticas, grupos, pesos de custo, etapas de regime, requisitos de utopia, limites de
-repressão e a tabela de figuras históricas (S1–S7 do roteiro) são **dados de jogo**, não lógica.
-Devem viver em arquivos de dados (JSON/TS tipado, a decidir — ver dúvidas abaixo), nunca
-hard-coded dentro de componentes de UI ou de regras de motor de jogo, para que o design possa
-evoluir sem tocar no motor.
+Policy trees, groups, cost weights, regime stages, utopia requirements, repression limits, and the
+historical figure table (S1–S7 in the design document) are **game data**, not logic. They should live
+in data files (typed JSON/TS, to be decided — see open questions below), never hard-coded inside UI
+components or game engine rules, so design can evolve without changing the engine.
 
-## Internacionalização
+## Internationalization
 
-O jogo é pt-BR e inglês. O nome **"Decreto" não é traduzido** em nenhum idioma. Todo texto visível ao
-jogador (nomes de políticas, grupos, eventos, manchetes) deve passar por um mecanismo de i18n desde o
-primeiro componente escrito — não hard-code strings em português esperando traduzir depois.
+The game supports Brazilian Portuguese and English. The name **"Decreto" is never translated**.
+All player-visible text (policy, group, and event names; headlines) must use an i18n mechanism from
+the first component; do not hard-code Portuguese strings and plan to translate them later.
 
-## Tom e conteúdo sensível
+## Tone and sensitive content
 
-"Simulação séria": repressão e violência aparecem em texto/manchetes/imagens sóbrias, nunca
-graficamente. Genocídio e extermínio de grupos étnicos/religiosos estão fora do escopo do jogo (S6) —
-não implementar essas opções nem dar suporte a elas em dados de conteúdo.
+"Serious simulation": repression and violence appear only in restrained text, headlines, and images,
+never graphically. Genocide and extermination of ethnic or religious groups are out of scope (S6): do
+not implement these options or support them in content data.
 
-## Stack técnico
+## Technical stack
 
 - **Monorepo:** pnpm workspaces + Turborepo.
-- **Frontend:** React + TypeScript. Interface de rede de nós, com imagens exibidas após eventos
-  marcantes.
-- **Backend:** Node.js + TypeScript. O motor de jogo (turnos, cálculo de indicadores, capital
-  político, verificação de pré-requisitos de árvore, condições de fim de jogo) roda no servidor —
-  o frontend não deve reimplementar essas regras, apenas consumir o resultado via API.
-- **Banco de dados:** PostgreSQL, para contas de usuário e saves de partida.
-- **i18n:** i18next / react-i18next no frontend. Toda string visível ao jogador passa por chave de
-  tradução pt-BR/en desde o primeiro componente — nunca hard-code texto em português esperando
-  traduzir depois. "Decreto" nunca é traduzido.
-- **Dados de conteúdo:** TypeScript tipado (não JSON solto). Árvores de políticas, grupos, pesos de
-  custo, etapas de regime, requisitos de utopia e tabela de figuras históricas (S1–S7 do roteiro)
-  vivem em módulos de dados tipados, separados da lógica do motor e dos componentes de UI, para que
-  adicionar/ajustar conteúdo não exija tocar em regras de jogo.
+- **Frontend:** React + TypeScript. Node graph interface, with images shown after major events.
+- **Backend:** Node.js + TypeScript. The game engine (turns, indicator calculations, political
+  capital, tree prerequisites, and end-game conditions) runs on the server. The frontend consumes
+  results via the API and does not reimplement these rules.
+- **Database:** PostgreSQL for user accounts and game saves.
+- **i18n:** i18next / react-i18next on the frontend. All player-visible strings use pt-BR/en
+  translation keys from the first component; never hard-code Portuguese text to translate later.
+  "Decreto" is never translated.
+- **Content data:** typed TypeScript (not loose JSON). Policy trees, groups, cost weights, regime
+  stages, utopia requirements, and historical figures (S1–S7 in the design document) live in typed
+  data modules, separate from engine logic and UI components. Adding or adjusting content should
+  not require changing game rules.
 
-### Estrutura de monorepo (sugerida — ajustar ao crescer)
+### Suggested monorepo structure (adjust as the project grows)
 
 ```
 apps/
-  web/      # frontend React
-  api/      # backend Node (motor de jogo, API, persistência)
+  web/      # React frontend
+  api/      # Node backend (game engine, API, persistence)
 packages/
-  game-content/  # dados tipados: árvores, grupos, regimes, utopias, figuras históricas
-  game-engine/   # regras puras (turnos, custo de capital, efeitos, condições de fim de jogo)
-  shared-types/  # tipos compartilhados entre api e web (se não couberem em game-content/engine)
+  game-content/  # typed data: trees, groups, regimes, utopias, historical figures
+  game-engine/   # pure rules (turns, capital cost, effects, end-game conditions)
+  shared-types/  # types shared between api and web (if they do not belong in game-content/engine)
 ```
 
-`game-engine` deve ser testável de forma isolada (funções puras sempre que possível), já que é
-onde vive a lógica de negócio mais sensível do jogo (fórmulas de custo, cascata de desfazer,
-condições de utopia/fim de jogo).
+`game-engine` should be independently testable (pure functions wherever possible), since it holds
+the game's most sensitive business logic (cost formulas, undo cascades, utopia/end-game conditions).
 
-### Testes
+### Tests
 
-- **Jest** para testes unitários/integração (TS, `game-engine`, `game-content`, `api`, componentes
-  React via `@testing-library/react`).
-- **Playwright** para testes end-to-end no frontend, usado quando necessário (fluxos críticos de
-  UI — ex.: ativar política no grafo de nós, virar turno, fluxo de eleição), não para cobrir toda
-  interação.
-- TDD conforme regra global: toda função nova do motor de jogo ganha teste unitário Jest no mesmo
-  commit.
-- `apps/web` e `apps/api` são pacotes independentes (scripts `dev`/`build`/`typecheck`/`lint`/`test`
-  próprios): nenhuma mudança no frontend deve exigir rodar/buildar o backend, e vice-versa, a não
-  ser que o pacote compartilhado (`game-engine`/`game-content`) tenha mudado de fato.
+- **Jest** for unit/integration tests (TS, `game-engine`, `game-content`, `api`, and React components
+  via `@testing-library/react`).
+- **Playwright** for frontend end-to-end tests when needed (critical UI flows, such as activating a
+  policy on the node graph, advancing a turn, and elections), not to cover every interaction.
+- Follow the global TDD rule: every new game engine function gets a Jest unit test in the same commit.
+- `apps/web` and `apps/api` are independent packages with their own `dev`/`build`/`typecheck`/`lint`/
+  `test` scripts. A frontend change should not require running/building the backend, and vice versa,
+  unless the shared `game-engine`/`game-content` package actually changed.
 
-## Qualidade de código
+## Code quality
 
-- **Sem `any` em código novo.** Preferir `unknown` + narrowing, ou tipos explícitos em
-  `shared-types`/`game-content`. Isso é mais crítico ainda em `game-engine`, onde um tipo solto
-  mascara erro de fórmula (custo de capital, condição de utopia) até rodar em produção.
-- **Limites de complexidade no lint** (ESLint, a configurar quando o repo nascer): complexidade
-  ciclomática ≤ 10, profundidade de aninhamento ≤ 3, no máx. 4 parâmetros por função, no máx. 80
-  linhas por função (fora de testes). `game-engine` é o lugar onde isso mais importa: fórmulas de
-  radicalidade/custo e a cascata de "desfazer" tendem a crescer em `if`s — quebrar em funções
-  menores em vez de aumentar os limites.
+- **No `any` in new code.** Prefer `unknown` with narrowing, or explicit types in `shared-types`/
+  `game-content`. This matters especially in `game-engine`, where loose types can hide formula errors
+  (capital cost, utopia conditions) until production.
+- **Lint complexity limits** (ESLint; configure when the repository is created): cyclomatic
+  complexity ≤ 10, nesting depth ≤ 3, at most 4 parameters per function, and at most 80 lines per
+  function (excluding tests). These limits matter most in `game-engine`: split formulas for
+  radicalism/cost and undo cascades into smaller functions rather than raising the limits.
 
-## Código mínimo
+## Minimal code
 
-- Implementar toda mudança com a **menor quantidade de código novo** possível: reutilizar o que já
-  existe antes de criar algo, e não adicionar abstrações que a tarefa não pede.
-- **Remover o código que a mudança torna obsoleto** no mesmo PR.
-- Se a remoção de código obsoleto for **grande** (fora do escopo da tarefa), não fazer na hora:
-  avisar o usuário e abrir uma issue no repo (`gh issue create`) para implementar depois.
+- Implement each change with the **smallest amount of new code** possible: reuse what exists and do
+  not add abstractions the task does not require.
+- **Remove code made obsolete by the change** in the same PR.
+- If removing obsolete code would be a **large change** outside the task's scope, leave it for now,
+  tell the user, and create a repository issue (`gh issue create`) for follow-up.
 
-## Antes de começar
+## Before starting
 
-- Antes de iniciar qualquer alteração de código ou de montar um plano, rodar `git fetch origin main`
-  (ou equivalente) para garantir que o estado de `main` usado como referência está atualizado —
-  especialmente relevante com múltiplas branches/worktrees em paralelo neste repo.
+Before making any code change or preparing a plan, run `git fetch origin main` (or equivalent) to
+ensure the `main` reference is up to date — especially important when multiple branches/worktrees
+are active in this repository.
 
-## Git hooks e CI
+## Git hooks and CI
 
-- **`pre-commit`:** typecheck → lint → complexidade → testes.
-- **`pre-push`:** typecheck → lint → complexidade → cobertura diff-aware contra `origin/main` (CI
-  também valida isso por PR: uma função tocada no diff que nenhum teste executa deve falhar o
-  gate).
-- **`commit-msg`:** valida Conventional Commits.
-- Hooks devem ser instalados automaticamente via script `prepare` do gerenciador de pacotes, não
-  manualmente.
+- **`pre-commit`:** typecheck → lint → complexity → tests.
+- **`pre-push`:** typecheck → lint → complexity → diff-aware coverage against `origin/main` (CI also
+  validates this on each PR: a changed function not executed by any test fails the gate).
+- **`commit-msg`:** validates Conventional Commits.
+- Hooks must be installed automatically through the package manager's `prepare` script, not manually.
 
-### Code review antes do PR
+### Code review before a PR
 
-- Antes de abrir um PR (`gh pr create`), invocar o agente/skill de code review sobre o diff.
-- A review deve buscar bugs e também **código desnecessário e overengineering** (abstrações,
-  camadas, parâmetros ou configurações que a tarefa não pede).
-- Débitos de severidade **alta e média** são resolvidos no mesmo PR, antes de abri-lo.
-- Débitos de severidade **baixa** viram issue no repo (`gh issue create`), com o link citado na
-  descrição do PR.
+- Before opening a PR (`gh pr create`), invoke the code review agent/skill on the diff.
+- Review for bugs and also **unnecessary code and overengineering** (abstractions, layers, parameters,
+  or settings the task does not require).
+- Resolve high- and medium-severity findings in the same PR before opening it.
+- Turn low-severity findings into repository issues (`gh issue create`) and cite their links in the PR
+  description.
 
 ### Auto-merge
 
-- Logo após abrir o PR, ativar o auto-merge: `gh pr merge <número> --auto --squash
-  --delete-branch`. O merge acontece sozinho quando o check obrigatório `ci` passa (proteção da
-  `main`), sem acompanhar a CI nem fazer merge manual.
-- Se a CI falhar, o PR fica aberto: corrigir na mesma branch e dar push. O auto-merge continua
-  ativo.
+- Right after opening the PR, enable auto-merge: `gh pr merge <number> --auto --squash --delete-branch`.
+  It will merge once the required `ci` check passes (main branch protection); do not wait for CI or
+  merge manually.
+- If CI fails, the PR stays open: fix it on the same branch and push. Auto-merge remains enabled.
 
-## Documentação
+## Documentation
 
-Quando o repo crescer, dividir em:
-- `docs/ARCHITECTURE.md` — o *porquê* das decisões (ex.: por que motor de jogo no servidor e não no
-  cliente, por que TS tipado em vez de JSON para conteúdo).
-- `docs/INFRASTRUCTURE.md` — CI, hooks, pipeline de build/deploy de `apps/web` e `apps/api`.
+As the repository grows, split documentation into:
+- `docs/ARCHITECTURE.md` — the *why* behind decisions (for example, why the game engine runs on the
+  server rather than the client, and why typed TS is used for content instead of JSON).
+- `docs/INFRASTRUCTURE.md` — CI, hooks, and build/deploy pipelines for `apps/web` and `apps/api`.
 
-Este `CLAUDE.md` continua sendo o resumo operacional; o roteiro continua sendo a fonte de verdade de
-design.
+This `CLAUDE.md` remains the operational summary; the design document remains the source of truth.

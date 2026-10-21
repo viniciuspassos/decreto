@@ -1,5 +1,5 @@
 {
-  "trailer": "comum",
+  "trailer": "shared",
   "plans": [
     { "id": "a1", "kind": "black", "seconds": 2 },
     {

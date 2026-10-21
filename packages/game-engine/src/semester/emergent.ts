@@ -2,7 +2,7 @@ import type { CountryEvent } from "@decreto/shared-types";
 import { addSize, effectProduct, effectTotal, sizeOf, type StepCtx } from "./common.js";
 import { systemEvent } from "./system-events.js";
 
-/** Crescimento de rebeldes por nível de recessão (0 a 3). */
+/** Rebel growth by recession level (0 to 3). */
 const REBEL_GROWTH = [-0.5, -0.5, 0.5, 1.0];
 
 const flag = (condition: boolean) => (condition ? 1 : 0);
@@ -18,7 +18,7 @@ export function rebelGrowth(ctx: StepCtx): number {
   return growth > 0 ? growth * effectProduct(ctx, "rebelGrowthMultiplier") : growth;
 }
 
-/** §3.8: revolucionários e rebeldes; a primeira vez que surgem rebeldes gera `rebels-emerge`. */
+/** §3.8: revolutionaries and rebels; the first time rebels emerge, generates `rebels-emerge`. */
 export function updateEmergent(ctx: StepCtx): CountryEvent[] {
   const { state } = ctx;
   addSize(state, "revolutionaries", revolutionaryGrowth(ctx));

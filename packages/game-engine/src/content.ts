@@ -4,7 +4,7 @@ import {
 } from "@decreto/game-content";
 import type { GameContent } from "./trees.js";
 
-/** Catálogos que o semestre consulta, injetados como `GameContent` (ver `trees.ts`). */
+/** Catalogs consulted by the semester, injected as `GameContent` (see `trees.ts`). */
 export interface SemesterContent extends GameContent {
   voterGroups: VoterGroup[];
   nodeEffects: Record<string, NodeEffect>;
@@ -14,7 +14,7 @@ export interface SemesterContent extends GameContent {
   nodeFigures: Record<string, string>;
 }
 
-/** O conteúdo real do jogo, de `@decreto/game-content`. */
+/** The actual game content from `@decreto/game-content`. */
 export const defaultContent: SemesterContent = {
   policyTrees, extraPrereqs: EXTRA_PREREQS, exclusiveNodePairs: EXCLUSIVE_NODE_PAIRS,
   voterGroups, nodeEffects, taxRateEffects, events, systemEvents, nodeFigures,

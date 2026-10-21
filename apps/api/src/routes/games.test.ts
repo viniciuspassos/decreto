@@ -30,7 +30,7 @@ function availableNode(nodes: Record<string, { status: string }>): string {
 }
 
 describe("games routes", () => {
-  it("cria uma partida e não expõe seed ou fila", async () => {
+  it("creates a game without exposing the seed or queue", async () => {
     const response = await request(app()).post("/games").send({ country: "Vessária", president: "Helena", situation: "stable" });
 
     expect(response.status).toBe(201);
@@ -39,19 +39,19 @@ describe("games routes", () => {
     expect(response.body).not.toHaveProperty("queue");
   });
 
-  it("rejeita corpo inválido", async () => {
+  it("rejects an invalid body", async () => {
     const response = await request(app()).post("/games").send({ country: "", president: "Helena", situation: "wrong" });
 
     expect(response).toMatchObject({ status: 400, body: { code: "validation_error" } });
   });
 
-  it("retorna 404 para partida ausente", async () => {
+  it("returns 404 for a missing game", async () => {
     const response = await request(app()).get("/games/00000000-0000-0000-0000-000000000000");
 
     expect(response).toMatchObject({ status: 404, body: { code: "game_not_found" } });
   });
 
-  it("pré-visualiza e encerra semestre, rejeitando versão antiga", async () => {
+  it("previews and closes a semester, rejecting an outdated version", async () => {
     const game = await createGame();
     const queue = [availableNode(game.nodes)];
     const preview = await request(app()).post(`/games/${game.id}/preview`).send({ queue });
@@ -63,14 +63,14 @@ describe("games routes", () => {
     expect(outdated).toMatchObject({ status: 409, body: { code: "version_conflict" } });
   });
 
-  it("rejeita fila inválida sem alterar a partida", async () => {
+  it("rejects an invalid queue without changing the game", async () => {
     const game = await createGame();
     const response = await request(app()).post(`/games/${game.id}/end-semester`).send({ queue: ["inexistente"], expectedVersion: game.version });
 
     expect(response).toMatchObject({ status: 400, body: { code: "invalid_queue" } });
   });
 
-  it("rejeita semestre durante eleição", async () => {
+  it("rejects a semester close during an election", async () => {
     const state = newGame({ country: "Vessária", president: "Helena", situation: "stable", seed: 5 }, defaultContent);
     const game = await persistGame(db, { ...state, turn: 9 });
     const response = await request(app()).post(`/games/${game.id}/end-semester`).send({ queue: [], expectedVersion: game.version });
@@ -78,7 +78,7 @@ describe("games routes", () => {
     expect(response).toMatchObject({ status: 400, body: { code: "validation_error" } });
   });
 
-  it("expõe campanha, projeção e votação ao fim do mandato", async () => {
+  it("exposes campaigning, vote projection, and voting at the end of a term", async () => {
     const state = newGame({ country: "Vessária", president: "Helena", situation: "stable", seed: 5 }, defaultContent);
     const game = await persistGame(db, { ...state, turn: 9 });
     const campaign = await request(app()).get(`/games/${game.id}/campaign`);
@@ -90,7 +90,7 @@ describe("games routes", () => {
     expect(election).toMatchObject({ status: 200, body: { game: { version: game.version + 1 }, won: expect.any(Boolean) } });
   });
 
-  it("rejeita promessa demais e eleição fora de fase", async () => {
+  it("rejects too many promises and elections in the wrong phase", async () => {
     const playing = await createGame();
     const preview = await request(app()).post(`/games/${playing.id}/election/preview`).send({ promises: [] });
     const state = newGame({ country: "Vessária", president: "Helena", situation: "stable", seed: 5 }, defaultContent);
@@ -101,7 +101,7 @@ describe("games routes", () => {
     expect(tooMany).toMatchObject({ status: 400, body: { code: "validation_error" } });
   });
 
-  it("rejeita promessa indisponível ao votar", async () => {
+  it("rejects an unavailable promise when voting", async () => {
     const state = newGame({ country: "Vessária", president: "Helena", situation: "stable", seed: 5 }, defaultContent);
     const election = await persistGame(db, { ...state, turn: 9 });
     const response = await request(app()).post(`/games/${election.id}/election`).send({ promises: ["inexistente"], expectedVersion: election.version });

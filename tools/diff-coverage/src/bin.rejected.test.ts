@@ -7,7 +7,7 @@ jest.unstable_mockModule("./cli.js", () => ({
 }));
 
 describe("bin (run reject)", () => {
-  it("define process.exitCode como 1 quando run() rejeita", async () => {
+  it("sets process.exitCode to 1 when run() rejects", async () => {
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
     await import("./bin.js");

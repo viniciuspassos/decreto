@@ -3,7 +3,7 @@ import { createApp } from "./app.js";
 import { createTestDb } from "./db/testDb.js";
 
 describe("GET /health", () => {
-  it("responde com status ok", async () => {
+  it("responds with an ok status", async () => {
     const { db, close } = await createTestDb({ runMigrations: false });
     const app = createApp({ db, assetsDir: "/tmp" });
 

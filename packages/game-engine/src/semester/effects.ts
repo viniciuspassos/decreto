@@ -5,7 +5,7 @@ import { addSize, clamp, clampIndicator } from "./common.js";
 
 const isLevel = (id: IndicatorId): id is LevelIndicatorId => (LEVEL_INDICATORS as IndicatorId[]).includes(id);
 
-/** Choque na base (decai por reversão e tem momento); `debt` soma direto no estoque. */
+/** Baseline shock (decays through reversion and has momentum); `debt` adds directly to the stock. */
 function applyShocks(state: EngineState, shocks: Partial<Record<IndicatorId, number>>): void {
   (Object.entries(shocks) as [IndicatorId, number][]).forEach(([id, delta]) => {
     if (isLevel(id)) state.base[id] += delta;
@@ -13,7 +13,7 @@ function applyShocks(state: EngineState, shocks: Partial<Record<IndicatorId, num
   });
 }
 
-/** Deltas de apoio; os negativos são ampliados ou amortecidos pelo humor da mídia (§3.6). */
+/** Support deltas; negative values are amplified or dampened by media mood (§3.6). */
 function applySupport(state: EngineState, effects: EventEffects): void {
   const multiplier = MEDIA_NEGATIVE_EVENT_MULTIPLIER[state.actors.media];
   const scaled = (delta: number) => (delta < 0 ? delta * multiplier : delta);
@@ -30,7 +30,7 @@ function applyRisks(state: EngineState, risks: Partial<Record<RiskId, number>>):
   });
 }
 
-/** Aplica um `EventEffects` (efeito base ou opção de escolha, game-design §4.5). */
+/** Applies `EventEffects` (base effect or choice option, design §4.5). */
 export function applyEventEffects(state: EngineState, effects: EventEffects): void {
   applyShocks(state, effects.indicators ?? {});
   applySupport(state, effects);

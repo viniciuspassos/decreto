@@ -1,7 +1,7 @@
 # Trailer 1: "Mandato"
 
 Roteiro do miolo (6–37 s). Linguagem comum, abertura (A1–A3), encerramento (e1a–e1b) e produção em
-[comum.md](comum.md). Trilha e som em [1-mandato.trilha.md](1-mandato.trilha.md).
+[shared.md](shared.md). Trilha e som em [1-mandato.trilha.md](1-mandato.trilha.md).
 
 Final democrático. O poder cresce pela **aprovação**: as multidões aumentam a cada eleição e o
 jogador envelhece, mas **nada diz que é o final feliz**. Cada escolha agrada um grupo e custa outro,
@@ -14,7 +14,7 @@ idade). A aliança aparece em destaque no 1-02a, reaparece no 1-07 e some no 1-0
 passagem dos mandatos fica por conta das mãos e do tamanho das multidões.
 
 **Duração por clipe:** cada clipe de IA fica **2 s** na tela (`seconds: 2` no manifest; ver
-[estrutura de roteiro e manifest](producao.md#roteiro-e-manifest-de-cada-trailer)). Todo plano de
+[estrutura de roteiro e manifest](production.md#storyboard-and-manifest-for-each-trailer)). Todo plano de
 "1 gesto só" dura portanto 2 s; planos com mais de uma cena são dois ou mais clipes encadeados por
 corte na edição, nunca uma transição dentro do mesmo clipe (ex.: nada de mapa mudando de cor
 sozinho — risco real de o modelo render isso como bandeira). A montagem 1-08 usa a técnica inversa:

@@ -10,7 +10,7 @@ import {
 } from "./trailerManifest.js";
 
 describe("parseTrailerManifest", () => {
-  it("aceita planos shared, clip e outros kinds", () => {
+  it("accepts shared, clip, and other kinds of plans", () => {
     const raw = JSON.stringify({
       trailer: "1-mandato",
       plans: [
@@ -32,7 +32,7 @@ describe("parseTrailerManifest", () => {
     });
   });
 
-  it("aceita prompt vazio (plano pendente)", () => {
+  it("accepts an empty prompt (pending plan)", () => {
     const raw = JSON.stringify({
       trailer: "1-mandato",
       plans: [{ id: "1-01", kind: "clip", prompt: "" }],
@@ -46,53 +46,53 @@ describe("parseTrailerManifest", () => {
     });
   });
 
-  it("rejeita um valor que não é objeto", () => {
+  it("rejects a value that is not an object", () => {
     expect(() => parseTrailerManifest(JSON.stringify(["x"]))).toThrow(
-      'manifest de trailer deve ser um objeto',
+      'trailer manifest must be an object',
     );
   });
 
-  it("rejeita plano que não é objeto", () => {
+  it("rejects a plan that is not an object", () => {
     const raw = JSON.stringify({ trailer: "1-mandato", plans: ["x"] });
-    expect(() => parseTrailerManifest(raw)).toThrow("plano inválido: não é um objeto");
+    expect(() => parseTrailerManifest(raw)).toThrow("invalid plan: expected an object");
   });
 
-  it("rejeita trailer fora do padrão slug", () => {
+  it("rejects a trailer that does not match the slug pattern", () => {
     const raw = JSON.stringify({ trailer: "1 Mandato", plans: [] });
     expect(() => parseTrailerManifest(raw)).toThrow('"trailer"');
   });
 
-  it("rejeita plans que não é array", () => {
+  it("rejects plans that are not an array", () => {
     const raw = JSON.stringify({ trailer: "1-mandato", plans: {} });
     expect(() => parseTrailerManifest(raw)).toThrow('"plans"');
   });
 
-  it("rejeita plano sem id válido", () => {
+  it("rejects a plan without a valid id", () => {
     const raw = JSON.stringify({ trailer: "1-mandato", plans: [{ id: "A B", kind: "clip", prompt: "x" }] });
     expect(() => parseTrailerManifest(raw)).toThrow('"id"');
   });
 
-  it("rejeita plano clip sem prompt", () => {
+  it("rejects a clip plan without a prompt", () => {
     const raw = JSON.stringify({ trailer: "1-mandato", plans: [{ id: "1-01", kind: "clip" }] });
-    expect(() => parseTrailerManifest(raw)).toThrow('"prompt" é obrigatório');
+    expect(() => parseTrailerManifest(raw)).toThrow('"prompt" is required');
   });
 
-  it("rejeita seed que não é número", () => {
+  it("rejects a seed that is not a number", () => {
     const raw = JSON.stringify({
       trailer: "1-mandato",
       plans: [{ id: "1-01", kind: "clip", prompt: "x", seed: "7" }],
     });
-    expect(() => parseTrailerManifest(raw)).toThrow('"seed" deve ser número');
+    expect(() => parseTrailerManifest(raw)).toThrow('"seed" must be a number');
   });
 
-  it("rejeita kind desconhecido", () => {
+  it("rejects an unknown kind", () => {
     const raw = JSON.stringify({ trailer: "1-mandato", plans: [{ id: "1-01", kind: "video" }] });
-    expect(() => parseTrailerManifest(raw)).toThrow('"kind" inválido');
+    expect(() => parseTrailerManifest(raw)).toThrow('invalid "kind"');
   });
 });
 
 describe("resolveTrailerClipEntries", () => {
-  it("gera uma entrada por plano clip, com category = trailer e name = id-sSEED", () => {
+  it("creates one entry per clip plan, with category = trailer and name = id-sSEED", () => {
     const trailerManifest = {
       trailer: "1-mandato",
       plans: [{ id: "1-01", kind: "clip" as const, prompt: "hands on a desk", seed: 7 }],
@@ -103,7 +103,7 @@ describe("resolveTrailerClipEntries", () => {
     ]);
   });
 
-  it("usa a seed padrão 42 quando o plano não define uma", () => {
+  it("uses the default seed 42 when the plan does not define one", () => {
     const trailerManifest = {
       trailer: "1-mandato",
       plans: [{ id: "1-01", kind: "clip" as const, prompt: "hands on a desk" }],
@@ -114,7 +114,7 @@ describe("resolveTrailerClipEntries", () => {
     ]);
   });
 
-  it("ignora planos clip com prompt pendente (vazio)", () => {
+  it("ignores clip plans with a pending (empty) prompt", () => {
     const trailerManifest = {
       trailer: "1-mandato",
       plans: [{ id: "1-01", kind: "clip" as const, prompt: "" }],
@@ -123,7 +123,7 @@ describe("resolveTrailerClipEntries", () => {
     expect(resolveTrailerClipEntries(trailerManifest, undefined)).toEqual([]);
   });
 
-  it("ignora planos screen/image/black", () => {
+  it("ignores screen/image/black plans", () => {
     const trailerManifest = {
       trailer: "1-mandato",
       plans: [{ id: "1-03", kind: "screen" as const }],
@@ -132,19 +132,19 @@ describe("resolveTrailerClipEntries", () => {
     expect(resolveTrailerClipEntries(trailerManifest, undefined)).toEqual([]);
   });
 
-  it("resolve plano shared buscando em comumManifest, com category = comum", () => {
+  it("resolves a shared plan by looking it up in sharedManifest, with category = shared", () => {
     const trailerManifest = { trailer: "1-mandato", plans: [{ id: "a2", shared: true as const }] };
-    const comumManifest = {
-      trailer: "comum",
+    const sharedManifest = {
+      trailer: "shared",
       plans: [{ id: "a2", kind: "clip" as const, prompt: "hands on a desk", seed: 42 }],
     };
 
-    expect(resolveTrailerClipEntries(trailerManifest, comumManifest)).toEqual([
-      { category: "comum", name: "a2-s42", prompt: "hands on a desk", seed: 42 },
+    expect(resolveTrailerClipEntries(trailerManifest, sharedManifest)).toEqual([
+      { category: "shared", name: "a2-s42", prompt: "hands on a desk", seed: 42 },
     ]);
   });
 
-  it("ignora plano shared cujo correspondente em comum está pendente ou não é clip", () => {
+  it("ignores a shared plan whose counterpart in shared is pending or is not a clip", () => {
     const trailerManifest = {
       trailer: "1-mandato",
       plans: [
@@ -152,39 +152,39 @@ describe("resolveTrailerClipEntries", () => {
         { id: "a2", shared: true as const },
       ],
     };
-    const comumManifest = {
-      trailer: "comum",
+    const sharedManifest = {
+      trailer: "shared",
       plans: [
         { id: "a1", kind: "black" as const },
         { id: "a2", kind: "clip" as const, prompt: "" },
       ],
     };
 
-    expect(resolveTrailerClipEntries(trailerManifest, comumManifest)).toEqual([]);
+    expect(resolveTrailerClipEntries(trailerManifest, sharedManifest)).toEqual([]);
   });
 
-  it("lança erro quando o plano shared não existe em comumManifest", () => {
+  it("throws when the shared plan does not exist in sharedManifest", () => {
     const trailerManifest = { trailer: "1-mandato", plans: [{ id: "a2", shared: true as const }] };
 
     expect(() => resolveTrailerClipEntries(trailerManifest, undefined)).toThrow(
-      'plano compartilhado "a2" não encontrado em comum.manifest.json',
+      'shared plan "a2" not found in shared.manifest.json',
     );
   });
 
-  it("cita o caminho real de comumManifestPath na mensagem de erro, quando informado", () => {
+  it("includes the actual sharedManifestPath in the error message when provided", () => {
     const trailerManifest = { trailer: "1-mandato", plans: [{ id: "a2", shared: true as const }] };
 
-    expect(() => resolveTrailerClipEntries(trailerManifest, undefined, "custom-comum.json")).toThrow(
-      'plano compartilhado "a2" não encontrado em custom-comum.json',
+    expect(() => resolveTrailerClipEntries(trailerManifest, undefined, "custom-shared.json")).toThrow(
+      'shared plan "a2" not found in custom-shared.json',
     );
   });
 
-  it("lança erro quando o plano shared aponta para outro plano shared em comum", () => {
+  it("throws when a shared plan points to another shared plan in shared", () => {
     const trailerManifest = { trailer: "1-mandato", plans: [{ id: "a2", shared: true as const }] };
-    const comumManifest = { trailer: "comum", plans: [{ id: "a2", shared: true as const }] };
+    const sharedManifest = { trailer: "shared", plans: [{ id: "a2", shared: true as const }] };
 
-    expect(() => resolveTrailerClipEntries(trailerManifest, comumManifest)).toThrow(
-      'plano compartilhado "a2" não pode apontar para outro plano shared',
+    expect(() => resolveTrailerClipEntries(trailerManifest, sharedManifest)).toThrow(
+      'shared plan "a2" cannot point to another shared plan',
     );
   });
 });
@@ -200,17 +200,17 @@ describe("loadTrailerManifest / loadTrailerClipEntries", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  it("loadTrailerManifest lê e parseia o manifest do disco", () => {
+  it("loadTrailerManifest reads and parses the manifest from disk", () => {
     const path = join(dir, "1-mandato.manifest.json");
     writeFileSync(path, JSON.stringify({ trailer: "1-mandato", plans: [] }));
 
     expect(loadTrailerManifest(path)).toEqual({ trailer: "1-mandato", plans: [] });
   });
 
-  it("loadTrailerClipEntries busca comum.manifest.json ao lado do manifest do trailer", () => {
+  it("loadTrailerClipEntries looks for shared.manifest.json next to the trailer manifest", () => {
     writeFileSync(
-      join(dir, "comum.manifest.json"),
-      JSON.stringify({ trailer: "comum", plans: [{ id: "a2", kind: "clip", prompt: "hands", seed: 1 }] }),
+      join(dir, "shared.manifest.json"),
+      JSON.stringify({ trailer: "shared", plans: [{ id: "a2", kind: "clip", prompt: "hands", seed: 1 }] }),
     );
     const trailerPath = join(dir, "1-mandato.manifest.json");
     writeFileSync(
@@ -225,39 +225,39 @@ describe("loadTrailerManifest / loadTrailerClipEntries", () => {
     );
 
     expect(loadTrailerClipEntries(trailerPath)).toEqual([
-      { category: "comum", name: "a2-s1", prompt: "hands", seed: 1 },
+      { category: "shared", name: "a2-s1", prompt: "hands", seed: 1 },
       { category: "1-mandato", name: "1-01-s42", prompt: "desk", seed: 42 },
     ]);
   });
 
-  it("loadTrailerClipEntries aceita um comumManifestPath explícito", () => {
-    const comumPath = join(dir, "outro-comum.json");
+  it("loadTrailerClipEntries accepts an explicit sharedManifestPath", () => {
+    const sharedPath = join(dir, "other-shared.json");
     writeFileSync(
-      comumPath,
-      JSON.stringify({ trailer: "comum", plans: [{ id: "a2", kind: "clip", prompt: "hands", seed: 1 }] }),
+      sharedPath,
+      JSON.stringify({ trailer: "shared", plans: [{ id: "a2", kind: "clip", prompt: "hands", seed: 1 }] }),
     );
     const trailerPath = join(dir, "1-mandato.manifest.json");
     writeFileSync(trailerPath, JSON.stringify({ trailer: "1-mandato", plans: [{ id: "a2", shared: true }] }));
 
-    expect(loadTrailerClipEntries(trailerPath, comumPath)).toEqual([
-      { category: "comum", name: "a2-s1", prompt: "hands", seed: 1 },
+    expect(loadTrailerClipEntries(trailerPath, sharedPath)).toEqual([
+      { category: "shared", name: "a2-s1", prompt: "hands", seed: 1 },
     ]);
   });
 
-  it("loadTrailerClipEntries lança erro de plano shared quando comum.manifest.json não existe", () => {
+  it("loadTrailerClipEntries throws a shared plan error when shared.manifest.json does not exist", () => {
     const trailerPath = join(dir, "1-mandato.manifest.json");
     writeFileSync(trailerPath, JSON.stringify({ trailer: "1-mandato", plans: [{ id: "a2", shared: true }] }));
 
-    expect(() => loadTrailerClipEntries(trailerPath)).toThrow('plano compartilhado "a2" não encontrado');
+    expect(() => loadTrailerClipEntries(trailerPath)).toThrow('shared plan "a2" not found');
   });
 
-  it("loadTrailerClipEntries cita o comumManifestPath customizado na mensagem de erro, quando passado", () => {
+  it("loadTrailerClipEntries includes the custom sharedManifestPath in the error message when passed", () => {
     const trailerPath = join(dir, "1-mandato.manifest.json");
     writeFileSync(trailerPath, JSON.stringify({ trailer: "1-mandato", plans: [{ id: "a2", shared: true }] }));
-    const comumPath = join(dir, "custom-comum.json");
+    const sharedPath = join(dir, "custom-shared.json");
 
-    expect(() => loadTrailerClipEntries(trailerPath, comumPath)).toThrow(
-      `plano compartilhado "a2" não encontrado em ${comumPath}`,
+    expect(() => loadTrailerClipEntries(trailerPath, sharedPath)).toThrow(
+      `shared plan "a2" not found in ${sharedPath}`,
     );
   });
 });

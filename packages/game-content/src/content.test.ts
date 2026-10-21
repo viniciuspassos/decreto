@@ -19,19 +19,19 @@ const taxNodeIds = new Set(policyTrees.find((t) => t.id === "taxes")?.nodes);
 const localesDir = join(dirname(fileURLToPath(import.meta.url)), "../../../apps/web/src/i18n/locales");
 const locales = { "pt-BR": JSON.parse(readFileSync(join(localesDir, "pt-BR.json"), "utf-8")), en: JSON.parse(readFileSync(join(localesDir, "en.json"), "utf-8")) };
 
-describe("conteúdo de jogo", () => {
-  it("tem as 25 árvores do S1 com ids de nó únicos", () => {
+describe("game content", () => {
+  it("has the 25 S1 trees with unique node IDs", () => {
     expect(policyTrees).toHaveLength(25);
     expect(new Set(nodeIds).size).toBe(nodeIds.length);
   });
 
-  it("árvores opostas apontam uma para a outra", () => {
+  it("opposing trees point to each other", () => {
     policyTrees.filter((t) => t.opposite).forEach((t) => {
       expect(policyTrees.find((o) => o.id === t.opposite)?.opposite).toBe(t.id);
     });
   });
 
-  it("mapeia nós existentes para figuras históricas existentes", () => {
+  it("maps existing nodes to existing historical figures", () => {
     const figures = new Set(historicalFigures.map((f) => f.id));
     Object.entries(nodeFigures).forEach(([node, figure]) => {
       expect(nodeIds).toContain(node);
@@ -39,13 +39,13 @@ describe("conteúdo de jogo", () => {
     });
   });
 
-  it("grupos (S2) e utopias (S5) só referenciam árvores existentes", () => {
+  it("groups (S2) and utopias (S5) only reference existing trees", () => {
     expect(voterGroups).toHaveLength(17);
     voterGroups.flatMap((g) => [...g.likes, ...g.dislikes]).forEach((id) => expect(treeIds.has(id)).toBe(true));
     utopias.flatMap((u) => u.trees).forEach((r) => expect(treeIds.has(r.treeId)).toBe(true));
   });
 
-  it("estado inicial: indicadores dentro da faixa 0-100 (exceto gdp/inflation/debt) e alíquota herdada é 30%", () => {
+  it("starting indicators are in range 0-100 (except gdp/inflation/debt) and the inherited tax rate is 30%", () => {
     expect(TAX_RATES).toContain(INITIAL_TAX_RATE);
     expect(INITIAL_TAX_RATE).toBe(30);
     (["crime", "health", "education", "pollution", "pressFreedom", "corruption"] as const).forEach((id) => {
@@ -55,11 +55,11 @@ describe("conteúdo de jogo", () => {
     expect(Object.keys(SITUATIONS).sort()).toEqual(["crisis", "stable", "unstable"]);
   });
 
-  it("tamanhos iniciais cobrem todos os grupos", () => {
+  it("starting sizes cover every group", () => {
     voterGroups.forEach((g) => expect(typeof g.initialSize).toBe("number"));
   });
 
-  it("extraPrereqs e pares exclusivos só referenciam nós existentes", () => {
+  it("extraPrereqs and exclusive pairs only reference existing nodes", () => {
     Object.entries(EXTRA_PREREQS).forEach(([nodeId, prereqs]) => {
       expect(nodeIdSet.has(nodeId)).toBe(true);
       prereqs.forEach((id) => expect(nodeIdSet.has(id)).toBe(true));
@@ -70,19 +70,19 @@ describe("conteúdo de jogo", () => {
     });
   });
 
-  it("todo nó (exceto a árvore de impostos) tem efeito definido; alíquotas de imposto cobrem TAX_RATES", () => {
+  it("every node except the tax tree has a defined effect; tax rates cover TAX_RATES", () => {
     nodeIds.filter((id) => !taxNodeIds.has(id)).forEach((id) => expect(nodeEffects[id]).toBeDefined());
     TAX_RATES.forEach((rate) => expect(taxRateEffects[rate]).toBeDefined());
   });
 
-  it("efeitos de nó só referenciam grupos existentes", () => {
+  it("node effects only reference existing groups", () => {
     Object.values(nodeEffects).forEach((effect) => {
       effect.groupSizeOnce?.forEach((e) => expect(groupIds.has(e.groupId)).toBe(true));
       effect.groupSizePerSemester?.forEach((e) => expect(groupIds.has(e.groupId)).toBe(true));
     });
   });
 
-  it("todo id de nó/grupo citado em eventos existe", () => {
+  it("every node and group ID referenced by events exists", () => {
     const conditionIds = (c: { nodeId?: string; nodeIds?: string[]; groupId?: string }) => {
       if (c.nodeId) expect(nodeIdSet.has(c.nodeId)).toBe(true);
       c.nodeIds?.forEach((id) => expect(nodeIdSet.has(id)).toBe(true));
@@ -101,7 +101,7 @@ describe("conteúdo de jogo", () => {
     });
   });
 
-  it("todo evento (sorteado e de sistema) tem chave i18n pt-BR e en", () => {
+  it("every random and system event has pt-BR and en i18n keys", () => {
     const allIds = [...events.map((e) => e.id), ...systemEvents.map((e) => e.id)];
     allIds.forEach((id) => {
       (["pt-BR", "en"] as const).forEach((locale) => {
@@ -119,7 +119,7 @@ describe("conteúdo de jogo", () => {
     });
   });
 
-  it("tabelas de movimento: grupos existentes, 9 indicadores de nível e cota de eventos somando 100%", () => {
+  it("movement tables use existing groups, 9 level indicators, and event odds totaling 100%", () => {
     GROUP_INDICATOR_REACTIONS.forEach((r) => {
       if (r.groups !== "all") r.groups.forEach((id) => expect(groupIds.has(id)).toBe(true));
     });

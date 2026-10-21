@@ -15,7 +15,7 @@ export type ConditionType =
   | "recessionAtLeast"
   | "always";
 
-/** Uma condição de gatilho (game-design §4.2). Várias condições num gatilho são combinadas com AND. */
+/** One trigger condition (game-design §4.2). Multiple conditions in a trigger are combined with AND. */
 export interface Condition {
   type: ConditionType;
   nodeId?: string;
@@ -26,21 +26,21 @@ export interface Condition {
   moods?: ActorMood[];
 }
 
-/** Escala o peso pela distância do indicador a um limiar: `min(3, 1 + |valor-limiar|/faixa)`. */
+/** Scales the weight by the indicator's distance from a threshold: `min(3, 1 + |value-threshold|/range)`. */
 export interface IndicatorScale {
   indicatorId: IndicatorId;
   threshold: number;
   range: number;
 }
 
-/** Multiplicador extra só aplicado se a condição for satisfeita (ex.: ×1,5 se Imp > 40). */
+/** An extra multiplier applied only when the condition is met (e.g. ×1.5 when press freedom > 40). */
 export interface ConditionalMultiplier {
   condition: Condition;
   factor: number;
 }
 
 export interface EventTrigger {
-  /** Todas devem ser verdadeiras (AND). Vários gatilhos no mesmo evento são alternativos (OR, vale o maior peso). */
+  /** All conditions must be true (AND). Multiple triggers on the same event are alternatives (OR; the highest weight applies). */
   conditions: Condition[];
   weight: number;
   scale?: IndicatorScale;
@@ -52,11 +52,11 @@ export interface GroupDelta {
   delta: number;
 }
 
-/** Esquema comum a efeito base e a cada opção de escolha (game-design §4.5). */
+/** Shared schema for base effects and each choice option (game-design §4.5). */
 export interface EventEffects {
   indicators?: Partial<Record<IndicatorId, number>>;
   groups?: GroupDelta[];
-  /** Delta de apoio para todos os grupos não emergentes. */
+  /** Support delta for all non-emergent groups. */
   allGroups?: number;
   sizes?: GroupDelta[];
   media?: number;
@@ -77,15 +77,15 @@ export interface GameEventDefinition {
   field: FieldId | "none";
   tone: EventTone;
   triggers: EventTrigger[];
-  /** Turnos até poder sair de novo; "once" = uma vez por partida. */
+  /** Turns until the event can appear again; "once" means once per game. */
   cooldown: number | "once";
-  /** ★ no catálogo: no máx. 1 por semestre mostra imagem. */
+  /** ★ in the catalog: at most one milestone image is shown per semester. */
   milestone?: boolean;
-  /** ⚑ no catálogo: liga a flag de crise ao ocorrer. */
+  /** ⚑ in the catalog: sets the crisis flag when this event occurs. */
   crisis?: boolean;
   effects: EventEffects;
   options?: { a: EventOption; b: EventOption };
-  /** Nunca sorteado enquanto este nó estiver ativo (ex.: `corruption-scoop` × `censorship`). */
+  /** Never selected while this node is active (e.g. `corruption-scoop` × `censorship`). */
   blockedByNode?: string;
 }
 
@@ -94,7 +94,7 @@ const anyNode = (nodeIds: string[], weight: number): EventTrigger => ({ conditio
 const always = (weight: number): EventTrigger => ({ conditions: [{ type: "always" }], weight });
 
 export const events: GameEventDefinition[] = [
-  // Segurança (9)
+  // Security (9)
   {
     id: "buyback-record", field: "security", tone: "positive", cooldown: 8,
     triggers: [node("gun-buyback", 4)],
@@ -157,7 +157,7 @@ export const events: GameEventDefinition[] = [
     },
   },
 
-  // Economia (9)
+  // Economy (9)
   {
     id: "shortages", field: "economy", tone: "negative", cooldown: 4,
     triggers: [node("price-controls", 6)],
@@ -204,7 +204,7 @@ export const events: GameEventDefinition[] = [
     effects: { indicators: { inflation: -0.8, gdp: 0.2 }, groups: [{ groupId: "agribusiness", delta: 4 }, { groupId: "poor", delta: 2 }] },
   },
 
-  // Trabalho (2)
+  // Labor (2)
   {
     id: "general-strike", field: "labor", tone: "negative", cooldown: 6, milestone: true,
     triggers: [node("labor-reform", 4), { conditions: [{ type: "indicatorAbove", indicatorId: "inflation", threshold: 12 }], weight: 4 }, node("end-minimum-wage", 5), node("strike-ban", 5)],
@@ -220,7 +220,7 @@ export const events: GameEventDefinition[] = [
     effects: { indicators: { inflation: 0.2, gdp: 0.1 }, groups: [{ groupId: "workers", delta: 5 }, { groupId: "business", delta: -1 }] },
   },
 
-  // Saúde (3)
+  // Health (3)
   {
     id: "hospital-queue-scandal", field: "health", tone: "negative", cooldown: 4,
     triggers: [node("private-partnerships", 4), { conditions: [{ type: "indicatorBelow", indicatorId: "health", threshold: 45 }], weight: 4, scale: { indicatorId: "health", threshold: 45, range: 15 } }],
@@ -241,7 +241,7 @@ export const events: GameEventDefinition[] = [
     effects: { indicators: { health: 3 }, groups: [{ groupId: "retirees", delta: 4 }, { groupId: "poor", delta: 2 }], media: 5 },
   },
 
-  // Educação (2)
+  // Education (2)
   {
     id: "school-ranking-record", field: "education", tone: "positive", cooldown: 6,
     triggers: [node("free-university", 4), { conditions: [{ type: "indicatorAbove", indicatorId: "education", threshold: 65 }], weight: 4 }],
@@ -260,7 +260,7 @@ export const events: GameEventDefinition[] = [
     },
   },
 
-  // Costumes (4)
+  // Social values (4)
   {
     id: "religious-march", field: "customs", tone: "mixed", cooldown: 6,
     triggers: [node("same-sex-marriage", 3), node("legal-abortion", 5), node("all-drugs-legalization", 5)],
@@ -282,7 +282,7 @@ export const events: GameEventDefinition[] = [
     effects: { indicators: { corruption: 4 }, groups: [{ groupId: "religious", delta: -5 }, { groupId: "middle-class", delta: -3 }], media: -5 },
   },
 
-  // Meio ambiente (4)
+  // Environment (4)
   {
     id: "environmental-disaster", field: "environment", tone: "negative", cooldown: 6, milestone: true,
     triggers: [{ conditions: [{ type: "indicatorAbove", indicatorId: "pollution", threshold: 65 }], weight: 3 }, node("mining-in-reserves", 5), node("end-environmental-laws", 7)],
@@ -312,7 +312,7 @@ export const events: GameEventDefinition[] = [
     effects: { indicators: { gdp: -0.4, health: -2, debt: 1.5 }, allGroups: -1, groups: [{ groupId: "poor", delta: -3 }], crisis: true },
   },
 
-  // Imigração (2)
+  // Immigration (2)
   {
     id: "migration-wave", field: "immigration", tone: "mixed", cooldown: 6,
     triggers: [node("easier-visas", 1.5), node("open-borders", 5)],
@@ -324,7 +324,7 @@ export const events: GameEventDefinition[] = [
     effects: { indicators: { gdp: -0.4, inflation: 0.5 }, groups: [{ groupId: "agribusiness", delta: -6 }, { groupId: "business", delta: -4 }] },
   },
 
-  // Imprensa e liberdades (2)
+  // Press and civil liberties (2)
   {
     id: "hacker-leak", field: "press", tone: "negative", cooldown: 6,
     triggers: [{ conditions: [{ type: "nodeActive", nodeId: "internet-monitoring" }], weight: 4, conditionalMultiplier: { condition: { type: "nodeActive", nodeId: "thought-police" }, factor: 1.5 } }, node("censorship", 4)],
@@ -340,7 +340,7 @@ export const events: GameEventDefinition[] = [
     },
   },
 
-  // Poder e regime (6)
+  // Power and regime (6)
   {
     id: "judges-resign", field: "power", tone: "negative", cooldown: "once",
     triggers: [node("judiciary-control", 5)],
@@ -386,7 +386,7 @@ export const events: GameEventDefinition[] = [
     },
   },
 
-  // Estado do país, sem política (2)
+  // Country state, no policy (2)
   {
     id: "sports-victory", field: "none", tone: "positive", cooldown: 10,
     triggers: [always(1.5)],
@@ -399,7 +399,7 @@ export const events: GameEventDefinition[] = [
   },
 ];
 
-/** Eventos gerados pelo motor (não sorteados, não contam na cota do semestre; game-design §5.2). */
+/** Events generated by the engine (not randomly selected and not counted toward the semester quota; game-design §5.2). */
 export interface SystemEventDefinition {
   id: string;
   milestone?: boolean;

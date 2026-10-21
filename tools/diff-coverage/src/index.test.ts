@@ -1,7 +1,7 @@
 import * as diffCoverage from "./index.js";
 
 describe("index", () => {
-  it("expõe a API pública do pacote", () => {
+  it("exposes the package public API", () => {
     expect(typeof diffCoverage.parseDiff).toBe("function");
     expect(typeof diffCoverage.filterGatedChanges).toBe("function");
     expect(typeof diffCoverage.mergeCoverage).toBe("function");

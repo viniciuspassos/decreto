@@ -8,7 +8,7 @@ const game = (activeNodes: string[]): EngineState => ({
 });
 
 describe("rankFigures", () => {
-  it("ordena as figuras pela fatia dos nós ativos que remetem a elas", () => {
+  it("ranks figures by the share of active nodes that refer to them", () => {
     const state = game(["strategic-state-company", "minimum-wage-raise", "privatizations", "minimal-state"]);
     expect(rankFigures(state, defaultContent)).toEqual([
       { figureId: "getulio-vargas", similarity: 50 },
@@ -17,13 +17,13 @@ describe("rankFigures", () => {
     ]);
   });
 
-  it("sem precedente histórico nos nós ativos, cai em Mandela", () => {
+  it("falls back to Mandela when active nodes have no historical precedent", () => {
     expect(rankFigures(game([]), defaultContent)).toEqual([{ figureId: "nelson-mandela", similarity: 100 }]);
   });
 });
 
 describe("endGameResult", () => {
-  it("só 20 anos é vitória e lista as árvores mais usadas", () => {
+  it("only 20 years counts as a win and lists the most used trees", () => {
     const state = game(["torture", "secret-police", "privatizations"]);
     const victory = endGameResult(state, "twentyYears", defaultContent);
     expect(victory.outcome).toBe("victory");

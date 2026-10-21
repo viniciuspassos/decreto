@@ -13,5 +13,5 @@ export function formatIndicator(id: IndicatorId, value: number): string {
   return PERCENT.includes(id) ? `${value}%` : String(value);
 }
 
-/** Variação com seta: ▲ sobe, ▼ desce. */
+/** Change with an arrow: ▲ up, ▼ down. */
 export const signed = (delta: number) => (delta > 0 ? `▲${delta}` : delta < 0 ? `▼${-delta}` : "0");

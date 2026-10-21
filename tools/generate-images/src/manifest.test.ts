@@ -5,53 +5,53 @@ import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 import { loadManifest, parseManifest } from "./manifest.js";
 
 describe("parseManifest", () => {
-  it("aceita um array de entradas válidas", () => {
+  it("accepts an array of valid entries", () => {
     const raw = JSON.stringify([
-      { category: "eventos", name: "golpe-militar", prompt: "tanks in the street" },
+      { category: "events", name: "coup", prompt: "tanks in the street" },
     ]);
 
     expect(parseManifest(raw)).toEqual([
-      { category: "eventos", name: "golpe-militar", prompt: "tanks in the street", seed: undefined },
+      { category: "events", name: "coup", prompt: "tanks in the street", seed: undefined },
     ]);
   });
 
-  it("aceita seed numérico opcional", () => {
+  it("accepts an optional numeric seed", () => {
     const raw = JSON.stringify([
-      { category: "eventos", name: "golpe-militar", prompt: "tanks in the street", seed: 7 },
+      { category: "events", name: "coup", prompt: "tanks in the street", seed: 7 },
     ]);
 
     const [entry] = parseManifest(raw);
     expect(entry?.seed).toBe(7);
   });
 
-  it("rejeita um valor que não é array", () => {
+  it("rejects a value that is not an array", () => {
     expect(() => parseManifest(JSON.stringify({ foo: "bar" }))).toThrow(
-      "manifest deve ser um array",
+      "manifest must be an array",
     );
   });
 
-  it("rejeita entrada que não é objeto", () => {
-    expect(() => parseManifest(JSON.stringify(["x"]))).toThrow("não é um objeto");
+  it("rejects an entry that is not an object", () => {
+    expect(() => parseManifest(JSON.stringify(["x"]))).toThrow("expected an object");
   });
 
-  it("rejeita category fora do padrão slug", () => {
+  it("rejects a category that does not match the slug pattern", () => {
     const raw = JSON.stringify([{ category: "Eventos!", name: "x", prompt: "y" }]);
     expect(() => parseManifest(raw)).toThrow('"category"');
   });
 
-  it("rejeita name fora do padrão slug", () => {
-    const raw = JSON.stringify([{ category: "eventos", name: "X Y", prompt: "y" }]);
+  it("rejects a name that does not match the slug pattern", () => {
+    const raw = JSON.stringify([{ category: "events", name: "X Y", prompt: "y" }]);
     expect(() => parseManifest(raw)).toThrow('"name"');
   });
 
-  it("rejeita prompt vazio", () => {
-    const raw = JSON.stringify([{ category: "eventos", name: "x", prompt: "   " }]);
-    expect(() => parseManifest(raw)).toThrow('"prompt" vazio');
+  it("rejects an empty prompt", () => {
+    const raw = JSON.stringify([{ category: "events", name: "x", prompt: "   " }]);
+    expect(() => parseManifest(raw)).toThrow('"prompt" must be a non-empty string');
   });
 
-  it("rejeita seed que não é número", () => {
-    const raw = JSON.stringify([{ category: "eventos", name: "x", prompt: "y", seed: "7" }]);
-    expect(() => parseManifest(raw)).toThrow('"seed" deve ser número');
+  it("rejects a seed that is not a number", () => {
+    const raw = JSON.stringify([{ category: "events", name: "x", prompt: "y", seed: "7" }]);
+    expect(() => parseManifest(raw)).toThrow('"seed" must be a number');
   });
 });
 
@@ -66,12 +66,12 @@ describe("loadManifest", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  it("lê e parseia o manifest do disco", () => {
+  it("reads and parses the manifest from disk", () => {
     const path = join(dir, "manifest.json");
-    writeFileSync(path, JSON.stringify([{ category: "eventos", name: "x", prompt: "y" }]));
+    writeFileSync(path, JSON.stringify([{ category: "events", name: "x", prompt: "y" }]));
 
     expect(loadManifest(path)).toEqual([
-      { category: "eventos", name: "x", prompt: "y", seed: undefined },
+      { category: "events", name: "x", prompt: "y", seed: undefined },
     ]);
   });
 });

@@ -8,13 +8,13 @@ export interface CostContext {
 }
 
 export interface QueueCostContext extends CostContext {
-  /** Margem de vitória ≥ 20 no primeiro semestre do mandato (roteiro S3). */
+  /** Victory margin ≥ 20 in the first semester of the term (design S3). */
   isHoneymoon: boolean;
   /** Flag de crise do semestre (game-design §3.9). */
   isCrisis: boolean;
 }
 
-/** 0 a 3: 0 = árvore já ativa; 1 = campo sem nada ativo; 2 = outra árvore do campo ativa; 3 = oposta ativa. */
+/** 0 to 3: 0 = tree already active; 1 = nothing active in the field; 2 = another field tree active; 3 = opposite active. */
 function distanceOf(nodeId: string, ctx: CostContext): number {
   const tree = treeOf(nodeId, ctx.content);
   if (!tree) return 0;
@@ -27,13 +27,13 @@ function distanceOf(nodeId: string, ctx: CostContext): number {
   return oppositeActive ? 3 : 2;
 }
 
-/** S3: custo de ativar um nó de árvore liga/desliga — não serve para árvores de intensidade. */
+/** S3: cost to activate a toggle-tree node; does not apply to intensity trees. */
 export function nodeCost(nodeId: string, ctx: CostContext): number {
   const { base, depth, distance } = CAPITAL_COST_WEIGHTS;
   return Math.round(base * (1 + depth * depthOf(nodeId, ctx.content) + distance * distanceOf(nodeId, ctx)));
 }
 
-/** S3/§1.4: custo de mover uma política de intensidade (ex.: `taxRate`) em faixas de 10%. */
+/** S3/§1.4: cost to move an intensity policy (e.g. `taxRate`) in 10% increments. */
 export function taxRateCost(currentRate: number, targetRate: number): number {
   const steps = Math.abs(targetRate - currentRate) / 10;
   return Math.round(TAX_STEP_COST_BASE * (1 + steps));
@@ -45,8 +45,8 @@ function isCrisisDiscounted(nodeId: string, content: GameContent): boolean {
 }
 
 /**
- * Custo total de uma fila de nós, na ordem em que seriam aplicados. Depende da ordem: lua de mel
- * só desconta as primeiras `HONEYMOON.discountedActions` da fila, não uma soma simples.
+ * Total cost of a node queue, in the order it would be applied. Order matters: the honeymoon
+ * discounts only the first `HONEYMOON.discountedActions` in the queue, not a simple sum.
  */
 export function queueCost(nodeIds: string[], ctx: QueueCostContext): number {
   let honeymoonLeft = ctx.isHoneymoon ? HONEYMOON.discountedActions : 0;

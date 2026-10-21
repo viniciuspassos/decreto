@@ -18,32 +18,32 @@ function weight(id: string, setup: (s: ReturnType<typeof game>) => void, applied
 }
 
 describe("eventWeight", () => {
-  it("vale o peso do gatilho satisfeito; 0 sem gatilho", () => {
+  it("uses the weight of the satisfied trigger; 0 without a trigger", () => {
     expect(weight("buyback-record", (s) => { s.activeNodes = ["gun-buyback"]; })).toBe(4);
     expect(weight("buyback-record", () => {})).toBe(0);
   });
 
-  it("nó ativado neste semestre pesa 1 + 0,5 × profundidade", () => {
+  it("a node activated this semester weighs 1 + 0.5 × depth", () => {
     expect(weight("buyback-record", (s) => { s.activeNodes = ["gun-buyback"]; }, ["gun-buyback"])).toBe(10);
   });
 
-  it("antimonotonia: positivo pesa ×1,5 sem positivo nos últimos 2 semestres", () => {
+  it("antimonotonicity: positive weighs ×1.5 with no positive in the last 2 semesters", () => {
     expect(weight("buyback-record", (s) => { s.activeNodes = ["gun-buyback"]; s.lastPositiveEventTurn = null; })).toBe(6);
   });
 
-  it("escala pela distância ao limiar e aplica multiplicador condicional", () => {
+  it("scales by distance from the threshold and applies a conditional multiplier", () => {
     expect(weight("organized-crime-wave", (s) => { s.indicators.crime = 70; })).toBe(6);
     expect(weight("military-abuse-viral", (s) => { s.activeNodes = ["military-on-streets"]; s.indicators.pressFreedom = 50; })).toBe(7.5);
   });
 
-  it("respeita cooldown, evento único e nó bloqueador", () => {
+  it("respects cooldown, one-time events, and blocking nodes", () => {
     expect(weight("good-harvest", (s) => { s.eventTurns["good-harvest"] = s.turn - 1; })).toBe(0);
     expect(weight("good-harvest", (s) => { s.eventTurns["good-harvest"] = s.turn - 4; })).toBe(2);
     expect(weight("judges-resign", (s) => { s.activeNodes = ["judiciary-control"]; s.eventTurns["judges-resign"] = -50; })).toBe(0);
     expect(weight("corruption-scoop", (s) => { s.indicators.corruption = 60; s.activeNodes = ["censorship"]; })).toBe(0);
   });
 
-  it("avalia condições de aprovação, apoio de grupo, humor militar e alíquota", () => {
+  it("evaluates approval, group support, military mood, and tax rate conditions", () => {
     expect(weight("mass-protests", (s) => { s.approval = 20; })).toBe(4);
     expect(weight("police-strike", (s) => { const g = s.groups.find((x) => x.id === "security-forces"); if (g) g.support = 20; })).toBe(4);
     expect(weight("coup-rumors", (s) => { s.actors.military = "hostile"; })).toBe(5);
@@ -54,7 +54,7 @@ describe("eventWeight", () => {
 });
 
 describe("conditionMet", () => {
-  it("aprovação acima e nível de recessão mínimo", () => {
+  it("approval above threshold and minimum recession level", () => {
     const state = game();
     expect(conditionMet({ type: "approvalAbove", threshold: 40 }, state)).toBe(true);
     expect(conditionMet({ type: "recessionAtLeast", threshold: 1 }, state)).toBe(false);
@@ -64,20 +64,20 @@ describe("conditionMet", () => {
 });
 
 describe("drawEvents", () => {
-  it("1, 2 ou 3 eventos com as probabilidades do §4.1", () => {
+  it("1, 2, or 3 events with the probabilities in §4.1", () => {
     expect(rollEventCount(fixedRng(0.1))).toBe(1);
     expect(rollEventCount(fixedRng(0.5))).toBe(2);
     expect(rollEventCount(fixedRng(0.95))).toBe(3);
   });
 
-  it("com todos em cooldown, ainda sai um evento 'sempre'", () => {
+  it("with everything on cooldown, an 'always' event still occurs", () => {
     const state = game();
     defaultContent.events.forEach((e) => { state.eventTurns[e.id] = state.turn; });
     const events = drawEvents({ state, content: defaultContent, rng: createRng(9) }, []);
     expect(events.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("o cooldown impede repetição enquanto houver outro elegível", () => {
+  it("cooldown prevents repetition while another event is eligible", () => {
     const content = { ...defaultContent, events: [def("good-harvest"), def("sports-victory")] };
     [1, 2, 3, 4, 5, 6, 7, 8].forEach((seed) => {
       const state = game();
@@ -88,7 +88,7 @@ describe("drawEvents", () => {
     });
   });
 
-  it("evento com escolha fica pendente e registra o turno", () => {
+  it("an event with a choice remains pending and records the turn", () => {
     const state = game();
     state.actors.military = "hostile";
     const content = { ...defaultContent, events: [def("coup-rumors")] };
@@ -107,7 +107,7 @@ describe("escolhas de evento", () => {
     return s;
   };
 
-  it("resolveEventChoice aplica a opção sem alterar a entrada", () => {
+  it("resolveEventChoice applies the option without changing the input", () => {
     const state = pending("coup-rumors");
     const next = resolveEventChoice(state, "coup-rumors", "a", defaultContent);
     expect(next.pendingChoices).toEqual([]);
@@ -116,7 +116,7 @@ describe("escolhas de evento", () => {
     expect(state.pendingChoices).toHaveLength(1);
   });
 
-  it("rejeita escolha não pendente ou sem capital", () => {
+  it("rejects a choice that is not pending or has no capital", () => {
     expect(() => resolveEventChoice(game(), "coup-rumors", "a", defaultContent)).toThrow();
     const broke = pending("general-strike");
     broke.capital = 5;
@@ -124,7 +124,7 @@ describe("escolhas de evento", () => {
     expect(canAfford(broke, { capital: -5 })).toBe(true);
   });
 
-  it("escolha em aberto vira opção A, ou B se a A estiver sem capital", () => {
+  it("an open choice becomes option A, or B if A lacks capital", () => {
     const withCapital = pending("general-strike");
     resolveDefaultChoices({ state: withCapital, content: defaultContent });
     expect(withCapital.capital).toBe(50);

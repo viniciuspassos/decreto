@@ -6,7 +6,7 @@ function changes(entries: [string, number[]][]): ChangedLinesByFile {
 }
 
 describe("filterGatedChanges", () => {
-  it("mantém arquivos de código-fonte em apps e packages", () => {
+  it("keeps source files in apps and packages", () => {
     const input = changes([
       ["apps/api/src/app.ts", [1]],
       ["packages/game-engine/src/politicalCapital.ts", [2]],
@@ -20,7 +20,7 @@ describe("filterGatedChanges", () => {
     ]);
   });
 
-  it("descarta arquivos de teste, docs e configs fora de src", () => {
+  it("discards test files, docs, and configs outside src", () => {
     const input = changes([
       ["apps/api/src/app.test.ts", [1]],
       ["docs/INFRASTRUCTURE.md", [1]],

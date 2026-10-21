@@ -17,19 +17,19 @@ afterAll(async () => {
 });
 
 describe("findImageForEvent", () => {
-  it("retorna a localização do arquivo quando o evento tem imagem", async () => {
+  it("returns the file location when the event has an image", async () => {
     const fileLocation = await findImageForEvent(db, "prisao-oposicao");
 
     expect(fileLocation).toBe("prisao-oposicao/prisao-oposicao.png");
   });
 
-  it("retorna null quando o evento não tem imagem cadastrada", async () => {
+  it("returns null when the event has no registered image", async () => {
     const fileLocation = await findImageForEvent(db, "evento-inexistente");
 
     expect(fileLocation).toBeNull();
   });
 
-  it("escolhe uma entre várias imagens cadastradas para o mesmo evento", async () => {
+  it("chooses one of several images registered for the same event", async () => {
     const variantes = ["comicio/palanque.png", "comicio/multidao.png"];
     await db
       .insert(eventImages)

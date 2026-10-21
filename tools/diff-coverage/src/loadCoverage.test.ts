@@ -20,19 +20,19 @@ describe("findCoverageFiles / loadCoverageData", () => {
     await rm(repoRoot, { recursive: true, force: true });
   });
 
-  it("encontra coverage-final.json sob apps/packages/tools", async () => {
+  it("finds coverage-final.json under apps/packages/tools", async () => {
     const files = await findCoverageFiles(repoRoot);
 
     expect(files).toEqual([join(repoRoot, "packages", "fake-pkg", "coverage", "coverage-final.json")]);
   });
 
-  it("carrega e faz parse do conteúdo de cada coverage-final.json encontrado", async () => {
+  it("loads and parses the contents of each coverage-final.json found", async () => {
     const data = await loadCoverageData(repoRoot);
 
     expect(data).toEqual([{ "/repo/packages/fake-pkg/src/a.ts": { path: "/repo/packages/fake-pkg/src/a.ts" } }]);
   });
 
-  it("retorna lista vazia quando não há nenhum coverage-final.json", async () => {
+  it("returns an empty list when no coverage-final.json exists", async () => {
     await rm(join(repoRoot, "packages"), { recursive: true, force: true });
 
     expect(await loadCoverageData(repoRoot)).toEqual([]);

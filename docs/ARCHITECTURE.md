@@ -1,69 +1,67 @@
-# Arquitetura — o porquê
+# Architecture: why
 
-Este documento registra as decisões de arquitetura e a razão de cada uma. Para *o quê* (regras do
-jogo), ver [`roteiro-do-jogo.md`](../roteiro-do-jogo.md). Para convenções de código no dia a dia,
-ver [`CLAUDE.md`](../CLAUDE.md).
+This document records architecture decisions and the reasons behind them. For game rules, see
+[`game-design.md`](../game-design.md). For day-to-day code conventions, see
+[`CLAUDE.md`](../CLAUDE.md).
 
-## Motor de jogo roda no backend, não no cliente
+## The game engine runs on the backend
 
-O motor (cálculo de turnos, custo de capital político, cascata de pré-requisitos/desfazer entre
-nós de árvore, condições de fim de jogo e de utopia) é a lógica de negócio mais sensível do
-projeto — fórmulas erradas ali quebram o balanceamento do jogo inteiro. Decidimos deixá-lo
-autoritativo no backend (Node.js + TypeScript) em vez de duplicá-lo ou confiar nele apenas no
-cliente, por dois motivos:
+The engine (turn calculations, political capital costs, prerequisite and undo cascades between tree
+nodes, and end-game and utopia conditions) contains the project's most sensitive business logic —
+incorrect formulas would break the game's balance. It is authoritative on the backend (Node.js +
+TypeScript), rather than duplicated or trusted only on the client, for two reasons:
 
-1. **Integridade:** um cliente web é manipulável (DevTools, requests forjados). Se o cálculo de
-   capital/efeitos rodasse só no frontend, seria trivial para o jogador trapacear.
-2. **Fonte única:** com o motor em um lugar só, não há risco de frontend e backend divergirem na
-   interpretação de uma regra (ex.: fórmula de custo em S3 do roteiro).
+1. **Integrity:** a web client can be manipulated (DevTools, forged requests). If capital and effects
+   were calculated only on the frontend, cheating would be trivial.
+2. **Single source of truth:** with the engine in one place, the frontend and backend cannot diverge
+   in how they interpret a rule (for example, the cost formula in section S3 of the design document).
 
-Consequência prática: o frontend nunca reimplementa regras de jogo — ele só exibe o estado que o
-backend retorna e envia intenções do jogador (ex.: "ativar nó X") para validação no servidor.
+In practice, the frontend never reimplements game rules. It displays the state returned by the
+backend and sends player intents (for example, "activate node X") for server-side validation.
 
-## Conteúdo de jogo como dados tipados, não hard-coded
+## Game content lives in typed data
 
-Árvores de políticas, grupos de eleitores, pesos de custo, etapas de regime, requisitos de utopia
-e a tabela de figuras históricas (S1–S7 do roteiro) mudam com frequência durante o balanceamento do
-jogo — é conteúdo de design, não lógica de engenharia. Por isso vivem em módulos de dados tipados
-(`packages/game-content`), separados do motor (`packages/game-engine`) e da UI. Isso permite:
+Policy trees, voter groups, cost weights, regime stages, utopia requirements, and the historical
+figure table (S1–S7 in the design document) change frequently during balancing. They are design
+content, not engineering logic. They therefore live in typed data modules (`packages/game-content`),
+separate from the engine (`packages/game-engine`) and UI. This makes it possible to:
 
-- Ajustar/adicionar conteúdo sem tocar em código de regras.
-- Checagem de tipos em build (preferido sobre JSON solto, que exigiria validação de schema em
-  runtime para a mesma garantia).
+- Adjust or add content without changing rule code.
+- Check types at build time (preferred to loose JSON, which would require runtime schema validation
+  to provide the same guarantee).
 
 ## Monorepo (pnpm workspaces + Turborepo)
 
-Frontend, backend e os pacotes compartilhados (`game-engine`, `game-content`, `shared-types`)
-evoluem juntos e compartilham tipos (ex.: o formato de um nó de árvore é o mesmo dos dois lados).
-Um monorepo com cache de build/test (Turborepo) evita duplicar esses tipos em repositórios
-separados e mantém o custo de CI baixo conforme o projeto cresce. `apps/web` e `apps/api` são
-pacotes independentes dentro dele — nenhuma mudança num deveria forçar rebuild/retest do outro, a
-não ser que um pacote compartilhado tenha mudado.
+The frontend, backend, and shared packages (`game-engine`, `game-content`, `shared-types`) evolve
+together and share types (for example, both sides use the same policy tree node format). A monorepo
+with build and test caching (Turborepo) avoids duplicating these types across repositories and keeps
+CI costs low as the project grows. `apps/web` and `apps/api` are independent packages: a change to
+one should not force a rebuild or retest of the other unless a shared package changed.
 
-## Metadados de arquivo (imagens de evento) no Postgres, não em `game-content`
+## Event image metadata lives in Postgres
 
-`apps/api` guarda em Postgres (tabela `event_images`, via Drizzle ORM) só a localização física das
-imagens geradas para cada evento (`event_name` → `file_location`). Isso é diferente do conteúdo de
-design do item anterior: não é uma regra de jogo nem dado de balanceamento, é metadado operacional
-de onde um arquivo binário está. Um `event_name` pode ter várias linhas (mais de uma imagem por
-evento); `findImageForEvent` escolhe uma ao acaso (`ORDER BY random()`) a cada chamada, o que pede
-uma tabela consultável em vez de um módulo TS estático. `event_name` referencia tanto o `nodeId` de
-uma árvore de política (`packages/game-content`, ex. `prisao-oposicao`) quanto eventos do loop
-principal que não pertencem a uma árvore (`posse`, `comicio`, `eleicao`, `atentado`, `morte` —
-roteiro §Loop principal), mas não é uma foreign key para uma tabela de "eventos" — o catálogo de
-conteúdo continua vivendo só em TS tipado; o Postgres não duplica esse catálogo.
+`apps/api` stores only the physical locations of generated event images in Postgres (the
+`event_images` table, via Drizzle ORM; `event_name` → `file_location`). Unlike the design content
+described above, this is operational metadata about where a binary file is stored, not a game rule
+or balancing data. An `event_name` can have multiple rows (more than one image per event);
+`findImageForEvent` picks one at random (`ORDER BY random()`) per call, which calls for a queryable
+table instead of a static TS module. `event_name` refers both to a policy tree `nodeId`
+(`packages/game-content`, for example `prisao-oposicao`) and to main-loop events that do not belong
+to a tree (`posse`, `comicio`, `eleicao`, `atentado`, `morte` — see the main loop in the design
+document). It is not a foreign key to an "events" table: the content catalog remains in typed TS,
+and Postgres does not duplicate it.
 
-Escolhemos **Drizzle ORM** (+ driver `pg`) em vez de Prisma ou SQL cru: migrations em SQL geradas a
-partir de um schema TypeScript, sem um codegen/schema-language paralelo ao TS, e com tipagem forte
-sem `any` — alinhado à regra do `CLAUDE.md`.
+We chose **Drizzle ORM** (with the `pg` driver) over Prisma or raw SQL: it generates SQL migrations
+from a TypeScript schema without a parallel codegen/schema language, and provides strong typing
+without `any`, in line with `CLAUDE.md`.
 
-## i18n desde o primeiro componente
+## i18n from the first component
 
-O jogo é pt-BR e inglês desde a v0.4 do roteiro (não é um caso de "traduzir depois"). Introduzir
-i18next desde o início evita o retrabalho de extrair strings hard-coded de toda a UI mais tarde.
-"Decreto" é a única string que nunca passa por tradução, em nenhum idioma.
+The game supports Brazilian Portuguese and English from version 0.4 of the design document; this
+is not a "translate later" case. Introducing i18next from the start avoids the later work of
+extracting hard-coded UI strings. "Decreto" is the only string that is never translated.
 
-## Decisões em aberto
+## Open decisions
 
-Nenhuma até o momento. Novas decisões de arquitetura devem ser adicionadas aqui conforme forem
-tomadas, com a razão por trás — não só o resultado.
+None so far. Add new architecture decisions here as they are made, including the reason, not only
+the outcome.

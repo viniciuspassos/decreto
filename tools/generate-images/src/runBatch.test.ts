@@ -38,22 +38,22 @@ describe("runBatch", () => {
     rmSync(imagesDir, { recursive: true, force: true });
   });
 
-  it("gera a imagem e grava no destino esperado", async () => {
+  it("generates the image and saves it to the expected destination", async () => {
     const results = await runBatch(
       BASE_WORKFLOW,
-      [{ category: "eventos", name: "golpe-militar", prompt: "tanks" }],
+      [{ category: "events", name: "coup", prompt: "tanks" }],
       { comfyUrl: "http://localhost:8188", imagesDir },
     );
 
-    const destination = join(imagesDir, "eventos", "golpe-militar.png");
+    const destination = join(imagesDir, "events", "coup.png");
     expect(results).toEqual([
-      { name: "golpe-militar", category: "eventos", status: "generated", destination },
+      { name: "coup", category: "events", status: "generated", destination },
     ]);
     expect(readFileSync(destination, "utf-8")).toBe("fake-png");
     expect(queuePromptMock).toHaveBeenCalledTimes(1);
   });
 
-  it("usa a extensão e o timeout informados e avisa cada entrada concluída", async () => {
+  it("uses the specified extension and reports each completed entry", async () => {
     const onResult = jest.fn();
 
     const results = await runBatch(
@@ -69,32 +69,32 @@ describe("runBatch", () => {
     expect(onResult).toHaveBeenCalledWith(results[0]);
   });
 
-  it("pula entradas já geradas quando force não é passado", async () => {
+  it("skips previously generated entries when force is not passed", async () => {
     const { mkdirSync } = await import("node:fs");
-    const destination = join(imagesDir, "eventos", "golpe-militar.png");
-    mkdirSync(join(imagesDir, "eventos"), { recursive: true });
+    const destination = join(imagesDir, "events", "coup.png");
+    mkdirSync(join(imagesDir, "events"), { recursive: true });
     writeFileSync(destination, "ja existe");
 
     const results = await runBatch(
       BASE_WORKFLOW,
-      [{ category: "eventos", name: "golpe-militar", prompt: "tanks" }],
+      [{ category: "events", name: "coup", prompt: "tanks" }],
       { comfyUrl: "http://localhost:8188", imagesDir },
     );
 
     expect(results).toEqual([
-      { name: "golpe-militar", category: "eventos", status: "skipped", destination },
+      { name: "coup", category: "events", status: "skipped", destination },
     ]);
     expect(queuePromptMock).not.toHaveBeenCalled();
   });
 
-  it("regenera entradas existentes quando force é passado", async () => {
+  it("regenerates existing entries when force is passed", async () => {
     const { mkdirSync } = await import("node:fs");
-    mkdirSync(join(imagesDir, "eventos"), { recursive: true });
-    writeFileSync(join(imagesDir, "eventos", "golpe-militar.png"), "antiga");
+    mkdirSync(join(imagesDir, "events"), { recursive: true });
+    writeFileSync(join(imagesDir, "events", "coup.png"), "old");
 
     const results = await runBatch(
       BASE_WORKFLOW,
-      [{ category: "eventos", name: "golpe-militar", prompt: "tanks" }],
+      [{ category: "events", name: "coup", prompt: "tanks" }],
       { comfyUrl: "http://localhost:8188", imagesDir, force: true },
     );
 
@@ -102,12 +102,12 @@ describe("runBatch", () => {
     expect(queuePromptMock).toHaveBeenCalledTimes(1);
   });
 
-  it("filtra pelo nome quando only é passado", async () => {
+  it("filters by name when only is passed", async () => {
     const results = await runBatch(
       BASE_WORKFLOW,
       [
-        { category: "eventos", name: "a", prompt: "x" },
-        { category: "eventos", name: "b", prompt: "y" },
+        { category: "events", name: "a", prompt: "x" },
+        { category: "events", name: "b", prompt: "y" },
       ],
       { comfyUrl: "http://localhost:8188", imagesDir, only: "b" },
     );
@@ -116,18 +116,18 @@ describe("runBatch", () => {
     expect(results[0]?.name).toBe("b");
   });
 
-  it("lança erro quando o ComfyUI não retorna nenhuma imagem", async () => {
+  it("throws when ComfyUI returns no images", async () => {
     pollForOutputImagesMock.mockResolvedValue([]);
 
     await expect(
-      runBatch(BASE_WORKFLOW, [{ category: "eventos", name: "a", prompt: "x" }], {
+      runBatch(BASE_WORKFLOW, [{ category: "events", name: "a", prompt: "x" }], {
         comfyUrl: "http://localhost:8188",
         imagesDir,
       }),
-    ).rejects.toThrow("não retornou imagem");
+    ).rejects.toThrow("returned no image");
   });
 
-  it("loadBaseWorkflow lê e parseia o template base do disco", () => {
+  it("loadBaseWorkflow reads and parses the base template from disk", () => {
     const basePath = join(imagesDir, "base.json");
     writeFileSync(basePath, JSON.stringify(BASE_WORKFLOW));
 

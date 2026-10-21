@@ -1,7 +1,7 @@
 # Trailer 4: "Reconstrução"
 
 Roteiro do miolo (6–48 s). Linguagem comum, abertura (a1–a3), encerramento (e1a–e1b) e produção em
-[comum.md](comum.md). Trilha e som em [4-reconstrucao.trilha.md](4-reconstrucao.trilha.md).
+[shared.md](shared.md). Trilha e som em [4-reconstrucao.trilha.md](4-reconstrucao.trilha.md).
 
 Variação do [trailer 1](1-mandato.md) com o arco invertido: **uma crescente só**. O jogador herda um
 país em crise profunda e, mandato após mandato, governa bem, até a nação virar modelo. O trailer 1
@@ -22,7 +22,7 @@ movimento. São 14 planos de 3 s (câmera lenta), e a câmera **sempre avança**
 O fecho é calmo, para a tagline cair sobre o silêncio.
 
 **Ao contrário dos outros trailers, os planos não encurtam:** ficam todos com 3 s e se alongam na
-sensação, por fades, à medida que o país sara (ver [linguagem comum](comum.md#linguagem-comum)).
+sensação, por fades, à medida que o país sara (ver [linguagem comum](shared.md#shared-creative-direction)).
 
 **Perspectiva central.** Corredor, mercado e portão têm o ponto de fuga no centro do quadro e o
 mesmo avanço de câmera. Mesmo com seeds diferentes no Wan, os dois lados do fade se sobrepõem

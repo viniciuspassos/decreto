@@ -4,10 +4,10 @@ import type { EngineState } from "./types.js";
 
 export type EndReason = EndGameResult["reason"];
 
-/** Em ordem de prioridade: derrota por risco rolado, vitória por tempo no poder, limite de 40 anos. */
+/** In priority order: defeat from a rolled risk, victory from time in power, 40-year limit. */
 const checkers: ((state: EngineState) => EndReason | null)[] = [
   (state) => state.defeat,
-  // 20 anos em turnos seguidos: vale também sob autoritarismo e monarquia, onde não há eleições ganhas.
+  // 20 consecutive years in power; also applies under authoritarianism and monarchy, where elections are not won.
   (state) => (state.turnsInPower >= TERMS_TO_WIN * TURNS_PER_TERM ? "twentyYears" : null),
   (state) => (state.turn > LAST_TURN ? "fortyYears" : null),
 ];

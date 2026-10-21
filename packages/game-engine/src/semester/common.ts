@@ -7,8 +7,8 @@ import type { Rng } from "../rng.js";
 import type { EngineState } from "../types.js";
 
 /**
- * Contexto de cada passo do semestre. `endSemester` clona o estado de entrada uma vez e os passos
- * alteram esse rascunho na ordem do game-design §3 — a função pública continua pura.
+ * Context for each semester step. `endSemester` clones the input state once, and the steps
+ * modify this draft in game-design §3 order; the public function remains pure.
  */
 export interface StepCtx {
   state: EngineState;
@@ -21,11 +21,11 @@ export interface SemesterCtx extends StepCtx {
 
 type NumericEffect = Exclude<keyof NodeEffect, "groupSizeOnce" | "groupSizePerSemester" | "mediaFloor">;
 
-/** O estado é JSON por contrato (vai para `jsonb`), então a cópia profunda por JSON é exata. */
+/** The state is JSON by contract (stored in `jsonb`), so a JSON deep copy is exact. */
 export const cloneState = (state: EngineState) => JSON.parse(JSON.stringify(state)) as EngineState;
 
 export const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
-/** `max(0, valor − limiar)`: o "excesso" usado em quase todas as fórmulas do game-design. */
+/** `max(0, value − threshold)`: the "excess" used in most game-design formulas. */
 export const over = (value: number, threshold: number) => Math.max(0, value - threshold);
 
 export const isActive = (state: EngineState, nodeId: string) => state.activeNodes.includes(nodeId);
@@ -44,7 +44,7 @@ export function addSize(state: EngineState, groupId: string, delta: number): voi
   group.size = clamp(group.size + delta, min, max);
 }
 
-/** Efeitos de todos os nós ativos + a linha da alíquota corrente (§1.2, §1.4). */
+/** Effects of all active nodes + the current tax rate row (§1.2, §1.4). */
 export function activeEffects({ state, content }: StepCtx): NodeEffect[] {
   return [...state.activeNodes.flatMap((n) => content.nodeEffects[n] ?? []), content.taxRateEffects[state.taxRate]];
 }
@@ -53,7 +53,7 @@ export function effectTotal(ctx: StepCtx, key: NumericEffect): number {
   return activeEffects(ctx).reduce((sum, effect) => sum + (effect[key] ?? 0), 0);
 }
 
-/** Produto de um multiplicador dos nós ativos (ausente = 1). */
+/** Product of a multiplier from active nodes (missing = 1). */
 export function effectProduct(ctx: StepCtx, key: "attackRiskMultiplier" | "rebelGrowthMultiplier"): number {
   return activeEffects(ctx).reduce((product, effect) => product * (effect[key] ?? 1), 1);
 }
@@ -63,11 +63,11 @@ export function clampIndicator(id: IndicatorId, value: number): number {
   return clamp(value, min, max);
 }
 
-/** §3.4: recessão e rebeldes deslocam o valor exibido, não a base. */
+/** §3.4: recession and rebels shift the displayed value, not the baseline. */
 const RECESSION_SHIFT: Partial<Record<LevelIndicatorId, number>> = { gdp: -1, unemployment: 1.5 };
 const REBELS_SHIFT: Partial<Record<LevelIndicatorId, number>> = { crime: 1, gdp: -0.1 };
 
-/** §1.2: `exibido = clamp(base + políticas + recessão + rebeldes)`; `debt` é estoque e fica como está. */
+/** §1.2: `displayed = clamp(base + policies + recession + rebels)`; `debt` is a stock and remains unchanged. */
 export function displayedIndicators(ctx: StepCtx): Indicators {
   const { state } = ctx;
   const rebels = sizeOf(state, "rebels");

@@ -7,7 +7,7 @@ export interface AvailabilityContext {
   content: GameContent;
 }
 
-/** Ativo ou enfileirado neste turno: conta tanto para pré-requisito quanto para bloqueio mútuo. */
+/** Active or queued this turn: counts for both prerequisites and mutual exclusion. */
 function committed(state: GameState, nodeId: string): boolean {
   return state.activeNodes.includes(nodeId) || state.queue.includes(nodeId);
 }
@@ -17,7 +17,7 @@ function previousNodeOk(nodeId: string, tree: PolicyTree, state: GameState): boo
   return previous === undefined || state.activeNodes.includes(previous);
 }
 
-/** Nó anterior da mesma árvore ativo + qualquer pré-requisito extra (ex.: Monarquia) satisfeito. */
+/** Previous node in the same tree is active, and any extra prerequisite (e.g. Monarchy) is satisfied. */
 export function prerequisitesMet(nodeId: string, ctx: AvailabilityContext): boolean {
   const tree = treeOf(nodeId, ctx.content);
   if (!tree) return false;
@@ -39,8 +39,8 @@ function exclusivePartnerCommitted(nodeId: string, ctx: AvailabilityContext): bo
 }
 
 /**
- * Árvore oposta (S1, §3.16.1) ou par exclusivo (§6.6) ativo ou enfileirado — bloqueia mesmo
- * dentro da fila do mesmo turno, não só entre nós já ativos.
+ * The opposite tree (S1, §3.16.1) or an exclusive pair (§6.6) is active or queued, blocking it
+ * even within the same turn's queue, not only among already active nodes.
  */
 export function blockedByOpposite(nodeId: string, ctx: AvailabilityContext): boolean {
   const tree = treeOf(nodeId, ctx.content);

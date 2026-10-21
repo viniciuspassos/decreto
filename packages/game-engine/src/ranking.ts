@@ -5,10 +5,10 @@ import { activeCount } from "./trees.js";
 import type { EngineState } from "./types.js";
 
 const TOP = 5;
-/** Sem nenhum nó com precedente histórico, o governo "não fez nada" notável. */
+/** With no node tied to a historical precedent, the government "did nothing" notable. */
 const FALLBACK_FIGURE = "nelson-mandela";
 
-/** S7: figuras históricas ordenadas pela fatia dos nós ativos que remetem a elas. */
+/** S7: historical figures ranked by the share of active nodes that refer to them. */
 export function rankFigures(state: EngineState, content: SemesterContent): EndGameResult["ranking"] {
   const counts = new Map<string, number>();
   state.activeNodes.forEach((n) => {

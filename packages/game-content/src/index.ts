@@ -1,6 +1,6 @@
 /**
- * Dados de conteúdo do jogo (árvores de políticas, grupos de eleitores, regimes,
- * utopias, figuras históricas — S1 a S7 do roteiro-do-jogo.md).
+ * Game content data (policy trees, voter groups, regimes, utopias, and historical figures —
+ * S1 through S7 of game-design.md).
  */
 
 export * from "./historical-figures.js";
