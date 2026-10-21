@@ -39,5 +39,7 @@ export function handleCliError(error: unknown): void {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   /* istanbul ignore next -- CLI bootstrap, not run when imported by tests */
-  main().catch(handleCliError);
+  const cliDb = createDb();
+  /* istanbul ignore next -- CLI bootstrap, not run when imported by tests */
+  main(cliDb).finally(() => cliDb.$client.end()).catch(handleCliError);
 }
