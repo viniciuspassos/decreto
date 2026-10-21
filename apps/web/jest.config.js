@@ -3,6 +3,7 @@ export default {
   preset: "ts-jest/presets/default-esm",
   extensionsToTreatAsEsm: [".ts", ".tsx"],
   testEnvironment: "jsdom",
+  testPathIgnorePatterns: ["/node_modules/", "/e2e/"],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",

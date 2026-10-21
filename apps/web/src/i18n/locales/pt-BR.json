@@ -289,6 +289,7 @@
     "consequences": "Consequências",
     "precedent": "Precedente revelado",
     "continue": "Continuar",
+    "pending": "Decisão pendente.",
     "buyback-record": { "title": "Recompra de armas recolhe milhares de unidades", "body": "Postos de troca juntam fila; autoridades comemoram a retirada de armas de circulação." },
     "school-shooting": { "title": "Atirador abre fogo em escola e reabre debate sobre armas", "body": "O país é tomado por luto e indignação; a tragédia reacende a discussão sobre porte de armas.", "option": { "a": "Decretar luto e defender o porte", "b": "Anunciar regras de armazenamento" } },
     "militia-takes-district": { "title": "Milícia armada assume controle de bairro inteiro", "body": "Moradores relatam cobrança de \"taxas de proteção\" e confrontos com a polícia." },
@@ -397,7 +398,18 @@
     "term": "Mandato {{n}}",
     "opposition": "Oposição",
     "restart": "Nova partida",
+    "ended": "Partida encerrada.",
     "similarity": "Semelhança com outras figuras",
     "topTrees": "Árvores mais usadas"
+  },
+  "error": {
+    "network_error": "Não foi possível conectar ao servidor. Tente novamente.",
+    "game_not_found": "Partida não encontrada. Comece uma nova partida.",
+    "version_conflict": "A partida mudou em outra aba. Recarregue para continuar.",
+    "invalid_queue": "Esta fila não é válida. Revise as ações escolhidas.",
+    "validation_error": "Escolha inválida. Revise sua seleção.",
+    "game_ended": "Esta partida já terminou.",
+    "internal_error": "Ocorreu um erro. Tente novamente.",
+    "dismiss": "Fechar aviso"
   }
 }

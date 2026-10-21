@@ -6,10 +6,11 @@ with free decisions across the political spectrum.
 
 ## Current status
 
-The frontend v0 (`apps/web`) includes all design screens and is playable end to end with a **mocked**
-backend in `apps/web/src/api/mockApi.ts`. Game content (trees, groups, regimes, utopias, historical
-figures) already lives in `packages/game-content`; the real engine (`apps/api` + `packages/game-engine`)
-has not been implemented yet — the API only responds to `/health`.
+The web app uses the API and server-side game engine for policy previews, semesters, events, and
+elections. Game content (trees, groups, regimes, utopias, historical figures) lives in
+`packages/game-content`; saves live in PostgreSQL. Accounts and save ownership remain tracked in
+[issue #18](https://github.com/viniciuspassos/decreto/issues/18), so this setup is for local
+development rather than public deployment.
 
 ## Prerequisites
 
@@ -27,16 +28,6 @@ pnpm --filter @decreto/api run db:migrate # apply migrations for a fresh databas
 pnpm --filter @decreto/api run db:seed    # populate initial data
 pnpm dev            # start apps/web (Vite, http://localhost:5173) and apps/api (http://localhost:3001) in parallel
 ```
-
-### Frontend only, with mocked data
-
-```bash
-pnpm install
-pnpm dev:mocked     # build shared packages and start only apps/web at http://localhost:5173
-```
-
-No API, database, or Docker is needed: all game rules come from `apps/web/src/api/mockApi.ts`.
-To get started quickly, select "Continuar partida" on the home screen (sample save).
 
 Other useful root commands (run across all packages via Turborepo, with caching):
 
@@ -108,7 +99,7 @@ apps/
   api/      # Node + TypeScript (Express) backend; game engine runs here
 packages/
   game-content/  # typed data: trees, groups, regimes, utopias, historical figures
-  game-engine/   # pure game engine rules (currently a testable placeholder)
+  game-engine/   # pure game engine rules
   shared-types/  # types shared between api and web
 tools/
   diff-coverage/ # diff-aware coverage gate used by pre-push and CI

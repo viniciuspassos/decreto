@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { GameState } from "@decreto/shared-types";
-import { TURNS_PER_TERM } from "../api/mockApi.js";
+import { TURNS_PER_TERM } from "@decreto/game-content";
 
 export const turnInTerm = (turn: number) => ((turn - 1) % TURNS_PER_TERM) + 1;
 export const yearOf = (turn: number) => Math.ceil(turn / 2);

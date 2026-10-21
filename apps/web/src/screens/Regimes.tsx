@@ -1,13 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { UTOPIA_TURNS_REQUIRED, policyTrees, utopias } from "@decreto/game-content";
-import type { GameState } from "@decreto/shared-types";
-import { activeCount, nodeStatus } from "../api/mockApi.js";
+import type { PlayableGame } from "../api/gameView.js";
+import { activeCount, nodeStatus } from "../api/gameView.js";
 import { TopBar } from "../components/TopBar.js";
 
 const REGIMES = ["authoritarianism", "monarchy"];
 const treeSize = (id: string) => policyTrees.find((t) => t.id === id)?.nodes.length ?? 0;
 
-export function Regimes({ game, onBack }: { game: GameState; onBack: () => void }) {
+export function Regimes({ game, onBack }: { game: PlayableGame; onBack: () => void }) {
   const { t } = useTranslation();
 
   return (

@@ -121,6 +121,8 @@ export interface GameView extends Omit<GameState, "queue"> {
   id: string;
   version: number;
   phase: GamePhase;
+  /** Persisted outcome, available when resuming an ended game. */
+  end: EndGameResult | null;
   maxActions: number;
   nodes: Record<string, GameNodeView>;
 }
@@ -136,6 +138,8 @@ export interface CreateGameRequest {
   country: string;
   president: string;
   situation: InitialSituation;
+  /** Deterministic test runs only; rejected by the API in production. */
+  seed?: number;
 }
 
 export interface PreviewQueueRequest {

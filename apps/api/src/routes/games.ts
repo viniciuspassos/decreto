@@ -3,7 +3,12 @@ import { z } from "zod";
 import type { Db } from "../db/client.js";
 import { campaign, closeSemester, createNewGame, electionPreview, findGame, previewQueue, vote } from "../services/gameService.js";
 
-const createSchema = z.object({ country: z.string().min(1), president: z.string().min(1), situation: z.enum(["stable", "unstable", "crisis"]) });
+const createSchema = z.object({
+  country: z.string().min(1), president: z.string().min(1), situation: z.enum(["stable", "unstable", "crisis"]),
+  seed: z.number().int().min(0).max(0xffffffff).optional(),
+}).refine((request) => request.seed === undefined || process.env.NODE_ENV !== "production", {
+  message: "seed is accepted only outside production", path: ["seed"],
+});
 const queueSchema = z.object({ queue: z.array(z.string()) });
 const versionedQueueSchema = queueSchema.extend({ expectedVersion: z.number().int().positive() });
 const promisesSchema = z.object({ promises: z.array(z.string()).max(3) });

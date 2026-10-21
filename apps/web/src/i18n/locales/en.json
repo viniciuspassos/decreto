@@ -289,6 +289,7 @@
     "consequences": "Consequences",
     "precedent": "Precedent revealed",
     "continue": "Continue",
+    "pending": "Decision pending.",
     "buyback-record": { "title": "Gun buyback program collects thousands of weapons", "body": "Exchange posts see long lines as authorities celebrate weapons taken off the streets." },
     "school-shooting": { "title": "Gunman opens fire at school, reigniting gun debate", "body": "The country mourns as the tragedy reopens the debate over gun ownership.", "option": { "a": "Declare mourning and defend gun rights", "b": "Announce storage regulations" } },
     "militia-takes-district": { "title": "Armed militia seizes control of entire district", "body": "Residents report \"protection fees\" and clashes with police." },
@@ -397,7 +398,18 @@
     "term": "Term {{n}}",
     "opposition": "Opposition",
     "restart": "New game",
+    "ended": "Game ended.",
     "similarity": "Similarity to other figures",
     "topTrees": "Most used trees"
+  },
+  "error": {
+    "network_error": "Could not connect to the server. Try again.",
+    "game_not_found": "Game not found. Start a new game.",
+    "version_conflict": "The game changed in another tab. Reload to continue.",
+    "invalid_queue": "This queue is invalid. Review your actions.",
+    "validation_error": "Invalid choice. Review your selection.",
+    "game_ended": "This game has already ended.",
+    "internal_error": "Something went wrong. Try again.",
+    "dismiss": "Dismiss notice"
   }
 }

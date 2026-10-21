@@ -2,7 +2,7 @@ import request from "supertest";
 import { defaultContent, newGame } from "@decreto/game-engine";
 import { createApp } from "../app.js";
 import type { Db } from "../db/client.js";
-import { createGame as persistGame } from "../db/games.js";
+import { createGame as persistGame, saveGame } from "../db/games.js";
 import { createTestDb } from "../db/testDb.js";
 
 let db: Db;
@@ -39,6 +39,24 @@ describe("games routes", () => {
     expect(response.body).not.toHaveProperty("queue");
   });
 
+  it("accepts a deterministic seed outside production without exposing it", async () => {
+    const response = await request(app()).post("/games").send({ country: "Vessária", president: "Helena", situation: "stable", seed: 7 });
+
+    expect(response.status).toBe(201);
+    expect(response.body).not.toHaveProperty("seed");
+  });
+
+  it("rejects a client seed in production", async () => {
+    const previous = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      const response = await request(app()).post("/games").send({ country: "Vessária", president: "Helena", situation: "stable", seed: 7 });
+      expect(response).toMatchObject({ status: 400, body: { code: "validation_error" } });
+    } finally {
+      process.env.NODE_ENV = previous;
+    }
+  });
+
   it("rejects an invalid body", async () => {
     const response = await request(app()).post("/games").send({ country: "", president: "Helena", situation: "wrong" });
 
@@ -51,6 +69,17 @@ describe("games routes", () => {
     expect(response).toMatchObject({ status: 404, body: { code: "game_not_found" } });
   });
 
+  it("returns the persisted result when an ended game is resumed", async () => {
+    const state = newGame({ country: "Vessária", president: "Helena", situation: "stable", seed: 5 }, defaultContent);
+    const created = await persistGame(db, state);
+    const result = { outcome: "defeat" as const, reason: "coup" as const, ranking: [], topTrees: [] };
+    await saveGame(db, { ...created, status: "ended", result }, created.version);
+
+    const response = await request(app()).get(`/games/${created.id}`);
+
+    expect(response).toMatchObject({ status: 200, body: { phase: "ended", end: result } });
+  });
+
   it("previews and closes a semester, rejecting an outdated version", async () => {
     const game = await createGame();
     const queue = [availableNode(game.nodes)];
@@ -59,6 +88,7 @@ describe("games routes", () => {
     const outdated = await request(app()).post(`/games/${game.id}/end-semester`).send({ queue: [], expectedVersion: game.version });
 
     expect(preview).toMatchObject({ status: 200, body: { errors: [] } });
+    expect(preview.body.nodes[queue[0]!]).toMatchObject({ status: "queued", cost: preview.body.totalCost });
     expect(closed).toMatchObject({ status: 200, body: { game: { version: 2 }, report: { applied: queue } } });
     expect(outdated).toMatchObject({ status: 409, body: { code: "version_conflict" } });
   });

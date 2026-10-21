@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { historicalFigures, nodeFigures, policyTrees, type FieldId } from "@decreto/game-content";
-import type { GameState, NodeStatus } from "@decreto/shared-types";
-import { nodeCost, nodeStatus } from "../api/mockApi.js";
+import type { NodeStatus } from "@decreto/shared-types";
+import type { PlayableGame } from "../api/gameView.js";
+import { nodeCost, nodeStatus } from "../api/gameView.js";
 import { NODE_RADIUS, layoutLabels, type LabelCandidate } from "./labelLayout.js";
 import { CLUSTER_BELOW, MAP_SIZE, useZoom, viewBox } from "./useZoom.js";
 
@@ -35,7 +36,7 @@ export const figureShortName = (figureId: string) =>
 
 
 interface Props {
-  game: GameState;
+  game: PlayableGame;
   selected: string | null;
   onSelect: (nodeId: string) => void;
 }
@@ -75,7 +76,7 @@ export function RadialMap({ game, selected, onSelect }: Props) {
   );
 }
 
-function FieldClusters({ game, onFocus }: { game: GameState; onFocus: (x: number, y: number) => void }) {
+function FieldClusters({ game, onFocus }: { game: PlayableGame; onFocus: (x: number, y: number) => void }) {
   const { t } = useTranslation();
   return (
     <>
@@ -103,7 +104,7 @@ interface MapNode {
   y: number;
 }
 
-const mapNodes = (game: GameState): MapNode[] =>
+const mapNodes = (game: PlayableGame): MapNode[] =>
   policyTrees.flatMap((tree, i) =>
     tree.nodes.map((nodeId, d) => ({ nodeId, status: nodeStatus(game, nodeId), ...polar(TREE_ANGLES[i] ?? 0, ringRadius(d + 1)) })),
   );
@@ -126,7 +127,7 @@ function Network({ game, selected, onSelect, scale }: Props & { scale: number })
   const { t } = useTranslation();
   const nodes = mapNodes(game);
   const nameOf = (n: MapNode) =>
-    t(`node.${n.nodeId}`) + { available: ` ${nodeCost(n.nodeId)}`, queued: ` · ${t("main.queued")}`, active: "", blocked: "" }[n.status];
+    t(`node.${n.nodeId}`) + { available: ` ${nodeCost(game, n.nodeId) ?? ""}`, queued: ` · ${t("main.queued")}`, active: "", blocked: "" }[n.status];
   const font = LABEL_FONT / scale;
   const obstacles = [{ x: C, y: C, r: R0 - 20 }, ...nodes.map((n) => ({ x: n.x, y: n.y, r: n.status === "blocked" ? BLOCKED_RADIUS : NODE_RADIUS }))];
   const labels = layoutLabels(labelCandidates(nodes, selected, nameOf), font, obstacles);
