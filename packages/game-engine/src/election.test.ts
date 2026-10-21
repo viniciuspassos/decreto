@@ -38,10 +38,11 @@ describe("isElectionDue", () => {
 });
 
 describe("isCampaignDue", () => {
-  it("opens the campaign on the final turn and skips it when elections are suspended", () => {
+  it("opens the campaign after the final semester and skips it when elections are suspended", () => {
     expect(isCampaignDue(game({ turn: 7 }))).toBe(false);
-    expect(isCampaignDue(game({ turn: 8 }))).toBe(true);
-    expect(isCampaignDue(game({ turn: 8, activeNodes: ["election-postponement"] }))).toBe(false);
+    expect(isCampaignDue(game({ turn: 8 }))).toBe(false);
+    expect(isCampaignDue(game({ turn: 9 }))).toBe(true);
+    expect(isCampaignDue(game({ turn: 9, activeNodes: ["election-postponement"] }))).toBe(false);
   });
 });
 
@@ -120,13 +121,14 @@ describe("runElection", () => {
     const { state, won } = runElection(start, [], defaultContent);
     expect(won).toBe(false);
     expect(state.turn).toBe(17);
-    expect(state.term).toBe(2);
+    expect(state.term).toBe(3);
     expect(state.activeNodes).toEqual(["privatizations", "harsher-sentences"]);
     expect(state.capital).toBe(77);
     expect(state.queue).toEqual([]);
     expect(state.turnsInPower).toBe(0);
     expect(state.history).toEqual([{ term: 1, inPower: false }]);
-    expect(isElectionDue(state)).toBe(true);
+    expect(isElectionDue(state)).toBe(false);
+    expect(isCampaignDue(state)).toBe(false);
   });
 
   it("the AI government falling is not a player defeat", () => {
@@ -151,10 +153,11 @@ describe("runElection", () => {
 
   it("the player runs again after losing and can win", () => {
     const lost = runElection(withSupport(30), [], defaultContent).state;
+    lost.turn = 25;
     lost.groups.forEach((g) => { if (g.support !== null) g.support = 65; });
     const back = runElection(lost, [], defaultContent);
     expect(back.won).toBe(true);
-    expect(back.state.term).toBe(3);
+    expect(back.state.term).toBe(4);
     expect(back.state.termsInRow).toBe(1);
     expect(back.state.history.map((h) => h.inPower)).toEqual([false, true]);
   });

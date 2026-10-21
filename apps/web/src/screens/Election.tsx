@@ -129,7 +129,7 @@ function ElectionControls({ projection, votes, campaignOnly, chosenCount, disabl
     <div className="spacer" />
     {!campaignOnly && <small className="muted">{t("election.ifLose")}</small>}
     <button className="btn primary" disabled={disabled} onClick={campaignOnly ? onCampaign : onVote}>
-      {t(campaignOnly ? "election.saveCampaign" : "election.vote", { count: chosenCount })}</button>
+      {t(campaignOnly ? "election.confirmCampaign" : "election.vote", { count: chosenCount })}</button>
   </>;
 }
 

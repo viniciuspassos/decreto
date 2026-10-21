@@ -83,7 +83,7 @@ export function useGame() {
     return response;
   }
 
-  async function saveCampaign(promises: string[]): Promise<boolean> {
+  async function submitCampaign(promises: string[]): Promise<ElectionResponse | null> {
     return persistCampaignSelection(game, promises, run, (next) => acceptGame(next, setGame, setSaveId));
   }
 
@@ -94,7 +94,7 @@ export function useGame() {
     setError(null);
   }
 
-  return { game, saveId, pending, error, setError, create, resume, toggleQueue, finishSemester, saveCampaign, vote, restart };
+  return { game, saveId, pending, error, setError, create, resume, toggleQueue, finishSemester, submitCampaign, vote, restart };
 }
 
 async function persistCampaignSelection(
@@ -102,12 +102,12 @@ async function persistCampaignSelection(
   promises: string[],
   run: ApiOperation,
   acceptGame: (next: GameView) => void,
-): Promise<boolean> {
-  if (!game) return false;
-  const response = await run(() => gameApi.saveCampaign(game, promises));
-  if (!response) return false;
+): Promise<ElectionResponse | null> {
+  if (!game) return null;
+  const response = await run(() => gameApi.submitCampaign(game, promises));
+  if (!response) return null;
   acceptGame(response.game);
-  return true;
+  return response;
 }
 
 function acceptGame(next: GameView, setGame: Dispatch<SetStateAction<PlayableGame | null>>,

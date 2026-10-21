@@ -360,8 +360,16 @@
     "ifLose": "If you lose, you follow the new government and can run again at the next election.",
     "vote_one": "Go to the polls · {{count}} promise",
     "vote_other": "Go to the polls · {{count}} promises",
-    "saveCampaign_one": "Confirm {{count}} promise and play the final turn",
-    "saveCampaign_other": "Confirm {{count}} promises and play the final turn",
+    "confirmCampaign_one": "Confirm {{count}} promise and hold the election",
+    "confirmCampaign_other": "Confirm {{count}} promises and hold the election",
+    "resultTitle": "Election result",
+    "resultEyebrow": "Term ended",
+    "elected": "You were elected",
+    "reelected": "You were reelected",
+    "notElected": "You were not elected",
+    "madePromises": "Promises made",
+    "noPromisesMade": "You made no promises in this campaign.",
+    "continueAfterResult": "Start next semester",
     "selectedCampaign": "campaign promise"
   },
   "regimes": {

@@ -43,8 +43,9 @@ function queuedNodeCost(state: StoredGame["state"], nodeId: string): number {
 
 function phaseOf(game: StoredGame): GameView["phase"] {
   if (game.status === "ended") return "ended";
+  if (isCampaignDue(game.state) && game.state.campaignPromises === undefined) return "campaign";
   if (isElectionDue(game.state)) return "election";
-  return isCampaignDue(game.state) && game.state.campaignPromises === undefined ? "campaign" : "playing";
+  return "playing";
 }
 
 export function gameView(game: StoredGame): GameView {
@@ -119,14 +120,18 @@ export async function electionPreview(db: Db, gameId: string, promises: string[]
   return { votes: projectVotes(game.state, promises, defaultContent), honeymoon: projectVotes(game.state, promises, defaultContent) >= 60 };
 }
 
+async function persistElectionOutcome(db: Db, game: StoredGame, promises: string[], expectedVersion: number): Promise<ElectionResponse> {
+  const { state, won } = runElection({ ...game.state, campaignPromises: promises }, promises, defaultContent);
+  const reason = checkEnd(state);
+  const saved = await saveGame(db, { ...game, state, status: reason ? "ended" : "playing", result: reason ? endGameResult(state, reason, defaultContent) : null }, expectedVersion);
+  return { game: gameView(saved), won, promises: [...promises], end: saved.result };
+}
+
 export async function vote(db: Db, gameId: string, promises: string[], expectedVersion: number): Promise<ElectionResponse> {
   const game = await requiredGame(db, gameId);
   requirePhase(game, "election");
   requireBallotPromises(game, promises);
-  const { state, won } = runElection(game.state, promises, defaultContent);
-  const reason = checkEnd(state);
-  const saved = await saveGame(db, { ...game, state, status: reason ? "ended" : "playing", result: reason ? endGameResult(state, reason, defaultContent) : null }, expectedVersion);
-  return { game: gameView(saved), won, end: saved.result };
+  return persistElectionOutcome(db, game, promises, expectedVersion);
 }
 
 export async function campaign(db: Db, gameId: string) {
@@ -135,10 +140,9 @@ export async function campaign(db: Db, gameId: string) {
   return { options: campaignOptions(game.state, defaultContent), maxPromises: 3 };
 }
 
-export async function saveCampaign(db: Db, gameId: string, promises: string[], expectedVersion: number): Promise<GameView> {
+export async function submitCampaign(db: Db, gameId: string, promises: string[], expectedVersion: number): Promise<ElectionResponse> {
   const game = await requiredGame(db, gameId);
   requirePhase(game, "campaign");
   requireValidPromises(game, promises);
-  const saved = await saveGame(db, { ...game, state: { ...game.state, campaignPromises: promises } }, expectedVersion);
-  return gameView(saved);
+  return persistElectionOutcome(db, game, promises, expectedVersion);
 }

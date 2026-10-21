@@ -70,7 +70,7 @@ function opposition(state: EngineState, content: SemesterContent): EngineState {
     (current) => ({ ...endSemester(current, content).state, defeat: null }), state,
   );
   // AI government events and crises do not carry over to the player; no consecutive term on return.
-  return { ...away, capital: state.capital, turnsInPower: 0, term: state.term + 1, termsInRow: 0, pendingChoices: [], crisis: false };
+  return { ...away, capital: state.capital, turnsInPower: 0, term: state.term + 2, termsInRow: 0, pendingChoices: [], crisis: false };
 }
 
 /**

@@ -4,6 +4,7 @@ import { useGame } from "./api/useGame.js";
 import { ErrorBanner } from "./components/ErrorBanner.js";
 import { EndedNotice } from "./components/EndedNotice.js";
 import { Election } from "./screens/Election.js";
+import { ElectionResult } from "./screens/ElectionResult.js";
 import { EndGame } from "./screens/EndGame.js";
 import { EventScreen } from "./screens/EventScreen.js";
 import { Groups } from "./screens/Groups.js";
@@ -16,6 +17,7 @@ type Screen =
   | { name: "home" | "main" | "groups" | "regimes" }
   | { name: "summary"; report: SemesterReport; events: CountryEvent[]; end: EndGameResult | null }
   | { name: "event"; events: CountryEvent[]; index: number; end: EndGameResult | null }
+  | { name: "election-result"; won: boolean; reelected: boolean; promises: string[]; end: EndGameResult | null }
   | { name: "end"; result: EndGameResult };
 
 export function App() {
@@ -34,11 +36,18 @@ export function App() {
     const response = await session.vote(promises);
     if (!response) return;
     setLost(!response.won);
-    setScreen(response.end ? { name: "end", result: response.end } : { name: "main" });
+    showElectionResult(response.won, promises, response.end);
   }
 
-  async function saveCampaign(promises: string[]): Promise<void> {
-    if (await session.saveCampaign(promises)) setScreen({ name: "main" });
+  async function submitCampaign(promises: string[]): Promise<void> {
+    const response = await session.submitCampaign(promises);
+    if (!response) return;
+    setLost(!response.won);
+    showElectionResult(response.won, response.promises, response.end);
+  }
+
+  function showElectionResult(won: boolean, promises: string[], end: EndGameResult | null): void {
+    setScreen({ name: "election-result", won, reelected: wasIncumbent(game), promises, end });
   }
 
   function next(events: CountryEvent[], index: number, end: EndGameResult | null): void {
@@ -55,7 +64,11 @@ export function App() {
 
   if (isCampaignScreen(game.phase, screen)) {
     return <>{banner}<Election key={game.version} game={game} lost={lost} pending={session.pending}
-      campaignOnly={game.phase === "campaign"} onCampaign={saveCampaign} onVote={vote} /></>;
+      campaignOnly={game.phase === "campaign"} onCampaign={submitCampaign} onVote={vote} /></>;
+  }
+  if (screen.name === "election-result") {
+    return <>{banner}<ElectionResult game={game} won={screen.won} reelected={screen.reelected}
+      promises={screen.promises} onContinue={() => setScreen(screen.end ? { name: "end", result: screen.end } : { name: "main" })} /></>;
   }
   if (game.phase === "ended" && screen.name === "main" && game.end) {
     return <>{banner}<EndGame game={game} result={game.end}
@@ -69,6 +82,12 @@ export function App() {
     onBack={() => setScreen({ name: "main" })} onNext={next}
     onToggleQueue={(id) => void session.toggleQueue(id)} onClose={() => void closeSemester()}
     onOpen={(name) => setScreen({ name })} onRestart={() => { session.restart(); setScreen({ name: "home" }); }} /></>;
+}
+
+function wasIncumbent(game: ReturnType<typeof useGame>["game"]): boolean {
+  if (!game) return false;
+  const previousTerm = game.history[game.history.length - 1];
+  return previousTerm ? previousTerm.inPower : true;
 }
 
 function isCampaignScreen(phase: NonNullable<ReturnType<typeof useGame>["game"]>["phase"], screen: Screen): boolean {

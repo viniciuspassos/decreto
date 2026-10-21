@@ -34,7 +34,7 @@ export const gameApi = {
   preview: (id: string, queue: string[]) => request<QueuePreview>(`/games/${encodeURIComponent(id)}/preview`, "POST", { queue }),
   endSemester: (game: GameView, queue: string[]) => request<EndSemesterResponse>(`/games/${encodeURIComponent(game.id)}/end-semester`, "POST", { queue, expectedVersion: game.version }),
   campaign: (id: string) => request<CampaignResponse>(`/games/${encodeURIComponent(id)}/campaign`),
-  saveCampaign: (game: GameView, promises: string[]) => request<{ game: GameView }>(`/games/${encodeURIComponent(game.id)}/campaign`, "POST", { promises, expectedVersion: game.version }),
+  submitCampaign: (game: GameView, promises: string[]) => request<ElectionResponse>(`/games/${encodeURIComponent(game.id)}/campaign`, "POST", { promises, expectedVersion: game.version }),
   electionPreview: (id: string, promises: string[]) => request<ElectionPreviewResponse>(`/games/${encodeURIComponent(id)}/election/preview`, "POST", { promises }),
   vote: (game: GameView, promises: string[]) => request<ElectionResponse>(`/games/${encodeURIComponent(game.id)}/election`, "POST", { promises, expectedVersion: game.version }),
 };
