@@ -36,6 +36,11 @@ class FakeGameServer {
     if (path === "/api/games/deleted-game" && this.delaySavedGet)
       return new Promise<Response>((resolve) => { this.resolveSavedGet = resolve; });
     if (path.endsWith("/campaign")) {
+      if (init?.method === "POST") {
+        const body = JSON.parse(String(init.body ?? "{}")) as { promises?: string[] };
+        this.game = { ...this.game, phase: "playing", campaignPromises: body.promises ?? [], version: this.game.version + 1 };
+        return this.respond({ game: this.game });
+      }
       if (this.failCampaign) return this.respond({ code: "network_error" }, 503);
       return this.respond({ options: this.campaignOptions, maxPromises: 3 });
     }
@@ -195,6 +200,32 @@ describe("App with API", () => {
     expect(server.requests).toContain("/api/games/game-1/campaign");
     expect(server.requests).toContain("/api/games/game-1/election/preview");
     expect(server.requests).toContain("/api/games/game-1/election");
+  });
+
+  it("saves campaign promises before playing the final turn", async () => {
+    const server = new FakeGameServer();
+    server.game = { ...server.game, phase: "campaign", turn: 8 };
+    global.fetch = server.fetch;
+    localStorage.setItem("decreto.gameId", "game-1");
+    render(<App />);
+    fireEvent.click(await screen.findByText("Continuar"));
+    fireEvent.click(await screen.findByText("Privatizações"));
+    const confirm = await screen.findByRole("button", { name: "Confirmar 1 promessa e jogar o último turno" });
+    await waitFor(() => expect(confirm).not.toBeDisabled());
+    fireEvent.click(confirm);
+    await screen.findByText("Ações deste semestre");
+    expect(server.requests).toContain("/api/games/game-1/campaign");
+  });
+
+  it("shows campaign promises that became active during the final semester", async () => {
+    const server = new FakeGameServer();
+    server.game = { ...server.game, phase: "election", turn: 9, campaignPromises: ["strategic-state-company"] };
+    global.fetch = server.fetch;
+    localStorage.setItem("decreto.gameId", "game-1");
+    render(<App />);
+    fireEvent.click(await screen.findByText("Continuar"));
+    await screen.findByText("Estatal estratégica");
+    expect(screen.getByText("promessa confirmada")).toBeTruthy();
   });
 
   it("shows a saved end result from the API", async () => {
