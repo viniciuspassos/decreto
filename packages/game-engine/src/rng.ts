@@ -1,10 +1,10 @@
-/** RNG da partida: mulberry32, cujo estado (`seed`) fica no estado do servidor e nunca vai ao cliente. */
+/** Game RNG: mulberry32, whose state (`seed`) stays in server state and is never sent to the client. */
 export interface Rng {
   /** Uniforme em [0, 1). */
   next(): number;
-  /** Normal padrão N(0,1) (Box-Muller). */
+  /** Standard normal N(0,1) (Box-Muller). */
   normal(): number;
-  /** Estado atual, para guardar e continuar a sequência no próximo semestre. */
+  /** Current state, saved to continue the sequence in the next semester. */
   seed(): number;
 }
 

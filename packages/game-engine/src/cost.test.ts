@@ -23,30 +23,30 @@ function ctx(activeNodes: string[]): CostContext {
 }
 
 describe("nodeCost", () => {
-  it("teste-ouro do roteiro: profundidade 3, distância 2 custa 48", () => {
-    // arrest-opponents (secret-police, profundidade 3) com outra árvore de Segurança ativa.
+  it("golden-path test: depth 3, distance 2 costs 48", () => {
+    // arrest-opponents (secret-police, depth 3) with another Security tree active.
     expect(nodeCost("arrest-opponents", ctx(["harsher-sentences"]))).toBe(48);
   });
 
-  it("distância 0 quando a própria árvore já tem nó ativo", () => {
+  it("distance 0 when the same tree already has an active node", () => {
     expect(nodeCost("carry-restriction", ctx(["mandatory-registration"]))).toBe(30);
   });
 
-  it("distância 1 quando o campo não tem nada ativo", () => {
+  it("distance 1 when the field has nothing active", () => {
     expect(nodeCost("mandatory-registration", ctx([]))).toBe(24);
   });
 
-  it("distância 3 quando a árvore oposta está ativa", () => {
+  it("distance 3 when the opposing tree is active", () => {
     expect(nodeCost("total-gun-ban", ctx(["legal-militias"]))).toBe(62);
   });
 });
 
 describe("taxRateCost", () => {
-  it("custa a base sem mudar a alíquota", () => {
+  it("costs the base amount without changing the tax rate", () => {
     expect(taxRateCost(30, 30)).toBe(10);
   });
 
-  it("escala com o número de faixas de 10% percorridas", () => {
+  it("scales with the number of 10% increments crossed", () => {
     expect(taxRateCost(30, 40)).toBe(20);
     expect(taxRateCost(0, 70)).toBe(80);
     expect(taxRateCost(70, 0)).toBe(80);
@@ -67,22 +67,22 @@ describe("queueCost", () => {
     return { state: state([]), content: small, isHoneymoon, isCrisis };
   }
 
-  it("sem descontos é a soma simples dos custos individuais", () => {
+  it("without discounts, equals the simple sum of individual costs", () => {
     const base = queueCtx(false, false);
     expect(queueCost(["a", "b", "c"], base)).toBe(
       nodeCost("a", base) + nodeCost("b", base) + nodeCost("c", base),
     );
   });
 
-  it("lua de mel só desconta as 2 primeiras ações da fila, nessa ordem", () => {
+  it("honeymoon discounts only the first 2 actions in the queue, in that order", () => {
     expect(queueCost(["a", "b", "c"], queueCtx(true, false))).toBe(12 + 17 + 24);
   });
 
-  it("desconto de crise só nos campos de Segurança e Poder", () => {
+  it("crisis discount applies only to Security and Power fields", () => {
     expect(queueCost(["a", "b", "c"], queueCtx(false, true))).toBe(17 + 24 + 17);
   });
 
-  it("combina lua de mel (por posição) e crise (por campo)", () => {
+  it("combines honeymoon (by position) and crisis (by field)", () => {
     expect(queueCost(["a", "b", "c"], queueCtx(true, true))).toBe(8 + 12 + 17);
   });
 });

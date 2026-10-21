@@ -6,7 +6,7 @@ import { App } from "./App.js";
 
 const container = document.getElementById("root");
 if (!container) {
-  throw new Error("#root não encontrado em index.html");
+  throw new Error("#root not found in index.html");
 }
 
 createRoot(container).render(

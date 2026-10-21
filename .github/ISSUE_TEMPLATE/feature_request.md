@@ -1,24 +1,24 @@
 ---
-name: Sugestão de funcionalidade
-about: Sugira uma nova funcionalidade ou mudança de design para o Decreto
+name: Feature request
+about: Suggest a new feature or design change for Decreto
 title: "[feat] "
 labels: enhancement
 ---
 
-## Problema ou motivação
+## Problem or motivation
 
-<!-- Que necessidade ou lacuna esta sugestão resolve? -->
+<!-- What need or gap would this suggestion address? -->
 
-## Solução proposta
+## Proposed solution
 
-<!-- Descreva a funcionalidade. Se envolve regra de negócio (árvores de políticas, capital
-político, eleições, etc.), verifique se já está coberta por `roteiro-do-jogo.md` antes de abrir
-a issue — a fonte de verdade do design é o roteiro, não este template. -->
+<!-- Describe the feature. If it involves game rules (policy trees, political capital,
+elections, etc.), check whether it is already covered by `game-design.md` before opening
+the issue. The game design document is the source of truth, not this template. -->
 
-## Alternativas consideradas
+## Alternatives considered
 
-<!-- Outras abordagens que você pensou e por que não as escolheu. -->
+<!-- Other approaches you considered and why you did not choose them. -->
 
-## Contexto adicional
+## Additional context
 
-<!-- Mockups, referências, links, etc. -->
+<!-- Mockups, references, links, etc. -->

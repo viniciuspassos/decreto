@@ -12,7 +12,7 @@ describe("startServer", () => {
     await close();
   });
 
-  it("sobe o servidor HTTP e responde em /health", async () => {
+  it("starts the HTTP server and responds at /health", async () => {
     process.env.PORT = "0";
     const { db, close: closeDb } = await createTestDb();
     close = closeDb;

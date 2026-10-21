@@ -1,13 +1,13 @@
-# Instruções para agentes
+# Agent instructions
 
-## Início de feature ou planejamento
+## Starting a feature or planning
 
-Antes de implementar uma feature ou elaborar um plano, sempre faça checkout da branch `main`
-e valide que ela está atualizada com `origin/main` (`git fetch origin main` seguido de
-`git pull --ff-only`). Pare e peça orientação se não puder atualizar por fast-forward.
+Before implementing a feature or preparing a plan, always check out the `main` branch and verify
+that it is up to date with `origin/main` (`git fetch origin main`, followed by
+`git pull --ff-only`). Stop and ask for guidance if it cannot be fast-forwarded.
 
-## Review antes de pull request
+## Review before opening a pull request
 
-Antes de abrir um pull request, invoque um subagente para revisar o diff da branch.
-Corrija todos os apontamentos de severidade alta ou média antes de abrir o pull
-request. Para cada apontamento de severidade baixa, crie uma issue no repositório.
+Before opening a pull request, invoke a subagent to review the branch diff. Fix all high- and
+medium-severity findings before opening the pull request. For each low-severity finding, create an
+issue in the repository.

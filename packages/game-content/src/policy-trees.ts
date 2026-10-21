@@ -1,6 +1,6 @@
 /**
- * Campos e árvores de políticas (S1 do roteiro) e etapas de regime (S4).
- * Só ids: nomes visíveis vivem nas chaves de i18n do frontend (`field.*`, `tree.*`, `node.*`).
+ * Policy fields and trees (design S1) and regime stages (S4).
+ * IDs only: visible names live in the frontend i18n keys (`field.*`, `tree.*`, `node.*`).
  */
 
 export type FieldId =
@@ -18,25 +18,25 @@ export type FieldId =
 export interface PolicyTree {
   id: string;
   field: FieldId;
-  /** Do moderado (índice 0 = profundidade 1) ao radical. */
+  /** Ordered from moderate (index 0 = depth 1) to radical. */
   nodes: string[];
-  /** Árvore oposta no mesmo campo: uma ativa bloqueia a outra (S1, 16.1). */
+  /** Opposing tree in the same field: activating one blocks the other (S1, 16.1). */
   opposite?: string;
-  /** Política de intensidade (ex.: impostos) em vez de liga/desliga. */
+  /** An intensity policy (e.g. taxes) instead of a toggle. */
   intensity?: boolean;
 }
 
 /**
- * Pré-requisitos extras além do nó anterior na mesma árvore (S4: Monarquia exige
- * Autoritarismo 4 ou Culto 3). Satisfeito se QUALQUER um dos nós listados estiver ativo.
+ * Additional prerequisites beyond the previous node in the same tree (S4: Monarchy requires
+ * Authoritarianism 4 or Cult 3). Satisfied when ANY listed node is active.
  */
 export const EXTRA_PREREQS: Record<string, string[]> = {
   "lifetime-title": ["congress-dissolution", "mandatory-portraits"],
 };
 
 /**
- * Pares de nós mutuamente exclusivos que não estão em árvores opostas (game-design §6.6):
- * `casino-ban` e `casinos-allowed` podem coexistir nas árvores, mas um bloqueia o outro.
+ * Mutually exclusive node pairs that are not in opposing trees (game-design §6.6):
+ * `casino-ban` and `casinos-allowed` can coexist in the trees, but each blocks the other.
  */
 export const EXCLUSIVE_NODE_PAIRS: [string, string][] = [["casino-ban", "casinos-allowed"]];
 
@@ -69,8 +69,8 @@ export const policyTrees: PolicyTree[] = [
 ];
 
 /**
- * Precedente histórico revelado quando o nó é ativado (ids de `historical-figures.ts`).
- * Mapeamento ilustrativo, conforme o design de UI.
+ * Historical precedent revealed when the node is activated (IDs from `historical-figures.ts`).
+ * Illustrative mapping based on the UI design.
  */
 export const nodeFigures: Record<string, string> = {
   "easier-registration": "jair-bolsonaro",

@@ -1,8 +1,8 @@
-/** Utopias (S5 do roteiro): árvores que precisam estar completas e turnos seguidos exigidos. */
+/** Utopias (design S5): trees that must be complete and remain active for consecutive turns. */
 
 export interface UtopiaTreeRequirement {
   treeId: string;
-  /** Profundidade exigida quando a árvore não precisa estar completa (ex.: Vigilância até o nó 2). */
+  /** Required depth when a tree does not need to be complete (e.g. Surveillance through node 2). */
   upTo?: number;
 }
 

@@ -17,13 +17,13 @@ function fileData(path: string): CoverageMapData {
 }
 
 describe("mergeCoverage", () => {
-  it("combina coverage-final.json de pacotes diferentes num único mapa", () => {
+  it("combines coverage-final.json files from different packages into one map", () => {
     const map = mergeCoverage([fileData("/repo/a/src/x.ts"), fileData("/repo/b/src/y.ts")]);
 
     expect(map.files().sort()).toEqual(["/repo/a/src/x.ts", "/repo/b/src/y.ts"]);
   });
 
-  it("retorna mapa vazio quando não há dados de coverage", () => {
+  it("returns an empty map when no coverage data exists", () => {
     expect(mergeCoverage([]).files()).toEqual([]);
   });
 });

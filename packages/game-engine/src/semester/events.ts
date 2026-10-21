@@ -10,7 +10,7 @@ import { applyEventEffects } from "./effects.js";
 const threshold = (c: Condition) => c.threshold ?? 0;
 const indicator = (c: Condition, s: EngineState) => (c.indicatorId ? s.indicators[c.indicatorId] : NaN);
 
-/** Avaliador de cada tipo de condição de gatilho (§4.2). */
+/** Evaluates each trigger condition type (§4.2). */
 const CONDITIONS: Record<ConditionType, (c: Condition, s: EngineState) => boolean> = {
   nodeActive: (c, s) => isActive(s, c.nodeId ?? ""),
   anyNodeActive: (c, s) => (c.nodeIds ?? []).some((n) => isActive(s, n)),
@@ -33,7 +33,7 @@ function scaleFactor(scale: IndicatorScale | undefined, state: EngineState): num
   return Math.min(3, 1 + Math.abs(state.indicators[scale.indicatorId] - scale.threshold) / scale.range);
 }
 
-/** "Fresco": nó do gatilho ativado neste semestre pesa `1 + 0,5 × profundidade` (§1.3). */
+/** "Fresh": a trigger node activated this semester has weight `1 + 0.5 × depth` (§1.3). */
 function freshFactor(trigger: EventTrigger, applied: string[], ctx: StepCtx): number {
   const fresh = trigger.conditions.flatMap((c) => [c.nodeId ?? "", ...(c.nodeIds ?? [])]).filter((n) => applied.includes(n));
   if (fresh.length === 0) return 1;
@@ -56,13 +56,13 @@ function offCooldown(def: GameEventDefinition, state: EngineState): boolean {
 
 const hasAlwaysTrigger = (def: GameEventDefinition) => def.triggers.some((t) => t.conditions.some((c) => c.type === "always"));
 
-/** Antimonotonia: positivo pesa ×1,5 se nenhum positivo saiu nos últimos 2 semestres. */
+/** Anti-monotony: positive weight is ×1.5 if no positive event occurred in the last 2 semesters. */
 function antiMonotony(def: GameEventDefinition, state: EngineState): number {
   const last = state.lastPositiveEventTurn;
   return def.tone === "positive" && (last === null || state.turn - last > 2) ? 1.5 : 1;
 }
 
-/** Peso efetivo do evento neste semestre; 0 = não pode sair (§4.2–§4.3). */
+/** Effective event weight this semester; 0 = cannot be drawn (§4.2–§4.3). */
 export function eventWeight(def: GameEventDefinition, applied: string[], ctx: StepCtx, ignoreCooldown = false): number {
   const { state } = ctx;
   if (def.blockedByNode && isActive(state, def.blockedByNode)) return 0;
@@ -82,7 +82,7 @@ function candidates(applied: string[], ctx: StepCtx, ignoreCooldown: boolean): C
     .filter((c) => c.weight > 0);
 }
 
-/** 1, 2 ou 3 eventos com as probabilidades do §4.1. */
+/** 1, 2, or 3 events with the probabilities from §4.1. */
 export function rollEventCount(rng: SemesterCtx["rng"]): number {
   let r = rng.next();
   const odds = EVENT_COUNT_ODDS.find((o) => (r -= o.probability) < 0);
@@ -106,8 +106,8 @@ function fire(ctx: StepCtx, def: GameEventDefinition, image: boolean): CountryEv
 }
 
 /**
- * Sorteio ponderado sem reposição (§4.3); só o evento marcante de maior peso mostra imagem.
- * Se nenhum evento for elegível, ignora o cooldown dos eventos "sempre" (nunca zero eventos).
+ * Weighted sampling without replacement (§4.3); only the highest-weight notable event shows an image.
+ * If no event is eligible, ignore the cooldown for "always" events (never return zero events).
  */
 export function drawEvents(ctx: SemesterCtx, applied: string[]): CountryEvent[] {
   const regular = candidates(applied, ctx, false);

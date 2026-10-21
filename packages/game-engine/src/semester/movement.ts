@@ -2,7 +2,7 @@ import { INDICATOR_DYNAMICS, LEVEL_INDICATORS, type LevelIndicatorId } from "@de
 import type { Indicators } from "@decreto/shared-types";
 import { over, type SemesterCtx } from "./common.js";
 
-/** §3.2: escala do ruído, de 0 a 2. */
+/** §3.2: noise scale, from 0 to 2. */
 export function instability(ind: Indicators, recessionLevel: number): number {
   return Math.min(
     2,
@@ -13,7 +13,7 @@ export function instability(ind: Indicators, recessionLevel: number): number {
 
 const atLeast = (value: number, threshold: number) => (value >= threshold ? 1 : 0);
 
-/** §3.3: alvo de cada indicador, a partir dos valores exibidos do semestre anterior (acoplamentos). */
+/** §3.3: target for each indicator, based on the previous semester's displayed values (couplings). */
 export function targets(i: Indicators, turnsInPower: number): Record<LevelIndicatorId, number> {
   return {
     gdp: 2 - 0.08 * over(i.inflation, 8) - 0.04 * over(i.corruption, 40) - 0.03 * over(i.crime, 50)
@@ -31,7 +31,7 @@ export function targets(i: Indicators, turnsInPower: number): Record<LevelIndica
   };
 }
 
-/** §3.1: reversão ao alvo + momento amortecido + ruído escalado pela instabilidade. */
+/** §3.1: reversion to target + damped momentum + noise scaled by instability. */
 export function updateBase({ state, rng }: SemesterCtx): void {
   const target = targets(state.indicators, state.turnsInPower);
   const noiseScale = 1 + instability(state.indicators, state.recessionLevel);

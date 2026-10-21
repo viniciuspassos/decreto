@@ -25,7 +25,7 @@ export function App() {
     return <Home onStart={(g) => { setGame(g); setScreen({ name: "main" }); }} />;
   }
 
-  /** `won` só vem preenchido logo após uma eleição. */
+  /** `won` is only populated immediately after an election. */
   const afterTurn = (g: GameState, won?: boolean): Screen => {
     const reason = checkEnd(g);
     if (reason) return { name: "end", result: endGame(g, reason) };

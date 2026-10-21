@@ -3,10 +3,10 @@ import type { CountryEvent } from "@decreto/shared-types";
 import { clampIndicator, displayedIndicators, effectTotal, over, sizeOf, type StepCtx } from "./common.js";
 import { systemEvent } from "./system-events.js";
 
-/** Déficit primário estrutural com imposto a 30% (§3.4). */
+/** Structural primary deficit with tax at 30% (§3.4). */
 const STRUCTURAL_DEFICIT = 0.3;
 
-/** §3.4: dívida é estoque — déficit primário + juros reais sobre o estoque + `Dív 1×` dos nós recém-ativados. */
+/** §3.4: debt is a stock — primary deficit + real interest on the stock + `Debt 1×` from newly activated nodes. */
 export function updateDebt(ctx: StepCtx, applied: string[]): void {
   const { state, content } = ctx;
   const { debt, gdp, corruption } = state.indicators;
@@ -17,7 +17,7 @@ export function updateDebt(ctx: StepCtx, applied: string[]): void {
   state.indicators.debt = clampIndicator("debt", debt + deficit + (debt * (realInterest - gdp)) / 200 + once);
 }
 
-/** Nível de recessão com histerese: entra pelo limiar de entrada e só sai abaixo do de saída (§3.4). */
+/** Recession level with hysteresis: enters at the entry threshold and exits only below the exit threshold (§3.4). */
 export function nextRecessionLevel(current: number, debt: number, preRecessionGdp: number): number {
   const holds = RECESSION_LEVELS.filter((r) => {
     const gdpLow = r.enterGdp !== undefined && preRecessionGdp < r.enterGdp;
@@ -28,7 +28,7 @@ export function nextRecessionLevel(current: number, debt: number, preRecessionGd
   return Math.max(0, ...holds.map((r) => r.level));
 }
 
-/** Atualiza o nível de recessão e recalcula os indicadores exibidos; devolve `recession-starts/ends`. */
+/** Updates the recession level and recalculates displayed indicators; returns `recession-starts/ends`. */
 export function updateRecession(ctx: StepCtx): CountryEvent[] {
   const { state } = ctx;
   const previous = state.recessionLevel;

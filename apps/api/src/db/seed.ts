@@ -29,15 +29,15 @@ export async function seedEventImages(db: Db): Promise<void> {
 
 export async function main(db: Db = createDb()): Promise<void> {
   await seedEventImages(db);
-  console.log("[db] seed de event_images aplicado");
+  console.log("[db] event_images seed applied");
 }
 
 export function handleCliError(error: unknown): void {
-  console.error("[db] falha ao aplicar seed", error);
+  console.error("[db] failed to apply seed", error);
   process.exitCode = 1;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  /* istanbul ignore next -- bootstrap de CLI, não roda sob o import dos testes */
+  /* istanbul ignore next -- CLI bootstrap, not run when imported by tests */
   main().catch(handleCliError);
 }

@@ -15,9 +15,9 @@ export interface TestDb {
 }
 
 export interface CreateTestDbOptions {
-  /** false pula as migrations — só serve para testar falha de conexão (banco já fechado). */
+  /** false skips migrations; only used to test connection failure (database already closed). */
   runMigrations?: boolean;
-  /** só para testar o tratamento de falha de migration; default é a pasta real de migrations. */
+  /** Only used to test migration failure handling; defaults to the real migrations directory. */
   migrationsFolder?: string;
 }
 

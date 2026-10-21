@@ -5,7 +5,7 @@ jest.unstable_mockModule("./cli.js", () => ({
 }));
 
 describe("bin (run resolve)", () => {
-  it("define process.exitCode a partir do valor resolvido por run()", async () => {
+  it("sets process.exitCode from the value resolved by run()", async () => {
     await import("./bin.js");
     await new Promise((resolve) => setImmediate(resolve));
 

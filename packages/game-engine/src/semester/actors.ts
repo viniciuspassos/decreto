@@ -2,7 +2,7 @@ import { MOOD_THRESHOLDS } from "@decreto/game-content";
 import type { ActorMood } from "@decreto/shared-types";
 import { activeEffects, effectTotal, groupOf, over, type StepCtx } from "./common.js";
 
-/** Do pior ao melhor humor, para aplicar o piso `mediaFloor`. */
+/** From worst to best mood, to apply the `mediaFloor`. */
 const MOOD_ORDER: ActorMood[] = ["hostile", "critical", "neutral", "loyal"];
 
 export function moodOf(score: number): ActorMood {
@@ -24,14 +24,14 @@ export function mediaScore(ctx: StepCtx): number {
     + effectTotal(ctx, "media") + state.moodMods.media;
 }
 
-/** Humor pelo escore, nunca abaixo do maior `mediaFloor` dos nós ativos (mídia cativa/leal). */
+/** Mood from the score, never below the highest `mediaFloor` among active nodes (captive/loyal media). */
 function mediaMood(ctx: StepCtx): ActorMood {
   const floors = activeEffects(ctx).flatMap((e) => e.mediaFloor ?? []);
   const rank = Math.max(...[moodOf(mediaScore(ctx)), ...floors].map((m) => MOOD_ORDER.indexOf(m)));
   return MOOD_ORDER[rank] ?? "neutral";
 }
 
-/** §3.6: humores da mídia e das Forças Armadas a partir dos escores. */
+/** §3.6: media and Armed Forces moods derived from scores. */
 export function updateMoods(ctx: StepCtx): void {
   ctx.state.actors = { media: mediaMood(ctx), military: moodOf(militaryScore(ctx)) };
 }

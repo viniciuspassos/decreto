@@ -1,7 +1,7 @@
 # Trailer 3: "Decreto"
 
 Roteiro do miolo (10–55 s). Linguagem comum, abertura (A1–A3), encerramento (E1) e produção em
-[comum.md](comum.md).
+[shared.md](shared.md).
 
 Ditadura sanguinária → assassinato → povo comemora. É o trailer da tagline. A sensação de poder
 cresce até se inverter de uma vez no final.

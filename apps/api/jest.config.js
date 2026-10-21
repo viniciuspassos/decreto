@@ -9,7 +9,7 @@ export default {
   transform: {
     "^.+\\.ts$": ["ts-jest", { useESM: true }],
   },
-  // Várias instâncias PGlite em paralelo deixam os testes de HTTP instáveis em máquinas locais e no CI.
+  // Multiple PGlite instances in parallel make HTTP tests flaky locally and in CI.
   maxWorkers: 1,
   collectCoverage: true,
   coverageDirectory: "coverage",

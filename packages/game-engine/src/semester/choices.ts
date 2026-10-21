@@ -8,7 +8,7 @@ import { updateMoods } from "./actors.js";
 
 export type ChoiceOption = "a" | "b";
 
-/** Recalcula o que deriva da base e do apoio depois de aplicar efeitos fora da ordem do semestre. */
+/** Recalculates values derived from the baseline and support after applying out-of-order semester effects. */
 export function refresh(ctx: StepCtx): void {
   ctx.state.indicators = displayedIndicators(ctx);
   ctx.state.approval = approvalOf(ctx.state.groups);
@@ -19,7 +19,7 @@ function optionEffects(eventId: string, option: ChoiceOption, content: SemesterC
   return content.events.find((e) => e.id === eventId)?.options?.[option].effects;
 }
 
-/** Opção que custa mais capital do que o jogador tem fica desabilitada (§4.4). */
+/** An option that costs more capital than the player has is disabled (§4.4). */
 export function canAfford(state: EngineState, effects: EventEffects): boolean {
   return state.capital + (effects.capital ?? 0) >= 0;
 }
@@ -31,8 +31,8 @@ function applyChoice(ctx: StepCtx, eventId: string, effects: EventEffects): void
 }
 
 /**
- * Resolve uma escolha pendente no início do turno (§4.4): não gasta ação, só o capital da opção.
- * Os riscos da opção valem para a rolagem do semestre corrente.
+ * Resolves a pending choice at the start of the turn (§4.4): costs no action, only the option's capital.
+ * The option's risks apply to the current semester roll.
  */
 export function resolveEventChoice(
   state: EngineState, eventId: string, option: ChoiceOption, content: SemesterContent,
@@ -47,7 +47,7 @@ export function resolveEventChoice(
   return next;
 }
 
-/** Escolhas que o jogador deixou em aberto: vale a opção A, ou a B se a A estiver sem capital. */
+/** Choices left open by the player: use option A, or B if A is unaffordable. */
 export function resolveDefaultChoices(ctx: StepCtx): void {
   ctx.state.pendingChoices.forEach(({ eventId }) => {
     const a = optionEffects(eventId, "a", ctx.content);

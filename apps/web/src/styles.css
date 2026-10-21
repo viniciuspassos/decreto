@@ -1,4 +1,4 @@
-/* Sistema visual "Industry": blueprint, aço sobre papel (design no Notion). */
+/* "Industry" visual system: blueprint, steel on paper (design in Notion). */
 :root {
   --bg: #1e2b3c;
   --bg-raised: #2a3a4f;
@@ -100,7 +100,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .node.blocked circle { fill: var(--muted); stroke: none; }
 .node.selected circle { stroke-width: 4; }
 
-/* Tabelas e cartões */
+/* Tables and cards */
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 8px; }
 td { padding: 6px 8px; border-top: 1px solid var(--line); white-space: nowrap; }
@@ -121,7 +121,7 @@ tr.on, tr:hover { background: var(--bg-raised); cursor: pointer; }
 .timeline span { flex: 1; padding: 6px 8px; font-size: 12px; border: 1px dashed var(--muted); }
 .timeline span.on { background: var(--accent); color: var(--bg); border-style: solid; }
 
-/* Evento e fim de jogo */
+/* Event and end game */
 .event { flex-direction: row; }
 .event > :first-child { flex: 1.6; }
 .event > .side { flex: 1; padding: 32px; }

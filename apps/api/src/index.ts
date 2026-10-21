@@ -11,11 +11,11 @@ export function startServer(db: Db = createDb()): Server {
   const assetsDir = process.env.ASSETS_DIR ?? path.resolve(dirname, "../../../assets/images");
 
   return createApp({ db, assetsDir }).listen(port, () => {
-    console.log(`[api] escutando em http://localhost:${port}`);
+    console.log(`[api] listening at http://localhost:${port}`);
   });
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  /* istanbul ignore next -- bootstrap de CLI, não roda sob o import dos testes */
+  /* istanbul ignore next -- CLI bootstrap, not run when imported by tests */
   startServer();
 }

@@ -1,53 +1,53 @@
 /**
- * Constantes de regra (roteiro §2–§3) e parâmetros de custo/turno usados pelo motor
- * (`packages/game-engine`). Só números — nenhuma fórmula vive aqui.
+ * Rule constants (design §2–§3) and cost/turn parameters used by the engine
+ * (`packages/game-engine`). Numbers only; formulas do not live here.
  */
 
-/** Ações disponíveis por turno (semestre), antes de qualquer desconto. */
+/** Actions available per turn (semester), before any discounts. */
 export const MAX_ACTIONS = 6;
 export const TURNS_PER_TERM = 8;
-/** Mandatos seguidos no poder para vencer por tempo (20 anos). */
+/** Consecutive terms in power required to win by time (20 years). */
 export const TERMS_TO_WIN = 5;
-/** Nós de regime que cancelam as eleições (S4): o mandato vira sem urna e o poder segue (roteiro §8). */
+/** Regime nodes that cancel elections (S4): the term continues without a vote and power is retained (design §8). */
 export const ELECTION_SUSPENDING_NODES = ["election-postponement", "end-of-elections"];
-/** Turno em que a partida termina sem vitória (40 anos). */
+/** Turn when the game ends without a win (40 years). */
 export const LAST_TURN = 80;
-/** Abaixo desta aprovação, risco de golpe vira derrota (ver `game-design` §3.7). */
+/** Below this approval, coup risk causes a loss (see `game-design` §3.7). */
 export const COUP_APPROVAL = 15;
 
-/** S3: custo = base × (1 + profundidade × peso maior + distância × peso menor). */
+/** S3: cost = base × (1 + depth × higher weight + distance × lower weight). */
 export const CAPITAL_COST_WEIGHTS = {
   base: 10,
   depth: 1,
   distance: 0.4,
 } as const;
 
-/** Lua de mel: margem de vitória grande desconta as primeiras ações do mandato pela metade. */
+/** Honeymoon: a large victory margin discounts the first actions of the term by half. */
 export const HONEYMOON = {
   minMargin: 20,
   discountedActions: 2,
   discount: 0.5,
 } as const;
 
-/** Desconto de custo em crise, só nos campos de Segurança e Poder (S3). */
+/** Crisis cost discount, only for the Security and Power fields (S3). */
 export const CRISIS_DISCOUNT = {
   fields: ["security", "power"] as const,
   discount: 0.3,
 } as const;
 
-/** Alíquotas possíveis da árvore de intensidade `taxes` (game-design §1.4). */
+/** Possible rates for the `taxes` intensity tree (game-design §1.4). */
 export const TAX_RATES = [0, 10, 20, 30, 40, 50, 60, 70] as const;
 export type TaxRate = (typeof TAX_RATES)[number];
 
-/** Custo de mudar `taxRate`: `10 × (1 + salto em faixas de 10%)`. */
+/** Cost to change `taxRate`: `10 × (1 + number of 10% brackets crossed)`. */
 export const TAX_STEP_COST_BASE = 10;
 
-/** Partida nova: capital e apoio de cada grupo não emergente ao tomar posse. */
+/** New game: starting capital and support for each non-emergent group upon taking office. */
 export const INITIAL_CAPITAL = 60;
 export const INITIAL_SUPPORT = 50;
-/** Capital ganho por semestre = aprovação × este fator (roteiro §4.21: só a aprovação conta). */
+/** Capital earned per semester = approval × this factor (design §4.21: approval is the only factor). */
 export const CAPITAL_PER_APPROVAL = 0.5;
-/** Apoio perdido por promessa de campanha não cumprida, pelos grupos que gostaram dela (roteiro §7). */
+/** Support lost by groups that liked an unfulfilled campaign promise (design §7). */
 export const BROKEN_PROMISE_PENALTY = 6;
-/** Reação de grupo por ação de política que ele gosta (+) ou não gosta (−). */
+/** Group reaction per policy action they like (+) or dislike (−). */
 export const POLICY_REACTION = 4;

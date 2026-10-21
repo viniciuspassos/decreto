@@ -1,33 +1,29 @@
-## Descrição
+## Description
 
-<!-- Resuma o que esta PR faz e por quê. Se corrige/implementa algo descrito no roteiro
-(`roteiro-do-jogo.md`), aponte a seção (ex.: S3, S6). -->
+<!-- Summarize what this pull request changes and why. If it fixes or implements something in the game design (`game-design.md`), reference the relevant section (for example, S3 or S6). -->
 
-## Tipo de mudança
+## Type of change
 
-- [ ] `feat` — nova funcionalidade
-- [ ] `fix` — correção de bug
-- [ ] `docs` — documentação
-- [ ] `refactor` — refatoração sem mudança de comportamento
-- [ ] `test` — testes
-- [ ] `build` / `ci` / `chore` — infraestrutura, build ou tarefas de manutenção
+- [ ] `feat` — new feature
+- [ ] `fix` — bug fix
+- [ ] `docs` — documentation
+- [ ] `refactor` — refactoring without behavior changes
+- [ ] `test` — tests
+- [ ] `build` / `ci` / `chore` — infrastructure, build, or maintenance
 
-## Issue relacionada
+## Related issue
 
 Closes #
 
 ## Checklist
 
-- [ ] Segui as convenções do `CLAUDE.md` do projeto e, quando aplicável, do roteiro
-      (`roteiro-do-jogo.md`)
-- [ ] Dados de conteúdo (árvores, grupos, regimes, etc.) ficam em módulos de dados,
-      não hard-coded em UI/motor
-- [ ] Strings visíveis ao jogador passam por chave de i18n (pt-BR/en); "Decreto" não foi
-      traduzido
-- [ ] Testes novos/atualizados cobrem a mudança (TDD: teste antes do código)
-- [ ] `typecheck`, `lint` e `test` passam localmente
-- [ ] Nenhum segredo (token, chave, `.env`) foi commitado
+- [ ] Followed the project conventions in `CLAUDE.md` and, when applicable, the game design in `game-design.md`
+- [ ] Kept content data (trees, groups, regimes, etc.) in data modules instead of hard-coding it in the UI or engine
+- [ ] Routed player-visible strings through i18n (`pt-BR`/`en`); did not translate “Decreto”
+- [ ] Added or updated tests that cover the change
+- [ ] `typecheck`, `lint`, and `test` pass locally
+- [ ] Committed no secrets (tokens, keys, `.env` files)
 
-## Como testar
+## How to test
 
-<!-- Passos para validar manualmente a mudança, se aplicável. -->
+<!-- Include manual validation steps, if applicable. -->

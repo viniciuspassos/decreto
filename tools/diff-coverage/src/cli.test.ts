@@ -49,7 +49,7 @@ describe("run", () => {
     await rm(repoRoot, { recursive: true, force: true });
   });
 
-  it("retorna 0 quando não há arquivos de src alterados", async () => {
+  it("returns 0 when no src files have changed", async () => {
     expect(await run("HEAD", repoRoot)).toBe(0);
   });
 
@@ -59,13 +59,13 @@ describe("run", () => {
     git(["commit", "-m", "feat: change return value"], repoRoot);
   }
 
-  it("retorna 1 quando não há nenhum coverage-final.json gerado ainda", async () => {
+  it("returns 1 when no coverage-final.json has been generated yet", async () => {
     await changeLogicLine();
 
     expect(await run("HEAD~1", repoRoot)).toBe(1);
   });
 
-  it("retorna 0 quando a linha alterada está coberta", async () => {
+  it("returns 0 when the changed line is covered", async () => {
     await changeLogicLine();
     const coverageDir = join(repoRoot, "packages", "fake", "coverage");
     await mkdir(coverageDir, { recursive: true });
@@ -77,7 +77,7 @@ describe("run", () => {
     expect(await run("HEAD~1", repoRoot)).toBe(0);
   });
 
-  it("retorna 1 quando a linha alterada não está coberta", async () => {
+  it("returns 1 when the changed line is not covered", async () => {
     await changeLogicLine();
     const coverageDir = join(repoRoot, "packages", "fake", "coverage");
     await mkdir(coverageDir, { recursive: true });

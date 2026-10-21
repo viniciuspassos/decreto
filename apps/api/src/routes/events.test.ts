@@ -22,7 +22,7 @@ afterAll(async () => {
 });
 
 describe("GET /events/:eventName/image", () => {
-  it("retorna a imagem do evento quando ela existe", async () => {
+  it("returns the event image when it exists", async () => {
     const app = createApp({ db, assetsDir });
 
     const response = await request(app).get("/events/prisao-oposicao/image");
@@ -31,7 +31,7 @@ describe("GET /events/:eventName/image", () => {
     expect(response.headers["content-type"]).toBe("image/png");
   });
 
-  it("retorna 404 quando o evento não tem imagem cadastrada", async () => {
+  it("returns 404 when the event has no registered image", async () => {
     const app = createApp({ db, assetsDir });
 
     const response = await request(app).get("/events/evento-inexistente/image");
@@ -39,7 +39,7 @@ describe("GET /events/:eventName/image", () => {
     expect(response.status).toBe(404);
   });
 
-  it("retorna 404 em vez de escapar de ASSETS_DIR (path traversal)", async () => {
+  it("returns 404 instead of escaping ASSETS_DIR (path traversal)", async () => {
     await db
       .insert(eventImages)
       .values({ eventName: "traversal-test", fileLocation: "../../../../etc/passwd" });
@@ -50,18 +50,18 @@ describe("GET /events/:eventName/image", () => {
     expect(response.status).toBe(404);
   });
 
-  it("retorna 404 quando o arquivo cadastrado não existe em disco", async () => {
+  it("returns 404 when the registered file does not exist on disk", async () => {
     await db
       .insert(eventImages)
-      .values({ eventName: "arquivo-ausente", fileLocation: "eventos/nao-existe.png" });
+      .values({ eventName: "missing-file", fileLocation: "events/missing.png" });
     const app = createApp({ db, assetsDir });
 
-    const response = await request(app).get("/events/arquivo-ausente/image");
+    const response = await request(app).get("/events/missing-file/image");
 
     expect(response.status).toBe(404);
   });
 
-  it("retorna 500 (em vez de derrubar o processo) quando a consulta ao banco falha", async () => {
+  it("returns 500 (instead of crashing the process) when the database query fails", async () => {
     const { db: brokenDb, close: closeBrokenDb } = await createTestDb({ runMigrations: false });
     await closeBrokenDb();
     const app = createApp({ db: brokenDb, assetsDir });

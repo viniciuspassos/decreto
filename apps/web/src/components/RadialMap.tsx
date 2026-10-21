@@ -10,7 +10,7 @@ const R0 = 120;
 const STEP = 80;
 const RINGS = 6;
 const CLUSTER_ZOOM = 1.8;
-/** Tamanho do rótulo em unidades SVG na escala 1; dividido pela escala para ficar constante na tela. */
+/** Label size in SVG units at scale 1; divided by the scale to remain constant on screen. */
 const LABEL_FONT = 24;
 const BLOCKED_RADIUS = 4;
 const PRIORITY: Record<NodeStatus, number> = { queued: 1, available: 2, active: 3, blocked: 9 };
@@ -19,7 +19,7 @@ export const ringRadius = (depth: number) => R0 + depth * STEP;
 export const polar = (angle: number, r: number) => ({ x: C + r * Math.cos(angle), y: C + r * Math.sin(angle) });
 
 const FIELDS = [...new Set(policyTrees.map((tr) => tr.field))];
-/** Um raio por árvore, com uma posição vazia entre campos para separar os grupos. */
+/** One radius per tree, with an empty position between fields to separate groups. */
 const SLOTS = policyTrees.length + FIELDS.length;
 export const TREE_ANGLES = policyTrees.map(
   (tr, i) => ((i + FIELDS.indexOf(tr.field)) / SLOTS) * 2 * Math.PI - Math.PI / 2,
@@ -108,7 +108,7 @@ const mapNodes = (game: GameState): MapNode[] =>
     tree.nodes.map((nodeId, d) => ({ nodeId, status: nodeStatus(game, nodeId), ...polar(TREE_ANGLES[i] ?? 0, ringRadius(d + 1)) })),
   );
 
-/** Rótulos candidatos: tudo que não está bloqueado, mais a política selecionada (prioridade máxima). */
+/** Candidate labels: everything that is not blocked, plus the selected policy (highest priority). */
 export function labelCandidates(nodes: MapNode[], selected: string | null, nameOf: (n: MapNode) => string): LabelCandidate[] {
   return nodes
     .filter((n) => n.status !== "blocked" || n.nodeId === selected)

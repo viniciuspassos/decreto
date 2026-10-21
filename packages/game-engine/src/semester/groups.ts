@@ -4,20 +4,20 @@ import {
 import type { GroupState, Indicators, Level } from "@decreto/shared-types";
 import { addSize, activeEffects, clamp, effectTotal, type StepCtx } from "./common.js";
 
-/** Média do apoio ponderada pelo tamanho; grupos emergentes (`support: null`) não contam. */
+/** Size-weighted average support; emerging groups (`support: null`) are not counted. */
 export function approvalOf(groups: GroupState[]): number {
   const counted = groups.filter((g) => g.support !== null && g.size > 0);
   const total = counted.reduce((sum, g) => sum + g.size, 0);
   return total === 0 ? 0 : counted.reduce((sum, g) => sum + (g.support ?? 0) * g.size, 0) / total;
 }
 
-/** Lealdade exibida, derivada do apoio corrente. */
+/** Displayed loyalty, derived from current support. */
 export function loyaltyOf(support: number | null): Level {
   if (support === null || support < 40) return "low";
   return support >= 60 ? "high" : "medium";
 }
 
-/** §3.5: âncora para onde o apoio volta, com desgaste de −2 por mandato seguido. */
+/** §3.5: anchor that support returns to, with wear of −2 for each consecutive term. */
 export function supportAnchor(ctx: StepCtx): number {
   return clamp(45 - 2 * (ctx.state.termsInRow - 1) + effectTotal(ctx, "supportAnchor"), 30, 65);
 }
@@ -32,14 +32,14 @@ function reactionTerm(r: GroupIndicatorReaction, ind: Indicators): number {
   return r.hiddenByCensorship ? raw * clamp(ind.pressFreedom / 60, 0, 1) : raw;
 }
 
-/** Soma das linhas da tabela de reação aos indicadores (§3.5) que valem para o grupo. */
+/** Sum of the indicator response table rows (§3.5) that apply to the group. */
 export function indicatorReaction(groupId: string, ind: Indicators): number {
   return GROUP_INDICATOR_REACTIONS
     .filter((r) => r.groups === "all" || r.groups.includes(groupId))
     .reduce((sum, r) => sum + reactionTerm(r, ind), 0);
 }
 
-/** Tamanhos por semestre: `tam` dos nós ativos (com teto) e `poor` puxado pelo desemprego (§3.5). */
+/** Sizes per semester: `tam` from active nodes (capped) and `poor` driven by unemployment (§3.5). */
 export function updateSizes(ctx: StepCtx): void {
   const { state } = ctx;
   activeEffects(ctx).flatMap((e) => e.groupSizePerSemester ?? []).forEach(({ groupId, delta, cap }) => {
@@ -49,7 +49,7 @@ export function updateSizes(ctx: StepCtx): void {
   addSize(state, "poor", 0.1 * (state.indicators.unemployment - 8));
 }
 
-/** §3.5: reação aos indicadores + volta à âncora + humor da mídia − recessão; recalcula a aprovação. */
+/** §3.5: indicator response + return to anchor + media mood − recession; recalculates approval. */
 export function updateSupport(ctx: StepCtx): void {
   const { state } = ctx;
   const anchor = supportAnchor(ctx);

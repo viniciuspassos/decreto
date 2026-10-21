@@ -1,8 +1,8 @@
 # Trailer 1: "Mandato" — roteiro da trilha sonora
 
 Trilha e som do trailer 1. A ordem e a duração dos planos seguem o
-[`1-mandato.manifest.json`](1-mandato.manifest.json) e o [`comum.manifest.json`](comum.manifest.json).
-Narrativa de cada plano em [1-mandato.md](1-mandato.md); base comum em [comum.md](comum.md).
+[`1-mandato.manifest.json`](1-mandato.manifest.json) e o [`shared.manifest.json`](shared.manifest.json).
+Narrativa de cada plano em [1-mandato.md](1-mandato.md); base comum em [shared.md](shared.md).
 
 Sem diálogo, sem narração, sem voz inteligível. Só **música** (instrumental) e **som ambiente** da
 cena. Mesmo áudio nas versões pt-BR e en.

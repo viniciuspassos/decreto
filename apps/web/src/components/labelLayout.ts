@@ -1,7 +1,7 @@
 /**
- * Posiciona rótulos do mapa radial sem sobreposição: nome acima do nó, figura abaixo.
- * Guloso por prioridade — um rótulo que colidiria com outro rótulo ou nó fica oculto
- * (aparece ao aproximar, já que a fonte encolhe em unidades SVG conforme o zoom).
+ * Places radial map labels without overlap: the name above the node, the figure below.
+ * Greedy by priority: a label that would collide with another label or node is hidden
+ * (it appears when zooming in, since the font shrinks in SVG units as the zoom changes).
  */
 
 export interface LabelCandidate {
@@ -10,7 +10,7 @@ export interface LabelCandidate {
   y: number;
   name: string;
   figure?: string;
-  /** Menor = mais importante. */
+/** Lower values have higher priority. */
   priority: number;
 }
 
@@ -31,7 +31,7 @@ interface Box {
 
 export const NODE_RADIUS = 10;
 const GAP = 6;
-/** Largura média de um caractere de Barlow em relação ao tamanho da fonte (folgada). */
+/** Average width of a Barlow character relative to the font size (with some slack). */
 const CHAR_WIDTH = 0.55;
 
 const overlaps = (a: Box, b: Box) => a.x1 < b.x2 && b.x1 < a.x2 && a.y1 < b.y2 && b.y1 < a.y2;
@@ -47,7 +47,7 @@ export interface Obstacle {
   r: number;
 }
 
-/** `obstacles`: círculos que nenhum rótulo pode cobrir (todos os nós, o centro). */
+/** `obstacles`: circles that no label may cover (all nodes and the center). */
 export function layoutLabels(candidates: LabelCandidate[], font: number, obstacles: Obstacle[]): PlacedLabel[] {
   const r = NODE_RADIUS;
   const taken: Box[] = obstacles.map((o) => ({ x1: o.x - o.r, x2: o.x + o.r, y1: o.y - o.r, y2: o.y + o.r }));

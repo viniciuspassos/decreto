@@ -1,7 +1,7 @@
 import { parseDiff } from "./parseDiff.js";
 
 describe("parseDiff", () => {
-  it("coleta números de linha adicionados num arquivo modificado", () => {
+  it("collects added line numbers in a modified file", () => {
     const diff = [
       "diff --git a/src/foo.ts b/src/foo.ts",
       "index abc123..def456 100644",
@@ -18,7 +18,7 @@ describe("parseDiff", () => {
     expect(changed.get("src/foo.ts")).toEqual(new Set([11, 12]));
   });
 
-  it("ignora linhas removidas e não move o cursor da nova versão", () => {
+  it("ignores removed lines and does not move the new version cursor", () => {
     const diff = [
       "diff --git a/src/bar.ts b/src/bar.ts",
       "--- a/src/bar.ts",
@@ -35,7 +35,7 @@ describe("parseDiff", () => {
     expect(changed.get("src/bar.ts")).toEqual(new Set([20]));
   });
 
-  it("ignora arquivos deletados (+++ /dev/null)", () => {
+  it("ignores deleted files (+++ /dev/null)", () => {
     const diff = [
       "diff --git a/src/old.ts b/src/old.ts",
       "deleted file mode 100644",
@@ -52,7 +52,7 @@ describe("parseDiff", () => {
     expect(changed.size).toBe(0);
   });
 
-  it("trata múltiplos hunks no mesmo arquivo de forma independente", () => {
+  it("handles multiple hunks in the same file independently", () => {
     const diff = [
       "diff --git a/src/multi.ts b/src/multi.ts",
       "--- a/src/multi.ts",
@@ -69,11 +69,11 @@ describe("parseDiff", () => {
     expect(changed.get("src/multi.ts")).toEqual(new Set([2, 52]));
   });
 
-  it("retorna mapa vazio para um diff sem conteúdo", () => {
+  it("returns an empty map for a diff with no content", () => {
     expect(parseDiff("").size).toBe(0);
   });
 
-  it("avança o cursor em linhas de contexto, para diffs com -U maior que 0", () => {
+  it("advances the cursor on context lines for diffs with -U greater than 0", () => {
     const diff = [
       "diff --git a/src/ctx.ts b/src/ctx.ts",
       "--- a/src/ctx.ts",

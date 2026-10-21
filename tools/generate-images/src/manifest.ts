@@ -3,18 +3,18 @@ import type { ManifestEntry } from "./types.js";
 
 const NAME_PATTERN = /^[a-z0-9-]+$/;
 
-/** Valida e normaliza o conteúdo bruto do manifest (array de entradas). */
+/** Validates and normalizes raw manifest content (an array of entries). */
 export function parseManifest(raw: string): ManifestEntry[] {
   const data: unknown = JSON.parse(raw);
   if (!Array.isArray(data)) {
-    throw new Error("manifest deve ser um array de entradas");
+    throw new Error("manifest must be an array of entries");
   }
   return data.map((entry, index) => validateEntry(entry, index));
 }
 
 function validateEntry(entry: unknown, index: number): ManifestEntry {
   if (typeof entry !== "object" || entry === null) {
-    throw new Error(`entrada ${index} inválida: não é um objeto`);
+    throw new Error(`entry ${index} is invalid: expected an object`);
   }
 
   const { category, name, prompt, seed } = entry as Record<string, unknown>;
@@ -22,10 +22,10 @@ function validateEntry(entry: unknown, index: number): ManifestEntry {
   requireSlug(name, index, "name");
 
   if (typeof prompt !== "string" || prompt.trim().length === 0) {
-    throw new Error(`entrada ${index}: "prompt" vazio`);
+    throw new Error(`entry ${index}: "prompt" must be a non-empty string`);
   }
   if (seed !== undefined && typeof seed !== "number") {
-    throw new Error(`entrada ${index}: "seed" deve ser número`);
+    throw new Error(`entry ${index}: "seed" must be a number`);
   }
 
   return { category: category as string, name: name as string, prompt, seed };
@@ -33,7 +33,7 @@ function validateEntry(entry: unknown, index: number): ManifestEntry {
 
 function requireSlug(value: unknown, index: number, field: string): void {
   if (typeof value !== "string" || !NAME_PATTERN.test(value)) {
-    throw new Error(`entrada ${index}: "${field}" deve ser minúsculo, só letras/números/hífen`);
+    throw new Error(`entry ${index}: "${field}" must be lowercase and contain only letters, numbers, or hyphens`);
   }
 }
 

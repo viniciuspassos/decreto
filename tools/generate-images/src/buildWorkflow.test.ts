@@ -11,31 +11,31 @@ function baseWorkflow(): ApiWorkflow {
 }
 
 describe("buildWorkflowForEntry", () => {
-  it("substitui o prompt positivo e o prefixo do arquivo de saída", () => {
+  it("replaces the positive prompt and output file prefix", () => {
     const workflow = buildWorkflowForEntry(baseWorkflow(), {
-      category: "eventos",
-      name: "golpe-militar",
+      category: "events",
+      name: "coup",
       prompt: "tanks in the street",
     });
 
     expect(workflow["2"]?.inputs.text).toBe("tanks in the street");
-    expect(workflow["7"]?.inputs.filename_prefix).toBe("decreto/eventos/golpe-militar");
+    expect(workflow["7"]?.inputs.filename_prefix).toBe("decreto/events/coup");
   });
 
-  it("mantém a seed do template quando a entrada não define uma", () => {
+  it("keeps the template seed when the input does not define one", () => {
     const workflow = buildWorkflowForEntry(baseWorkflow(), {
-      category: "eventos",
-      name: "golpe-militar",
+      category: "events",
+      name: "coup",
       prompt: "tanks in the street",
     });
 
     expect(workflow["5"]?.inputs.seed).toBe(42);
   });
 
-  it("sobrescreve a seed quando a entrada define uma", () => {
+  it("overrides the seed when the input defines one", () => {
     const workflow = buildWorkflowForEntry(baseWorkflow(), {
-      category: "eventos",
-      name: "golpe-militar",
+      category: "events",
+      name: "coup",
       prompt: "tanks in the street",
       seed: 999,
     });
@@ -43,7 +43,7 @@ describe("buildWorkflowForEntry", () => {
     expect(workflow["5"]?.inputs.seed).toBe(999);
   });
 
-  it("sobrescreve noise_seed quando o sampler é KSamplerAdvanced", () => {
+  it("overrides noise_seed when the sampler is KSamplerAdvanced", () => {
     const base = baseWorkflow();
     base["5"] = { class_type: "KSamplerAdvanced", inputs: { noise_seed: 42 } };
 
@@ -57,19 +57,19 @@ describe("buildWorkflowForEntry", () => {
     expect(workflow["5"]?.inputs).toEqual({ noise_seed: 7 });
   });
 
-  it("não modifica o template base original", () => {
+  it("does not modify the original base template", () => {
     const base = baseWorkflow();
-    buildWorkflowForEntry(base, { category: "eventos", name: "x", prompt: "y" });
+    buildWorkflowForEntry(base, { category: "events", name: "x", prompt: "y" });
 
     expect(base["2"]?.inputs.text).toBe("{{PROMPT}}");
   });
 
-  it("lança erro se o template não tiver o nó esperado", () => {
+  it("throws if the template does not have the expected node", () => {
     const base = baseWorkflow();
     delete base["7"];
 
     expect(() =>
-      buildWorkflowForEntry(base, { category: "eventos", name: "x", prompt: "y" }),
-    ).toThrow('não tem o nó "7"');
+      buildWorkflowForEntry(base, { category: "events", name: "x", prompt: "y" }),
+    ).toThrow('is missing node "7"');
   });
 });

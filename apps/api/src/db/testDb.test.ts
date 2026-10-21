@@ -13,7 +13,7 @@ describe("createTestDb", () => {
     }
   });
 
-  it("com runMigrations: false, a tabela ainda não existe", async () => {
+  it("with runMigrations: false, the table does not exist yet", async () => {
     const { db, close } = await createTestDb({ runMigrations: false });
 
     try {
@@ -23,16 +23,16 @@ describe("createTestDb", () => {
     }
   });
 
-  it("close() impede consultas seguintes", async () => {
+  it("close() prevents subsequent queries", async () => {
     const { db, close } = await createTestDb();
     await close();
 
     await expect(db.select().from(eventImages)).rejects.toThrow();
   });
 
-  it("fecha o client e repropaga o erro quando a migration falha", async () => {
+  it("closes the client and rethrows the error when migration fails", async () => {
     await expect(
-      createTestDb({ migrationsFolder: "/caminho/de/migrations/inexistente" }),
+      createTestDb({ migrationsFolder: "/path/to/migrations/missing" }),
     ).rejects.toThrow();
   });
 });

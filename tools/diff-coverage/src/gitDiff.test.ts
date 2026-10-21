@@ -25,15 +25,15 @@ describe("getRepoRoot / getDiffText", () => {
     await rm(repoRoot, { recursive: true, force: true });
   });
 
-  it("getRepoRoot aponta para a raiz do repositório criado", () => {
+  it("getRepoRoot points to the created repository root", () => {
     expect(getRepoRoot(repoRoot)).toBe(repoRoot);
   });
 
-  it("getDiffText retorna vazio quando HEAD não mudou", () => {
+  it("getDiffText returns empty when HEAD has not changed", () => {
     expect(getDiffText("HEAD", repoRoot)).toBe("");
   });
 
-  it("getDiffText mostra a linha adicionada depois de um novo commit", async () => {
+  it("getDiffText shows the added line after a new commit", async () => {
     await writeFile(join(repoRoot, "file.ts"), "export const a = 1;\nexport const b = 2;\n");
     git(["add", "file.ts"], repoRoot);
     git(["commit", "-m", "feat: add b"], repoRoot);

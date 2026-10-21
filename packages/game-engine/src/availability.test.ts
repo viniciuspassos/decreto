@@ -34,50 +34,50 @@ function ctx(activeNodes: string[], queue: string[] = []): AvailabilityContext {
 }
 
 describe("prerequisitesMet", () => {
-  it("exige o nó anterior da mesma árvore ativo", () => {
+  it("requires the previous node in the same tree to be active", () => {
     expect(prerequisitesMet("carry-restriction", ctx([]))).toBe(false);
     expect(prerequisitesMet("carry-restriction", ctx(["mandatory-registration"]))).toBe(true);
   });
 
-  it("primeiro nó da árvore não exige nada", () => {
+  it("the first node in a tree has no requirements", () => {
     expect(prerequisitesMet("mandatory-registration", ctx([]))).toBe(true);
   });
 
-  it("pré-requisito extra é satisfeito por qualquer um dos nós listados", () => {
+  it("an extra prerequisite is satisfied by any of the listed nodes", () => {
     expect(prerequisitesMet("lifetime-title", ctx([]))).toBe(false);
     expect(prerequisitesMet("lifetime-title", ctx(["mandatory-portraits"]))).toBe(true);
   });
 });
 
 describe("blockedByOpposite", () => {
-  it("bloqueia quando a árvore oposta tem nó ativo", () => {
+  it("blocks when the opposing tree has an active node", () => {
     expect(blockedByOpposite("carry-restriction", ctx(["easier-registration"]))).toBe(true);
   });
 
-  it("bloqueia quando a árvore oposta só tem nó na fila do mesmo turno", () => {
+  it("blocks when the opposing tree has a node queued for the same turn", () => {
     expect(blockedByOpposite("carry-restriction", ctx([], ["easier-registration"]))).toBe(true);
   });
 
-  it("não bloqueia quando a oposta está livre", () => {
+  it("does not block when the opposing tree is clear", () => {
     expect(blockedByOpposite("carry-restriction", ctx([]))).toBe(false);
   });
 
-  it("bloqueia par exclusivo mesmo sem árvores opostas", () => {
+  it("blocks an exclusive pair even without opposing trees", () => {
     expect(blockedByOpposite("casino-ban", ctx(["casinos-allowed"]))).toBe(true);
   });
 });
 
 describe("nodeStatus", () => {
-  it("é active quando já ativo e queued quando na fila", () => {
+  it("is active when already active and queued when in the queue", () => {
     expect(nodeStatus("mandatory-registration", ctx(["mandatory-registration"]))).toBe("active");
     expect(nodeStatus("carry-restriction", ctx([], ["carry-restriction"]))).toBe("queued");
   });
 
-  it("é available quando pré-requisitos ok e nada bloqueia", () => {
+  it("is available when prerequisites are met and nothing blocks it", () => {
     expect(nodeStatus("mandatory-registration", ctx([]))).toBe("available");
   });
 
-  it("é blocked sem pré-requisito ou com oposta ativa", () => {
+  it("is blocked without a prerequisite or with an active opposing node", () => {
     expect(nodeStatus("carry-restriction", ctx([]))).toBe("blocked");
     expect(nodeStatus("mandatory-registration", ctx(["easier-registration"]))).toBe("blocked");
   });

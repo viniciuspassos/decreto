@@ -20,13 +20,13 @@ function play(state: EngineState, semesters: number, content = defaultContent) {
 }
 
 describe("endSemester", () => {
-  it("é reprodutível: mesma seed gera o mesmo semestre", () => {
+  it("is reproducible: the same seed generates the same semester", () => {
     const start = { ...game(42), queue: ["harsher-sentences"] };
     expect(endSemester(start, defaultContent)).toEqual(endSemester(start, defaultContent));
     expect(endSemester(game(43), defaultContent).state.base).not.toEqual(endSemester(game(42), defaultContent).state.base);
   });
 
-  it("não altera o estado de entrada e avança o turno e a seed", () => {
+  it("does not change the input state and advances the turn and seed", () => {
     const start = { ...game(), queue: ["harsher-sentences"] };
     const snapshot = cloneState(start);
     const { state } = endSemester(start, defaultContent);
@@ -38,7 +38,7 @@ describe("endSemester", () => {
     expect(state.queue).toEqual([]);
   });
 
-  it("sempre sai pelo menos 1 evento sorteado, sem repetir no semestre e com no máximo 1 imagem", () => {
+  it("always produces at least 1 random event, with no repeats in the semester and at most 1 image", () => {
     const { reports } = play(game(7), 30);
     reports.forEach((report) => {
       const drawn = report.events.filter((e) => drawnIds.has(e.id));
@@ -48,21 +48,21 @@ describe("endSemester", () => {
     });
   });
 
-  it("efeitos de nó acumulam ao longo da árvore", () => {
+  it("node effects accumulate along the tree", () => {
     const base = game();
     const crime = (activeNodes: string[]) => displayedIndicators({ state: { ...base, activeNodes }, content: defaultContent }).crime;
     expect(crime(["harsher-sentences"])).toBeCloseTo(base.indicators.crime - 2);
     expect(crime(["harsher-sentences", "military-on-streets"])).toBeCloseTo(base.indicators.crime - 7);
   });
 
-  it("a dívida cresce por semestre sem políticas", () => {
+  it("debt grows each semester without policies", () => {
     const quiet = { ...defaultContent, events: [] };
     const { reports, state } = play(game(3), 6, quiet);
     const debts = [...reports.map((r) => r.indicatorsBefore.debt), state.indicators.debt];
     debts.slice(1).forEach((debt, i) => expect(debt).toBeGreaterThan(debts[i] ?? Infinity));
   });
 
-  it("o capital ganho usa a aprovação nova, depois de pagar a fila", () => {
+  it("capital gained uses the new approval, after paying for the queue", () => {
     const start = { ...game(), queue: ["harsher-sentences"] };
     const { state, report } = endSemester(start, defaultContent);
     expect(state.capitalPerTurn).toBe(capitalGain(state.approval));
@@ -70,11 +70,11 @@ describe("endSemester", () => {
     expect(state.capital).toBe(60 - 24 + capitalGain(state.approval));
   });
 
-  it("não avança partida já perdida", () => {
+  it("does not advance a game that has already been lost", () => {
     expect(() => endSemester({ ...game(), defeat: "coup" }, defaultContent)).toThrow("game over");
   });
 
-  it("escolha em aberto vale a opção A antes da fila, com o capital do início do turno", () => {
+  it("an open choice defaults to option A before the queue, using capital at the start of the turn", () => {
     const start = { ...game(), capital: 34, queue: ["harsher-sentences"], pendingChoices: [{ eventId: "general-strike", turn: 0 }] };
     const { state } = endSemester(start, defaultContent);
     expect(state.capital).toBe(34 - 10 - 24 + capitalGain(state.approval));
@@ -82,12 +82,12 @@ describe("endSemester", () => {
     expect(() => endSemester({ ...start, capital: 30 }, defaultContent)).toThrow(InvalidQueueError);
   });
 
-  it("rejeita fila inválida", () => {
+  it("rejects an invalid queue", () => {
     const invalid = { ...game(), queue: ["mandatory-registration", "easier-registration"] };
     expect(() => endSemester(invalid, defaultContent)).toThrow(InvalidQueueError);
   });
 
-  it("golpe acontece com aprovação baixa, recessão e militares hostis", () => {
+  it("a coup occurs with low approval, recession, and hostile military", () => {
     const doomed = (seed: number): EngineState => {
       const s = game(seed);
       s.groups.forEach((g) => { if (g.support !== null) g.support = 5; });
@@ -103,7 +103,7 @@ describe("endSemester", () => {
     expect(coups.length).toBeGreaterThan(0);
   });
 
-  it("relatório traz riscos, mudanças de grupo e eventos", () => {
+  it("the report includes risks, group changes, and events", () => {
     const { report } = endSemester({ ...game(), queue: ["harsher-sentences"] }, defaultContent);
     expect(report.applied).toEqual(["harsher-sentences"]);
     expect(Object.keys(report.risks).sort()).toEqual(["attack", "coup", "rebels", "revolution"]);
@@ -111,7 +111,7 @@ describe("endSemester", () => {
     expect(report.events.length).toBeGreaterThan(0);
   });
 
-  it("liga a crise após evento de crise e decai os modificadores temporários", () => {
+  it("starts the crisis after a crisis event and decays temporary modifiers", () => {
     const s = game();
     s.lastCrisisTurn = 1;
     s.moodMods = { media: 10, military: -8 };
@@ -120,7 +120,7 @@ describe("endSemester", () => {
     expect(state.moodMods).toEqual({ media: 5, military: -4 });
   });
 
-  it("createRng continua a sequência a partir da seed guardada", () => {
+  it("createRng continues the sequence from the saved seed", () => {
     const rng = createRng(5);
     rng.next();
     const resumed = createRng(rng.seed());

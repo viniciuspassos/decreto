@@ -21,18 +21,18 @@ import {
 const fresh = () => ({ ...newGame("Vessária", "Helena", "unstable"), capital: 1000 });
 
 describe("mockApi", () => {
-  it("custo segue o exemplo do S3: prender opositores = 48", () => {
+  it("cost matches the S3 example: arrest opponents = 48", () => {
     expect(depthOf("arrest-opponents")).toBe(3);
     expect(nodeCost("arrest-opponents")).toBe(48);
     expect(nodeCost("secret-police")).toBe(20);
   });
 
-  it("treeOf e activeCount localizam a árvore do nó", () => {
+  it("treeOf and activeCount locate the node tree", () => {
     expect(treeOf("torture")?.id).toBe("secret-police");
     expect(activeCount(loadSave(), "secret-police")).toBe(2);
   });
 
-  it("nó só fica disponível com o anterior ativo e sem árvore oposta ativa", () => {
+  it("a node is available only when its predecessor is active and the opposing tree is inactive", () => {
     const g = { ...fresh(), activeNodes: ["mandatory-registration"] };
     expect(nodeStatus(g, "mandatory-registration")).toBe("active");
     expect(nodeStatus(g, "carry-restriction")).toBe("available");
@@ -41,7 +41,7 @@ describe("mockApi", () => {
     expect(nodeStatus(g, "lifetime-title")).toBe("blocked");
   });
 
-  it("fila respeita 6 ações, capital e desfaz ao clicar de novo", () => {
+  it("queue respects the 6-action limit and capital, and toggles off when clicked again", () => {
     let g = fresh();
     g = toggleQueued(g, "secret-police");
     expect(nodeStatus(g, "secret-police")).toBe("queued");
@@ -54,7 +54,7 @@ describe("mockApi", () => {
     expect(toggleQueued({ ...fresh(), capital: 10 }, "secret-police").queue).toEqual([]);
   });
 
-  it("endSemester ativa a fila, cobra capital, avança turno e revela figura", () => {
+  it("endSemester activates the queue, charges capital, advances the turn, and reveals a figure", () => {
     const g = toggleQueued(fresh(), "privatizations");
     const { state, report, event } = endSemester(g);
     expect(state.turn).toBe(2);
@@ -65,12 +65,12 @@ describe("mockApi", () => {
     expect(event?.figureId).toBe("fernando-henrique-cardoso");
   });
 
-  it("eleição acontece no início de cada mandato após o primeiro", () => {
+  it("elections occur at the start of each term after the first", () => {
     expect(isElectionTurn({ ...fresh(), turn: 8 })).toBe(false);
     expect(isElectionTurn({ ...fresh(), turn: 9 })).toBe(true);
   });
 
-  it("promessas: uma por campo, projeção e resultado da eleição", () => {
+  it("promises: one per field, vote projection, and election outcome", () => {
     const g = { ...fresh(), turn: 9 };
     const options = campaignOptions(g);
     expect(options).toHaveLength(6);
@@ -83,7 +83,7 @@ describe("mockApi", () => {
     expect(lost.state.turn).toBe(17);
   });
 
-  it("fim de jogo: golpe, 20 anos e 40 anos", () => {
+  it("game end: coup, 20 years, and 40 years", () => {
     expect(checkEnd({ ...fresh(), approval: 10 })).toBe("coup");
     const history = Array.from({ length: 5 }, (_, i) => ({ term: i + 1, inPower: true }));
     expect(checkEnd({ ...fresh(), history })).toBe("twentyYears");
@@ -91,7 +91,7 @@ describe("mockApi", () => {
     expect(checkEnd(fresh())).toBeNull();
   });
 
-  it("endGame ranqueia figuras das políticas ativas", () => {
+  it("endGame ranks figures from active policies", () => {
     const result = endGame(loadSave(), "twentyYears");
     expect(result.outcome).toBe("victory");
     expect(result.ranking[0]?.figureId).toBeDefined();

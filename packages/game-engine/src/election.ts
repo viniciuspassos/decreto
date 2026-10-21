@@ -20,7 +20,7 @@ function promiseFor(nodeId: string, content: SemesterContent): CampaignPromise {
   return { nodeId, gains: groupsWhere("likes"), loses: groupsWhere("dislikes") };
 }
 
-/** Uma opção por campo (exceto Poder, que é regime): o próximo nó disponível entre as árvores do campo. */
+/** One option per field (except Power, which is a regime): the next available node across the field's trees. */
 export function campaignOptions(state: EngineState, content: SemesterContent): CampaignPromise[] {
   const fields = [...new Set(content.policyTrees.map((t) => t.field))].filter((f) => f !== "power");
   return fields.flatMap((field) => {
@@ -40,7 +40,7 @@ function validPromises(state: EngineState, nodeIds: string[], content: SemesterC
 const countFor = (promises: CampaignPromise[], key: "gains" | "loses", groupId: string) =>
   promises.filter((p) => p[key].includes(groupId)).length;
 
-/** Apoio na urna: as promessas do mandato não cumpridas cobram dos grupos que gostaram; as novas animam e afastam. */
+/** Ballot support: broken term promises cost support from groups that liked them; new promises excite and alienate groups. */
 function ballotGroups(state: EngineState, promises: CampaignPromise[], content: SemesterContent): GroupState[] {
   const broken = state.promises.filter((n) => !state.activeNodes.includes(n)).map((n) => promiseFor(n, content));
   return state.groups.map((g) => {
@@ -52,23 +52,23 @@ function ballotGroups(state: EngineState, promises: CampaignPromise[], content: 
   });
 }
 
-/** Votos projetados (% de apoio ponderado) para as promessas escolhidas, sem alterar o estado. */
+/** Projected votes (weighted support %) for the selected promises, without changing the state. */
 export function projectVotes(state: EngineState, nodeIds: string[], content: SemesterContent): number {
   return approvalOf(ballotGroups(state, validPromises(state, nodeIds, content), content));
 }
 
-/** O governo seguinte (IA) roda um mandato sem fila e sem tocar nos nós do jogador; derrubá-lo não é derrota do jogador. */
+/** The next government (AI) runs a term without a queue and without changing the player's nodes; ending it is not a player defeat. */
 function opposition(state: EngineState, content: SemesterContent): EngineState {
   const away = Array.from({ length: TURNS_PER_TERM }).reduce<EngineState>(
     (current) => ({ ...endSemester(current, content).state, defeat: null }), state,
   );
-  // Eventos e crise do governo da IA não passam para o jogador; sem mandato seguido ao voltar.
+  // AI government events and crises do not carry over to the player; no consecutive term on return.
   return { ...away, capital: state.capital, turnsInPower: 0, term: state.term + 1, termsInRow: 0, pendingChoices: [], crisis: false };
 }
 
 /**
- * Eleição de fim de mandato (roteiro §7). Vence com mais de 50% de apoio; margem ≥ 20 (`2×apoio − 100`)
- * ativa a lua de mel. Perder avança um mandato inteiro sob o governo da IA; o jogador pode concorrer de novo.
+ * End-of-term election (design §7). Win with more than 50% support; a margin ≥ 20 (`2×support − 100`)
+ * triggers the honeymoon. Losing advances one full term under AI government; the player can run again.
  */
 export function runElection(state: EngineState, nodeIds: string[], content: SemesterContent): ElectionResult {
   if (state.defeat || !isElectionDue(state)) throw new Error("no election due");

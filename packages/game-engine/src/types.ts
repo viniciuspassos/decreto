@@ -9,38 +9,38 @@ export interface PendingChoice {
 export type Defeat = "coup" | "attack" | "revolution";
 
 /**
- * Estado completo da partida no servidor: o `GameState` que a UI vê + o que só o motor usa
- * (seed, base dos indicadores, cooldowns...). `indicators` guarda os valores exibidos; `debt` é estoque.
+ * Complete server-side game state: the `GameState` seen by the UI plus engine-only data
+ * (seed, indicator baselines, cooldowns...). `indicators` stores displayed values; `debt` is a stock.
  */
 export interface EngineState extends GameState {
   /** Estado do RNG (mulberry32). Nunca enviado ao cliente. */
   seed: number;
-  /** Alíquota corrente: `taxes-X` está ativo ⇔ `taxRate ≥ X` (game-design §1.4). */
+  /** Current tax rate: `taxes-X` is active ⇔ `taxRate ≥ X` (game-design §1.4). */
   taxRate: TaxRate;
-  /** Ajuste de alíquota na fila do turno (conta como 1 ação), ou `null`. */
+  /** Tax rate adjustment in the turn queue (counts as 1 action), or `null`. */
   queuedTaxRate: TaxRate | null;
-  /** "País sem as políticas" (§1.2) e seu valor um semestre antes (momento, §3.1). */
+  /** "Country without policies" (§1.2) and its value one semester earlier (momentum, §3.1). */
   base: Record<LevelIndicatorId, number>;
   previousBase: Record<LevelIndicatorId, number>;
   /** 0 a 3 (§3.4). */
   recessionLevel: number;
   turnsInPower: number;
-  /** Mandatos seguidos, para o desgaste de governo na âncora de apoio (§3.5). */
+  /** Consecutive terms, for government wear on the support anchor (§3.5). */
   termsInRow: number;
-  /** Flag de crise do turno corrente (§3.9) e último turno com evento de crise. */
+  /** Current turn crisis flag (§3.9) and last turn with a crisis event. */
   crisis: boolean;
   lastCrisisTurn: number | null;
-  /** Modificadores temporários de escore de mídia e militares; decaem 50% por semestre (§4.5). */
+  /** Temporary media and military score modifiers; decay by 50% per semester (§4.5). */
   moodMods: { media: number; military: number };
-  /** Último turno em que cada evento sorteado saiu (cooldown, §4.3). */
+  /** Last turn each drawn event occurred (cooldown, §4.3). */
   eventTurns: Record<string, number>;
   lastPositiveEventTurn: number | null;
   rebelsEmerged: boolean;
-  /** Escolhas de evento a resolver no início do turno (§4.4). */
+  /** Event choices to resolve at the start of the turn (§4.4). */
   pendingChoices: PendingChoice[];
-  /** Riscos somados só à próxima rolagem (efeitos `risks` de eventos e escolhas). */
+  /** Risks added only to the next roll (`risks` effects from events and choices). */
   eventRisks: Partial<Record<RiskId, number>>;
-  /** Lua de mel no semestre corrente (S3); ligada pela eleição. */
+  /** Honeymoon for the current semester (S3); activated by the election. */
   honeymoon: boolean;
   defeat: Defeat | null;
 }

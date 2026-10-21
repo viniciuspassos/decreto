@@ -4,7 +4,7 @@ import { useRef, useState, type PointerEvent, type WheelEvent } from "react";
 export const MAP_SIZE = 1400;
 export const MIN_SCALE = 0.6;
 export const MAX_SCALE = 6;
-/** Abaixo desta escala, as ações se agrupam por campo. */
+/** Below this scale, actions are grouped by field. */
 export const CLUSTER_BELOW = 1;
 const STEP = 1.4;
 
@@ -25,7 +25,7 @@ export function viewBox(v: View): string {
 
 export const zoomBy = (v: View, factor: number): View => ({ ...v, scale: clampScale(v.scale * factor) });
 
-/** Move o centro da vista por um deslocamento em pixels de tela. */
+/** Moves the center of the view by a screen-pixel offset. */
 export function panBy(v: View, dx: number, dy: number, screenSize: number): View {
   const unitsPerPx = MAP_SIZE / v.scale / (screenSize || 1);
   return { ...v, x: v.x - dx * unitsPerPx, y: v.y - dy * unitsPerPx };

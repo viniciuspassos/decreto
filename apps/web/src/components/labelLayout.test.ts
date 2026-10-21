@@ -5,7 +5,7 @@ const cand = (id: string, [x, y]: [number, number], priority: number, figure?: s
   ({ id, x, y, name: id, priority, figure });
 
 describe("layoutLabels", () => {
-  it("põe o nome acima do nó e a figura abaixo", () => {
+  it("places the name above the node and the figure below", () => {
     const [name, figure] = layoutLabels([cand("a", [100, 100], 1, "≈ X")], FONT, []);
     expect(name).toMatchObject({ kind: "name", x: 100 });
     expect(name?.y).toBeLessThan(100);
@@ -13,17 +13,17 @@ describe("layoutLabels", () => {
     expect(figure?.y).toBeGreaterThan(100);
   });
 
-  it("nunca deixa um rótulo sobrepor outro: o de menor prioridade fica oculto", () => {
+  it("never lets labels overlap: the lower-priority label is hidden", () => {
     const placed = layoutLabels([cand("baixa", [105, 100], 3), cand("alta", [100, 100], 0)], FONT, []);
     expect(placed.map((p) => p.id)).toEqual(["alta"]);
   });
 
-  it("não cobre obstáculos e mostra os dois quando há espaço", () => {
+  it("does not cover obstacles and shows both when there is room", () => {
     expect(layoutLabels([cand("a", [100, 100], 1)], FONT, [{ x: 100, y: 80, r: 5 }])).toEqual([]);
     expect(layoutLabels([cand("a", [0, 0], 1), cand("b", [500, 0], 1)], FONT, [])).toHaveLength(2);
   });
 
-  it("caixas dos rótulos posicionados não se cruzam (rede densa)", () => {
+  it("placed label boxes do not intersect (dense network)", () => {
     const grid = Array.from({ length: 60 }, (_, i) => cand(`n${i}`, [(i % 10) * 25, Math.floor(i / 10) * 18], i % 4, "≈ Fig"));
     const boxes = layoutLabels(grid, FONT, []).map((p) => textBox(p.text, p.x, p.y, FONT));
     boxes.forEach((a, i) =>

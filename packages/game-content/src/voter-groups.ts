@@ -1,12 +1,12 @@
-/** Grupos de eleitores (S2 do roteiro). `likes`/`dislikes` são ids de árvores de `policy-trees.ts`. */
+/** Voter groups (design S2). `likes`/`dislikes` are tree IDs from `policy-trees.ts`. */
 
 export interface VoterGroup {
   id: string;
   likes: string[];
   dislikes: string[];
-  /** % da população ao tomar posse (grupos se sobrepõem; 0 para grupos emergentes). */
+  /** Population share upon taking office (groups overlap; 0 for emergent groups). */
   initialSize: number;
-  /** Surge durante o jogo (revolucionários, rebeldes) em vez de existir desde a posse. */
+  /** Emerges during the game (revolutionaries, rebels) instead of existing from the start. */
   emergent?: boolean;
 }
 

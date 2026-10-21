@@ -1,5 +1,5 @@
 /**
- * Tipos compartilhados entre apps/web e apps/api.
+ * Types shared between apps/web and apps/api.
  * Ver CLAUDE.md -> "Estrutura de monorepo".
  */
 
@@ -11,7 +11,7 @@ export interface HealthStatus {
 }
 
 /*
- * Contrato do estado de partida entre motor (apps/api) e UI (apps/web).
+ * Game state contract between the engine (apps/api) and UI (apps/web).
  * Na v0 do frontend, `apps/web/src/api/mockApi.ts` produz esses objetos.
  */
 
@@ -36,13 +36,13 @@ export type RiskId = "coup" | "attack" | "revolution" | "rebels";
 
 export interface GroupState {
   id: string;
-  /** % da população (grupos se sobrepõem). */
+  /** % of the population (groups overlap). */
   size: number;
-  /** % de apoio ao governo; `null` para grupos que ainda não surgiram ou não apoiam ninguém. */
+  /** % support for the government; `null` for groups that have not emerged or support no one. */
   support: number | null;
   delta: number;
   loyalty: Level;
-  /** Última política de que o grupo se lembra (id de nó). */
+  /** Last policy the group remembers (node ID). */
   memory: string | null;
 }
 
@@ -54,7 +54,7 @@ export interface TermRecord {
 export interface GameState {
   country: string;
   president: string;
-  /** Turno global, começando em 1 (2 por ano, 80 em 40 anos). */
+  /** Global turn, starting at 1 (2 per year, 80 in 40 years). */
   turn: number;
   term: number;
   approval: number;
@@ -76,7 +76,7 @@ export interface SemesterReport {
   indicatorsBefore: Indicators;
   groupChanges: { id: string; delta: number }[];
   risks: Record<RiskId, number>;
-  /** Eventos do semestre (sorteados e de sistema), com as manchetes via `event.<id>.*` (game-design §4.6). */
+  /** Semester events (drawn and system), with headlines via `event.<id>.*` (game-design §4.6). */
   events: CountryEvent[];
 }
 
@@ -84,9 +84,9 @@ export interface CountryEvent {
   id: string;
   turn: number;
   option?: "a" | "b";
-  /** Evento com escolha ainda não resolvida pelo jogador (§4.4). */
+  /** Event choice not yet resolved by the player (§4.4). */
   pending: boolean;
-  /** Mostra a imagem de `assets/events/<id>` (no máximo 1 evento sorteado por semestre, §4.1). */
+  /** Shows the image from `assets/events/<id>` (at most 1 drawn event per semester, §4.1). */
   image?: boolean;
 }
 
@@ -116,7 +116,7 @@ export interface GameNodeView {
   cost: number | null;
 }
 
-/** Estado exposto pela API; a fila pertence ao cliente e a seed fica apenas no servidor. */
+/** State exposed by the API; the queue belongs to the client and the seed stays on the server. */
 export interface GameView extends Omit<GameState, "queue"> {
   id: string;
   version: number;

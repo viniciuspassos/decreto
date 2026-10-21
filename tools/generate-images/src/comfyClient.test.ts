@@ -15,7 +15,7 @@ describe("comfyClient", () => {
     jest.restoreAllMocks();
   });
 
-  it("queuePrompt retorna o prompt_id da fila", async () => {
+  it("queuePrompt returns the queued prompt_id", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ prompt_id: "abc123" }));
 
     const promptId = await queuePrompt("http://localhost:8188", {});
@@ -23,15 +23,15 @@ describe("comfyClient", () => {
     expect(promptId).toBe("abc123");
   });
 
-  it("queuePrompt lança erro quando o ComfyUI recusa", async () => {
+  it("queuePrompt throws when ComfyUI rejects the request", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ error: "bad" }, false, 400));
 
     await expect(queuePrompt("http://localhost:8188", {})).rejects.toThrow(
-      "ComfyUI recusou o prompt",
+      "ComfyUI rejected the prompt",
     );
   });
 
-  it("pollForOutputImages espera o histórico ficar disponível", async () => {
+  it("pollForOutputImages waits for the history to become available", async () => {
     const images = [{ filename: "a.png", subfolder: "decreto", type: "output" }];
     const fetchMock = jest
       .spyOn(globalThis, "fetch")
@@ -44,15 +44,15 @@ describe("comfyClient", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("pollForOutputImages lança erro quando o ComfyUI recusa /history", async () => {
+  it("pollForOutputImages throws when ComfyUI rejects /history", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}, false, 500));
 
     await expect(
       pollForOutputImages("http://localhost:8188", "p1", { intervalMs: 1, timeoutMs: 10 }),
-    ).rejects.toThrow("ComfyUI recusou /history");
+    ).rejects.toThrow("ComfyUI rejected /history");
   });
 
-  it("pollForOutputImages lança na hora o erro de execução do ComfyUI", async () => {
+  it("pollForOutputImages immediately throws the ComfyUI execution error", async () => {
     const status = {
       status_str: "error",
       messages: [["execution_error", { exception_message: "MPS out of memory" }]],
@@ -61,28 +61,28 @@ describe("comfyClient", () => {
 
     await expect(
       pollForOutputImages("http://localhost:8188", "p1", { intervalMs: 1 }),
-    ).rejects.toThrow("ComfyUI falhou no prompt p1: MPS out of memory");
+    ).rejects.toThrow("ComfyUI failed on prompt p1: MPS out of memory");
   });
 
-  it("pollForOutputImages usa mensagem genérica quando o erro não tem detalhe", async () => {
+  it("pollForOutputImages uses a generic message when the error has no details", async () => {
     jest
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(jsonResponse({ p1: { status: { status_str: "error" } } }));
 
     await expect(
       pollForOutputImages("http://localhost:8188", "p1", { intervalMs: 1 }),
-    ).rejects.toThrow("erro desconhecido");
+    ).rejects.toThrow("unknown error");
   });
 
-  it("pollForOutputImages lança erro de timeout quando o prompt nunca termina", async () => {
+  it("pollForOutputImages throws a timeout error when the prompt never finishes", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}));
 
     await expect(
       pollForOutputImages("http://localhost:8188", "p1", { intervalMs: 1, timeoutMs: 5 }),
-    ).rejects.toThrow("tempo esgotado");
+    ).rejects.toThrow("Timed out");
   });
 
-  it("downloadImage retorna os bytes da imagem", async () => {
+  it("downloadImage returns the image bytes", async () => {
     const bytes = new TextEncoder().encode("fake-png").buffer;
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
@@ -99,11 +99,11 @@ describe("comfyClient", () => {
     expect(buffer.toString()).toBe("fake-png");
   });
 
-  it("downloadImage lança erro quando o ComfyUI recusa /view", async () => {
+  it("downloadImage throws when ComfyUI rejects /view", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}, false, 404));
 
     await expect(
       downloadImage("http://localhost:8188", { filename: "a.png", subfolder: "", type: "output" }),
-    ).rejects.toThrow("ComfyUI recusou /view");
+    ).rejects.toThrow("ComfyUI rejected /view");
   });
 });

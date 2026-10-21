@@ -1,24 +1,24 @@
 import type { ActorMood } from "@decreto/shared-types";
 import { TAX_RATES } from "./rules.js";
 
-/** Efeito de tamanho de grupo aplicado uma vez, no semestre de ativação do nó. */
+/** Group-size effect applied once, in the semester when the node is activated. */
 export interface GroupSizeOnceEffect {
   groupId: string;
-  /** Multiplica o tamanho atual do grupo (ex.: 0,5 = reduz à metade). */
+  /** Multiplies the group's current size (e.g. 0.5 halves it). */
   multiplier: number;
 }
 
-/** Efeito de tamanho de grupo aplicado a cada semestre enquanto o nó está ativo. */
+/** Group-size effect applied each semester while the node is active. */
 export interface GroupSizePerSemesterEffect {
   groupId: string;
   delta: number;
-  /** Teto de tamanho (%) acima do qual o efeito não se aplica mais. */
+  /** Maximum group size (%); the effect no longer applies above this value. */
   cap?: number;
 }
 
 /**
- * Efeito de um nó (ou alíquota de imposto) sobre indicadores e modificadores (game-design §1.6, §2).
- * Campos numéricos são incrementais e somam-se aos de outros nós ativos; os multiplicadores empilham.
+ * Effect of a node (or tax rate) on indicators and modifiers (game-design §1.6, §2).
+ * Numeric fields are additive across active nodes; multipliers stack.
  */
 export interface NodeEffect {
   gdp?: number;
@@ -30,42 +30,42 @@ export interface NodeEffect {
   pollution?: number;
   pressFreedom?: number;
   corruption?: number;
-  /** Soma ao déficit primário a cada semestre em que o nó está ativo (pp do PIB). */
+  /** Added to the primary deficit each semester the node is active (GDP percentage points). */
   debtPerSemester?: number;
-  /** Soma uma única vez, no semestre de ativação. */
+  /** Added once, in the semester of activation. */
   debtOnce?: number;
-  /** Humor militar (escore). */
+  /** Military mood score. */
   military?: number;
-  /** Humor da mídia (escore). */
+  /** Media mood score. */
   media?: number;
-  /** pp somados ao risco de golpe do semestre. */
+  /** Percentage points added to the semester's coup risk. */
   coupRisk?: number;
-  /** pp somados ao risco de tentativa de atentado do semestre. */
+  /** Percentage points added to the semester's assassination-attempt risk. */
   attackRisk?: number;
-  /** pp somados ao risco de revolução do semestre. */
+  /** Percentage points added to the semester's revolution risk. */
   revolutionRisk?: number;
-  /** pp de crescimento de `revolutionaries` por semestre. */
+  /** Percentage points of `revolutionaries` growth per semester. */
   revolutionaryGrowth?: number;
-  /** Pontos somados à âncora de apoio de todos os grupos. */
+  /** Points added to the support anchor for all groups. */
   supportAnchor?: number;
-  /** Multiplica o risco de atentado (`ate×0,7`, empilha). */
+  /** Multiplies assassination-attempt risk (e.g. `0.7`; stacks). */
   attackRiskMultiplier?: number;
-  /** pp somados à chance de um atentado ser fatal (§3.7). */
+  /** Percentage points added to the chance of a fatal assassination attempt (§3.7). */
   fatalAttackChance?: number;
-  /** Multiplica o crescimento de rebeldes quando positivo (§3.8). */
+  /** Multiplies rebel growth when positive (§3.8). */
   rebelGrowthMultiplier?: number;
-  /** Humor mínimo da mídia enquanto o nó está ativo (mídia cativa/leal, §3.6). */
+  /** Minimum media mood while the node is active (captive/loyal media, §3.6). */
   mediaFloor?: ActorMood;
   groupSizeOnce?: GroupSizeOnceEffect[];
   groupSizePerSemester?: GroupSizePerSemesterEffect[];
 }
 
 /**
- * Efeito de cada um dos 99 nós (game-design §2). Os 6 nós da árvore `taxes` não entram aqui:
- * seu efeito depende da alíquota corrente (`taxRateEffects`, abaixo), não do nó em si.
+ * Effects for each of the 99 nodes (game-design §2). The 6 nodes in the `taxes` tree are excluded:
+ * their effect depends on the current rate (`taxRateEffects` below), not on the node itself.
  */
 export const nodeEffects: Record<string, NodeEffect> = {
-  // Segurança
+  // Security
   "mandatory-registration": { crime: -2, corruption: -1 },
   "carry-restriction": { crime: -3 },
   "gun-buyback": { crime: -3, debtOnce: 2 },
@@ -84,7 +84,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   torture: { crime: -1, pressFreedom: -6, corruption: 3, media: -15, revolutionRisk: -3, attackRisk: 2, revolutionaryGrowth: 0.3 },
   "opponent-assassination": { pressFreedom: -8, corruption: 3, media: -20, military: -5, revolutionRisk: -6, attackRisk: 4, revolutionaryGrowth: 0.4 },
 
-  // Economia
+  // Economy
   "strategic-state-company": { gdp: 0.2, unemployment: -0.5, corruption: 2, debtPerSemester: 0.3, debtOnce: 3 },
   "price-controls": { gdp: -0.4, inflation: -3.0, corruption: 1 },
   "sector-nationalization": { gdp: -0.6, unemployment: -1.0, corruption: 3, debtPerSemester: 0.6, debtOnce: 8 },
@@ -104,7 +104,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
     groupSizePerSemester: [{ groupId: "poor", delta: 0.2 }],
   },
 
-  // Trabalho
+  // Labor
   "minimum-wage-raise": { unemployment: 0.3, inflation: 0.5, crime: -1, health: 1, groupSizePerSemester: [{ groupId: "poor", delta: -0.1 }] },
   "shorter-workweek": { gdp: -0.3, unemployment: -0.5, health: 1 },
   "job-stability": { gdp: -0.4, unemployment: -0.4, inflation: 0.3 },
@@ -114,7 +114,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "end-payroll-taxes": { gdp: 0.5, unemployment: -0.8, debtPerSemester: 0.8 },
   "strike-ban": { gdp: 0.3, pressFreedom: -4, revolutionaryGrowth: 0.1 },
 
-  // Saúde
+  // Health
   "public-network-expansion": { health: 5, debtPerSemester: 0.6 },
   "free-medicines": { health: 4, debtPerSemester: 0.5 },
   "fully-state-health": { gdp: -0.2, health: 3, corruption: 2, debtPerSemester: 0.6 },
@@ -125,7 +125,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
     groupSizePerSemester: [{ groupId: "poor", delta: 0.1 }],
   },
 
-  // Educação
+  // Education
   "school-meals-grants": { crime: -1, health: 1, education: 3, debtPerSemester: 0.4, groupSizePerSemester: [{ groupId: "poor", delta: -0.1 }] },
   "free-university": { education: 4, debtPerSemester: 0.6 },
   "mandatory-full-time-school": { crime: -2, education: 4, debtPerSemester: 0.5 },
@@ -160,7 +160,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "mining-in-reserves": { gdp: 0.5, pollution: 7, corruption: 2, debtPerSemester: -0.2 },
   "end-environmental-laws": { gdp: 0.6, health: -3, pollution: 10, corruption: 2 },
 
-  // Imigração
+  // Immigration
   "easier-visas": { gdp: 0.2 },
   "immigrant-amnesty": { gdp: 0.2, corruption: -1, debtPerSemester: 0.2, groupSizePerSemester: [{ groupId: "immigrants", delta: 0.1, cap: 15 }] },
   "open-borders": { gdp: 0.5, unemployment: 0.6, health: -1, debtPerSemester: 0.3, groupSizePerSemester: [{ groupId: "immigrants", delta: 0.3, cap: 15 }] },
@@ -199,8 +199,8 @@ export const nodeEffects: Record<string, NodeEffect> = {
 };
 
 /**
- * Efeito por alíquota de imposto (game-design §1.4), absoluto e relativo a 30% = zero.
- * `taxRate` ausente da tabela = sem efeito (30%, estado inicial).
+ * Effect by tax rate (game-design §1.4), absolute and relative to 30% = zero.
+ * A `taxRate` missing from the table has no effect (30%, the starting state).
  */
 export const taxRateEffects: Record<(typeof TAX_RATES)[number], NodeEffect> = {
   0: { gdp: 1.0, unemployment: -0.6, health: -5, education: -5, crime: 3, debtPerSemester: 2.6 },

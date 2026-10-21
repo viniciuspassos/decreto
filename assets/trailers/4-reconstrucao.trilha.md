@@ -1,7 +1,7 @@
 # Trailer 4: "Reconstrução" — roteiro da trilha sonora
 
 Trilha e som do trailer 4. Ordem e duração em [`4-reconstrucao.manifest.json`](4-reconstrucao.manifest.json)
-e [`comum.manifest.json`](comum.manifest.json); narrativa em [4-reconstrucao.md](4-reconstrucao.md).
+e [`shared.manifest.json`](shared.manifest.json); narrativa em [4-reconstrucao.md](4-reconstrucao.md).
 Mesmas regras da [trilha do trailer 1](1-mandato.trilha.md) (paleta, Stable Audio 3.0 Medium, sem
 voz), salvo o andamento e o que muda abaixo.
 

@@ -21,16 +21,16 @@ export class InvalidQueueError extends Error {
   }
 }
 
-/** Capital ganho por semestre: só a aprovação conta (roteiro §4.21). */
+/** Capital earned per semester: only approval counts (design §4.21). */
 export const capitalGain = (approval: number) => Math.round(approval * CAPITAL_PER_APPROVAL);
 
-/** §3.9: crise por recessão ≥ 2 ou por evento de crise neste semestre ou no anterior. */
+/** §3.9: crisis from recession ≥ 2 or a crisis event this semester or the previous one. */
 function isCrisis(state: EngineState): boolean {
   const recentEvent = state.lastCrisisTurn !== null && state.turn - state.lastCrisisTurn <= 1;
   return state.recessionLevel >= 2 || recentEvent;
 }
 
-/** Passo 11 do §3 + virada de turno: crise, decaimento, capital pela aprovação **nova**, delta dos grupos. */
+/** Step 11 of §3 + turn advance: crisis, decay, capital from **new** approval, group deltas. */
 function closeSemester(ctx: SemesterCtx, before: EngineState): void {
   const { state } = ctx;
   state.crisis = isCrisis(state);
@@ -69,9 +69,9 @@ function buildReport(before: EngineState, after: EngineState, { applied, risks, 
 }
 
 /**
- * Fecha o semestre na ordem do game-design §3 (função pura: o estado de entrada não é alterado).
- * Escolhas de evento em aberto valem como resolvidas no início do turno (§4.4), antes da fila.
- * Lança `InvalidQueueError` se a fila não for válida. Mesma seed + mesmo estado ⇒ mesmo resultado.
+ * Closes the semester in design §3 order (pure function: the input state is not modified).
+ * Open event choices are treated as resolved at the start of the turn (§4.4), before the queue.
+ * Throws `InvalidQueueError` if the queue is invalid. Same seed + same state ⇒ same result.
  */
 export function endSemester(input: EngineState, content: SemesterContent): { state: EngineState; report: SemesterReport } {
   if (input.defeat) throw new Error(`game over: ${input.defeat}`);

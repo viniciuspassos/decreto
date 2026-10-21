@@ -30,7 +30,7 @@ function changes(lines: number[]): ChangedLinesByFile {
 }
 
 describe("findUncoveredChanges", () => {
-  it("marca como não cobertas apenas as linhas com statement de contagem zero", () => {
+  it("marks only lines with a zero-count statement as uncovered", () => {
     const coverageMap = createCoverageMap(buildCoverageData());
 
     const uncovered = findUncoveredChanges(changes([5, 10]), coverageMap, REPO_ROOT);
@@ -38,7 +38,7 @@ describe("findUncoveredChanges", () => {
     expect(uncovered).toEqual([{ file: "apps/api/src/app.ts", line: 5 }]);
   });
 
-  it("ignora linhas alteradas sem nenhum statement (comentário/branco/tipo)", () => {
+  it("ignores changed lines without a statement (comment/blank/type)", () => {
     const coverageMap = createCoverageMap(buildCoverageData());
 
     const uncovered = findUncoveredChanges(changes([7]), coverageMap, REPO_ROOT);
@@ -46,7 +46,7 @@ describe("findUncoveredChanges", () => {
     expect(uncovered).toEqual([]);
   });
 
-  it("marca todas as linhas alteradas quando o arquivo nunca foi executado", () => {
+  it("marks all changed lines when the file has never been executed", () => {
     const coverageMap = createCoverageMap({});
 
     const uncovered = findUncoveredChanges(changes([1, 2]), coverageMap, REPO_ROOT);
@@ -57,7 +57,7 @@ describe("findUncoveredChanges", () => {
     ]);
   });
 
-  it("marca um index.ts/types.ts PRESENTE na coverage com statement de contagem zero", () => {
+  it("marks an index.ts/types.ts PRESENT in coverage with a zero-count statement", () => {
     const indexPath = "/repo/packages/game-engine/src/index.ts";
     const coverageMap = createCoverageMap({
       [indexPath]: {
@@ -77,7 +77,7 @@ describe("findUncoveredChanges", () => {
     expect(uncovered).toEqual([{ file: "packages/game-engine/src/index.ts", line: 1 }]);
   });
 
-  it("não marca um index.ts/types.ts AUSENTE da coverage (barril sem statements)", () => {
+  it("does not mark an index.ts/types.ts ABSENT from coverage (barrel without statements)", () => {
     const coverageMap = createCoverageMap({});
     const changed: ChangedLinesByFile = new Map([["packages/game-engine/src/index.ts", new Set([1])]]);
 

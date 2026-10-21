@@ -4,21 +4,21 @@ import type { ManifestEntry, TrailerManifest, TrailerPlan } from "./types.js";
 
 const SLUG_PATTERN = /^[a-z0-9-]+$/;
 const DEFAULT_SEED = 42;
-const COMUM_FILENAME = "comum.manifest.json";
+const SHARED_MANIFEST_FILENAME = "shared.manifest.json";
 
-/** Valida e normaliza o manifest de um trailer ({ trailer, plans }). */
+/** Validates and normalizes a trailer manifest ({ trailer, plans }). */
 export function parseTrailerManifest(raw: string): TrailerManifest {
   const data = JSON.parse(raw) as Record<string, unknown>;
   if (typeof data !== "object" || data === null || Array.isArray(data)) {
-    throw new Error('manifest de trailer deve ser um objeto com "trailer" e "plans"');
+    throw new Error('trailer manifest must be an object with "trailer" and "plans"');
   }
 
   const { trailer, plans } = data;
   if (typeof trailer !== "string" || !SLUG_PATTERN.test(trailer)) {
-    throw new Error('"trailer" deve ser minúsculo, só letras/números/hífen');
+    throw new Error('"trailer" must be lowercase and contain only letters, numbers, or hyphens');
   }
   if (!Array.isArray(plans)) {
-    throw new Error('"plans" deve ser um array');
+    throw new Error('"plans" must be an array');
   }
 
   return { trailer, plans: plans.map(validatePlan) };
@@ -26,12 +26,12 @@ export function parseTrailerManifest(raw: string): TrailerManifest {
 
 function validatePlan(plan: unknown): TrailerPlan {
   if (typeof plan !== "object" || plan === null) {
-    throw new Error("plano inválido: não é um objeto");
+    throw new Error("invalid plan: expected an object");
   }
 
   const { id, shared, kind, prompt, seed } = plan as Record<string, unknown>;
   if (typeof id !== "string" || !SLUG_PATTERN.test(id)) {
-    throw new Error('plano inválido: "id" deve ser minúsculo, só letras/números/hífen');
+    throw new Error('invalid plan: "id" must be lowercase and contain only letters, numbers, or hyphens');
   }
   if (shared === true) {
     return { id, shared: true };
@@ -42,19 +42,19 @@ function validatePlan(plan: unknown): TrailerPlan {
   if (kind === "screen" || kind === "image" || kind === "black") {
     return { id, kind };
   }
-  throw new Error(`plano "${id}": "kind" inválido (${String(kind)})`);
+  throw new Error(`plan "${id}": invalid "kind" (${String(kind)})`);
 }
 
 function requirePrompt(id: string, prompt: unknown): string {
   if (typeof prompt !== "string") {
-    throw new Error(`plano "${id}": "prompt" é obrigatório em planos "clip" (pode ser "" se pendente)`);
+    throw new Error(`plan "${id}": "prompt" is required for "clip" plans (may be "" if pending)`);
   }
   return prompt;
 }
 
 function requireOptionalSeed(id: string, seed: unknown): number | undefined {
   if (seed !== undefined && typeof seed !== "number") {
-    throw new Error(`plano "${id}": "seed" deve ser número`);
+    throw new Error(`plan "${id}": "seed" must be a number`);
   }
   return seed;
 }
@@ -64,19 +64,19 @@ export function loadTrailerManifest(path: string): TrailerManifest {
 }
 
 /**
- * Resolve os planos "clip" de um trailer em entradas prontas para o lote de geração: planos
- * `shared: true` são buscados em `comumManifest` (category "comum"), e planos com prompt ainda
- * vazio (pendentes) ou que não são "clip" (screen/image/black) são ignorados.
+ * Resolves a trailer's "clip" plans into entries ready for the generation batch: plans
+ * with `shared: true` are looked up in `sharedManifest` (category "shared"), and plans with an
+ * empty prompt (pending) or that are not "clip" (screen/image/black) are ignored.
  */
 export function resolveTrailerClipEntries(
   trailerManifest: TrailerManifest,
-  comumManifest: TrailerManifest | undefined,
-  comumManifestPath: string = COMUM_FILENAME,
+  sharedManifest: TrailerManifest | undefined,
+  sharedManifestPath: string = SHARED_MANIFEST_FILENAME,
 ): ManifestEntry[] {
   const entries: ManifestEntry[] = [];
   for (const plan of trailerManifest.plans) {
     const entry = "shared" in plan
-      ? resolveSharedPlan(plan.id, comumManifest, comumManifestPath)
+      ? resolveSharedPlan(plan.id, sharedManifest, sharedManifestPath)
       : clipEntryFromPlan(trailerManifest.trailer, plan);
     if (entry) {
       entries.push(entry);
@@ -87,17 +87,17 @@ export function resolveTrailerClipEntries(
 
 function resolveSharedPlan(
   id: string,
-  comumManifest: TrailerManifest | undefined,
-  comumManifestPath: string,
+  sharedManifest: TrailerManifest | undefined,
+  sharedManifestPath: string,
 ): ManifestEntry | undefined {
-  const shared = comumManifest?.plans.find((plan) => plan.id === id);
+  const shared = sharedManifest?.plans.find((plan) => plan.id === id);
   if (!shared) {
-    throw new Error(`plano compartilhado "${id}" não encontrado em ${comumManifestPath}`);
+    throw new Error(`shared plan "${id}" not found in ${sharedManifestPath}`);
   }
   if ("shared" in shared) {
-    throw new Error(`plano compartilhado "${id}" não pode apontar para outro plano shared`);
+    throw new Error(`shared plan "${id}" cannot point to another shared plan`);
   }
-  return clipEntryFromPlan("comum", shared);
+  return clipEntryFromPlan("shared", shared);
 }
 
 function clipEntryFromPlan(category: string, plan: Exclude<TrailerPlan, { shared: true }>): ManifestEntry | undefined {
@@ -108,10 +108,10 @@ function clipEntryFromPlan(category: string, plan: Exclude<TrailerPlan, { shared
   return { category, name: `${plan.id}-s${seed}`, prompt: plan.prompt, seed };
 }
 
-/** Carrega o manifest de um trailer e resolve seus clipes, buscando comum.manifest.json ao lado dele. */
-export function loadTrailerClipEntries(trailerManifestPath: string, comumManifestPath?: string): ManifestEntry[] {
+/** Loads a trailer manifest and resolves its clips, looking for `shared.manifest.json` beside it. */
+export function loadTrailerClipEntries(trailerManifestPath: string, sharedManifestPath?: string): ManifestEntry[] {
   const trailerManifest = loadTrailerManifest(trailerManifestPath);
-  const resolvedComumPath = comumManifestPath ?? join(dirname(trailerManifestPath), COMUM_FILENAME);
-  const comumManifest = existsSync(resolvedComumPath) ? loadTrailerManifest(resolvedComumPath) : undefined;
-  return resolveTrailerClipEntries(trailerManifest, comumManifest, resolvedComumPath);
+  const resolvedSharedPath = sharedManifestPath ?? join(dirname(trailerManifestPath), SHARED_MANIFEST_FILENAME);
+  const sharedManifest = existsSync(resolvedSharedPath) ? loadTrailerManifest(resolvedSharedPath) : undefined;
+  return resolveTrailerClipEntries(trailerManifest, sharedManifest, resolvedSharedPath);
 }

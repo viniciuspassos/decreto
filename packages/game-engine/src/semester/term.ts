@@ -5,10 +5,10 @@ export const termEnded = (state: EngineState) => state.turn > state.term * TURNS
 
 const electionsSuspended = (state: EngineState) => ELECTION_SUSPENDING_NODES.some((n) => state.activeNodes.includes(n));
 
-/** Há eleição a disputar: o mandato acabou e nenhum regime a cancelou (roteiro §7, §8). */
+/** An election is pending: the term ended and no regime canceled it (design §7, §8). */
 export const isElectionDue = (state: EngineState) => termEnded(state) && !electionsSuspended(state);
 
-/** Sem eleição, o mandato vence sozinho: o poder segue e o desgaste de governo continua. */
+/** Without an election, the term expires automatically: power continues and government wear continues. */
 export function skipElectionIfSuspended(state: EngineState): void {
   if (!termEnded(state) || !electionsSuspended(state)) return;
   state.history.push({ term: state.term, inPower: true });

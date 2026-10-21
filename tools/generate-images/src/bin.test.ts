@@ -2,12 +2,12 @@ import { jest } from "@jest/globals";
 
 jest.unstable_mockModule("./cli.js", () => ({
   run: jest.fn(async () => {
-    throw new Error("falha simulada");
+    throw new Error("simulated failure");
   }),
 }));
 
 describe("bin", () => {
-  it("define process.exitCode = 1 quando run() rejeita", async () => {
+  it("sets process.exitCode = 1 when run() rejects", async () => {
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
     await import("./bin.js");

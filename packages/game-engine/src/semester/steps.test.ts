@@ -23,7 +23,7 @@ const setSupport = (ctx: StepCtx, groupId: string, support: number) => {
 };
 
 describe("newGame", () => {
-  it("parte do estado inicial da situação, com imposto a 30% e base = exibido", () => {
+  it("starts from the initial situation state, with tax at 30% and baseline = displayed", () => {
     const s = game("crisis");
     expect(s.indicators.unemployment).toBe(14.5);
     expect(s.indicators.health).toBe(BASE_INDICATORS.health);
@@ -38,21 +38,21 @@ describe("newGame", () => {
   });
 });
 
-describe("movimento da base", () => {
-  it("instabilidade soma os excessos e satura em 2", () => {
+describe("baseline movement", () => {
+  it("instability adds the excesses and caps at 2", () => {
     expect(instability(BASE_INDICATORS, 0)).toBe(0);
     expect(instability({ ...BASE_INDICATORS, debt: 130, inflation: 20 }, 1)).toBeCloseTo(1 + 0.5 + 0.25);
     expect(instability({ ...BASE_INDICATORS, debt: 400 }, 3)).toBe(2);
   });
 
-  it("alvos acoplam indicadores e corrupção sobe com tempo no poder", () => {
+  it("targets couple indicators and corruption rises with time in power", () => {
     const t = targets(BASE_INDICATORS, 0);
     expect(t.unemployment).toBeCloseTo(8 - 1.5 * (1.8 - 2));
     expect(t.pressFreedom).toBe(60);
     expect(targets(BASE_INDICATORS, 16).corruption - t.corruption).toBe(10);
   });
 
-  it("sem ruído, a base anda em direção ao alvo e guarda o semestre anterior", () => {
+  it("without noise, the baseline moves toward the target and preserves the previous semester", () => {
     const ctx = { ...ctxOf(), rng: fixedRng(0.5) };
     const before = ctx.state.base;
     updateBase(ctx);
@@ -61,8 +61,8 @@ describe("movimento da base", () => {
   });
 });
 
-describe("dívida e recessão", () => {
-  it("dívida soma déficit, juros e Dív 1× dos nós recém-ativados", () => {
+describe("debt and recession", () => {
+  it("debt adds the deficit, interest, and Debt 1× from newly activated nodes", () => {
     const passive = ctxOf();
     updateDebt(passive, []);
     expect(passive.state.indicators.debt).toBeCloseTo(74 + 0.3 + (74 * (3 - 1.8)) / 200);
@@ -72,7 +72,7 @@ describe("dívida e recessão", () => {
     expect(spender.state.indicators.debt - passive.state.indicators.debt).toBeCloseTo(2);
   });
 
-  it("nível de recessão tem histerese", () => {
+  it("recession level has hysteresis", () => {
     expect(nextRecessionLevel(0, 100, 0)).toBe(1);
     expect(nextRecessionLevel(1, 95, 0)).toBe(1);
     expect(nextRecessionLevel(1, 85, 0)).toBe(0);
@@ -82,7 +82,7 @@ describe("dívida e recessão", () => {
     expect(nextRecessionLevel(3, 155, 0)).toBe(2);
   });
 
-  it("recessão desloca PIB/desemprego exibidos e gera eventos de início e fim", () => {
+  it("recession shifts displayed GDP/unemployment and generates start and end events", () => {
     const ctx = ctxOf();
     ctx.state.indicators.debt = 135;
     expect(updateRecession(ctx).map((e) => e.id)).toEqual(["recession-starts"]);
@@ -94,8 +94,8 @@ describe("dívida e recessão", () => {
   });
 });
 
-describe("grupos", () => {
-  it("aprovação é a média ponderada pelo tamanho, sem grupos emergentes", () => {
+describe("groups", () => {
+  it("approval is the size-weighted average, without emergent groups", () => {
     const groups: GroupState[] = [
       { id: "a", size: 30, support: 60, delta: 0, loyalty: "medium", memory: null },
       { id: "b", size: 10, support: 20, delta: 0, loyalty: "medium", memory: null },
@@ -106,7 +106,7 @@ describe("grupos", () => {
     expect([loyaltyOf(null), loyaltyOf(30), loyaltyOf(50), loyaltyOf(70)]).toEqual(["low", "low", "medium", "high"]);
   });
 
-  it("reação a indicadores; corrupção some com imprensa amordaçada", () => {
+  it("reaction to indicators; corruption disappears when the press is silenced", () => {
     const ind = { ...BASE_INDICATORS, gdp: 1.5, unemployment: 15 };
     expect(indicatorReaction("workers", ind)).toBeCloseTo(-3);
     const corrupt = { ...BASE_INDICATORS, gdp: 1.5, unemployment: 9, corruption: 65 };
@@ -115,7 +115,7 @@ describe("grupos", () => {
     expect(indicatorReaction("rich", { ...BASE_INDICATORS, gdp: 20 })).toBeCloseTo(0.6 * 4);
   });
 
-  it("âncora desgasta por mandato e soma `anc` dos nós", () => {
+  it("anchor wears down per term and adds the nodes’ `anc` values", () => {
     const ctx = ctxOf();
     expect(supportAnchor(ctx)).toBe(45);
     ctx.state.termsInRow = 3;
@@ -123,7 +123,7 @@ describe("grupos", () => {
     expect(supportAnchor(ctx)).toBe(43);
   });
 
-  it("tamanhos: `tam` com teto e pobres puxados pelo desemprego", () => {
+  it("sizes: `tam` with a cap and the poor influenced by unemployment", () => {
     const ctx = ctxOf();
     ctx.state.activeNodes = ["official-religion"];
     ctx.state.indicators.unemployment = 18;
@@ -134,7 +134,7 @@ describe("grupos", () => {
     expect(groupOf(ctx.state, "poor")?.size).toBe(5);
   });
 
-  it("apoio volta à âncora, sofre recessão e recalcula a aprovação", () => {
+  it("support returns to the anchor, is affected by recession, and recalculates approval", () => {
     const ctx = ctxOf();
     ctx.state.indicators.gdp = 1.5;
     ctx.state.recessionLevel = 1;
@@ -145,12 +145,12 @@ describe("grupos", () => {
   });
 });
 
-describe("atores", () => {
-  it("faixas de humor", () => {
+describe("actors", () => {
+  it("mood levels", () => {
     expect([moodOf(55), moodOf(40), moodOf(25), moodOf(24.9)]).toEqual(["loyal", "neutral", "critical", "hostile"]);
   });
 
-  it("militares: apoio das forças + `mil` − dívida alta − recessão", () => {
+  it("military: armed forces support + `mil` − high debt − recession", () => {
     const ctx = ctxOf();
     ctx.state.activeNodes = ["harsher-sentences"];
     ctx.state.indicators.debt = 125;
@@ -158,7 +158,7 @@ describe("atores", () => {
     expect(militaryScore(ctx)).toBe(50 + 5 - 8 - 5);
   });
 
-  it("censura segura a mídia em neutro; monopólio a deixa leal", () => {
+  it("censorship keeps the media neutral; monopoly makes it loyal", () => {
     const ctx = ctxOf();
     ctx.state.approval = 0;
     updateMoods(ctx);
@@ -172,8 +172,8 @@ describe("atores", () => {
   });
 });
 
-describe("riscos", () => {
-  it("atentado cresce com revolucionários e desesperados; polícia secreta protege", () => {
+describe("risks", () => {
+  it("assassination risk rises with revolutionaries and desperate people; secret police provides protection", () => {
     const ctx = ctxOf();
     addSize(ctx.state, "revolutionaries", 10);
     expect(attackRisk(ctx)).toBeCloseTo(8);
@@ -186,7 +186,7 @@ describe("riscos", () => {
     expect(fatalChance(ctx)).toBe(10);
   });
 
-  it("revolução só com 5% de revolucionários, multiplicada pelo humor militar", () => {
+  it("revolution requires 5% revolutionaries, multiplied by military mood", () => {
     const ctx = ctxOf();
     addSize(ctx.state, "revolutionaries", 4);
     expect(revolutionRisk(ctx)).toBe(0);
@@ -195,7 +195,7 @@ describe("riscos", () => {
     expect(revolutionRisk(ctx)).toBeCloseTo(7.5 * 1.6);
   });
 
-  it("golpe: militar leal limita a 3", () => {
+  it("coup: a loyal military limits risk to 3", () => {
     const ctx = ctxOf();
     ctx.state.approval = 10;
     ctx.state.actors.military = "hostile";
@@ -204,7 +204,7 @@ describe("riscos", () => {
     expect(coupRisk(ctx)).toBe(3);
   });
 
-  it("rolagem: atentado frustrado liga a crise; fatal e golpe derrotam", () => {
+  it("resolution: a failed assassination attempt starts a crisis; a fatal attempt and coup cause defeat", () => {
     const foiled = { ...ctxOf(), rng: { ...fixedRng(0.5) } };
     expect(rollRisks(foiled, { attack: 100, revolution: 0, coup: 0, rebels: 0 }).map((e) => e.id)).toEqual(["attack-foiled"]);
     expect(foiled.state.lastCrisisTurn).toBe(1);
@@ -220,8 +220,8 @@ describe("riscos", () => {
   });
 });
 
-describe("grupos emergentes", () => {
-  it("revolucionários crescem com aprovação baixa; rebeldes com recessão ≥ 2", () => {
+describe("emergent groups", () => {
+  it("revolutionaries grow with low approval; rebels grow with recession ≥ 2", () => {
     const ctx = ctxOf();
     ctx.state.approval = 20;
     expect(revolutionaryGrowth(ctx)).toBeCloseTo(0.3);
@@ -231,7 +231,7 @@ describe("grupos emergentes", () => {
     expect(rebelGrowth(ctx)).toBe(0.25);
   });
 
-  it("`rebels-emerge` só na primeira vez", () => {
+  it("`rebels-emerge` only happens the first time", () => {
     const ctx = ctxOf();
     ctx.state.recessionLevel = 3;
     expect(updateEmergent(ctx).map((e) => e.id)).toEqual(["rebels-emerge"]);
@@ -240,8 +240,8 @@ describe("grupos emergentes", () => {
   });
 });
 
-describe("fila", () => {
-  it("valida pré-requisito, opostas, duplicata, impostos, máximo de ações e capital", () => {
+describe("queue", () => {
+  it("validates prerequisites, opposing nodes, duplicates, taxes, action limit, and capital", () => {
     const codes = (queue: string[], capital = 1000) => {
       const s = game();
       s.capital = capital;
@@ -261,7 +261,7 @@ describe("fila", () => {
     expect(validateQueue(ctxOf(sameRate))).toEqual([{ code: "unavailable", nodeId: "taxes" }]);
   });
 
-  it("ajuste de alíquota custa capital, conta como ação e mexe com quem não gosta de imposto", () => {
+  it("adjusting the tax rate costs capital, counts as an action, and affects those who dislike taxes", () => {
     const ctx = ctxOf();
     ctx.state.queuedTaxRate = 40;
     expect(queueTotalCost(ctx)).toBe(20);
@@ -274,7 +274,7 @@ describe("fila", () => {
     expect(groupOf(ctx.state, "business")?.support).toBe(50);
   });
 
-  it("ativar nó move apoio e memória dos grupos e aplica `tam` na ativação", () => {
+  it("activating a node shifts group support and memory and applies `tam` on activation", () => {
     const ctx = ctxOf();
     ctx.state.capital = 1000;
     ctx.state.activeNodes = ["immigration-quotas", "border-wall"];
@@ -286,8 +286,8 @@ describe("fila", () => {
   });
 });
 
-describe("efeitos de evento", () => {
-  it("choque na base, dívida no estoque, mídia amplia negativos e capital não fica negativo", () => {
+describe("event effects", () => {
+  it("shock to the baseline, debt to the stock, media amplifies negatives, and capital does not go below zero", () => {
     const ctx = ctxOf();
     ctx.state.actors.media = "hostile";
     applyEventEffects(ctx.state, {
@@ -305,7 +305,7 @@ describe("efeitos de evento", () => {
     expect(ctx.state.lastCrisisTurn).toBe(1);
   });
 
-  it("`rev` nos eventos é tamanho de revolucionários, não risco", () => {
+  it("`rev` in events is the size of revolutionaries, not risk", () => {
     const ctx = ctxOf();
     const wrongful = defaultContent.events.find((e) => e.id === "wrongful-execution");
     if (wrongful) applyEventEffects(ctx.state, wrongful.effects);
@@ -315,7 +315,7 @@ describe("efeitos de evento", () => {
 });
 
 describe("rng", () => {
-  it("uniforme em [0, 1) e normal com média ~0", () => {
+  it("uniform in [0, 1) and normal with mean ~0", () => {
     const rng = createRng(123);
     const uniforms = Array.from({ length: 2000 }, () => rng.next());
     expect(Math.min(...uniforms)).toBeGreaterThanOrEqual(0);

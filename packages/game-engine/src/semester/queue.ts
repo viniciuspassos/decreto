@@ -12,7 +12,7 @@ export interface QueueError {
   nodeId?: string;
 }
 
-/** Nós da fila + o ajuste de alíquota, que conta como 1 ação (§1.4). */
+/** Queued nodes plus the tax rate adjustment, which counts as 1 action (§1.4). */
 export const queuedActions = (state: EngineState) => state.queue.length + (state.queuedTaxRate === null ? 0 : 1);
 
 export function queueTotalCost({ state, content }: StepCtx): number {
@@ -20,7 +20,7 @@ export function queueTotalCost({ state, content }: StepCtx): number {
   return nodes + (state.queuedTaxRate === null ? 0 : taxRateCost(state.taxRate, state.queuedTaxRate));
 }
 
-/** Cada nó precisa estar disponível considerando o resto da fila (opostas enfileiradas se bloqueiam). */
+/** Each node must be available considering the rest of the queue (queued opposites block each other). */
 function nodeErrors({ state, content }: StepCtx): QueueError[] {
   return state.queue.flatMap((nodeId, i): QueueError[] => {
     if (state.queue.indexOf(nodeId) !== i) return [{ code: "duplicate", nodeId }];
@@ -30,7 +30,7 @@ function nodeErrors({ state, content }: StepCtx): QueueError[] {
   });
 }
 
-/** Pré-requisitos, opostas, máximo de ações e capital suficiente; lista vazia = fila válida. */
+/** Prerequisites, opposites, maximum actions, and sufficient capital; an empty list means the queue is valid. */
 export function validateQueue(ctx: StepCtx): QueueError[] {
   const errors = nodeErrors(ctx);
   if (ctx.state.queuedTaxRate === ctx.state.taxRate) errors.push({ code: "unavailable", nodeId: "taxes" });
@@ -39,7 +39,7 @@ export function validateQueue(ctx: StepCtx): QueueError[] {
   return errors;
 }
 
-/** ±4 para quem gosta/não gosta da árvore; `direction` −1 inverte (baixar imposto). */
+/** ±4 for groups that like/dislike the tree; `direction` −1 reverses it (lowering taxes). */
 function reactToTree(ctx: StepCtx, treeId: string, direction: number, nodeId?: string): void {
   ctx.content.voterGroups.forEach((g) => {
     const sign = (g.likes.includes(treeId) ? 1 : 0) - (g.dislikes.includes(treeId) ? 1 : 0);
@@ -58,7 +58,7 @@ function activate(ctx: StepCtx, nodeId: string): void {
   });
 }
 
-/** Passo 1 do §3: paga a fila, ativa os nós, muda a alíquota; devolve os nós ativados. */
+/** Step 1 of §3: pays for the queue, activates nodes, changes the tax rate; returns activated nodes. */
 export function applyQueue(ctx: StepCtx): string[] {
   const { state } = ctx;
   const applied = state.queue;
