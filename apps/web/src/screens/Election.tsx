@@ -46,6 +46,7 @@ export function Election({ game, lost, pending, onVote }: Props) {
   }, [game.id, chosenIds]);
 
   function toggle(id: string): void {
+    if (!chosenIds.includes(id) && chosenIds.length >= maxPromises) return;
     setProjection(null);
     setPreviewPending(true);
     setChosenIds((selected) => selected.includes(id) ? selected.filter((value) => value !== id)

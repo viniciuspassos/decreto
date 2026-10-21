@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import i18n from "./i18n/index.js";
 import { App } from "./App.js";
-import type { CountryEvent, EndGameResult } from "@decreto/shared-types";
+import type { CampaignPromise, CountryEvent, EndGameResult } from "@decreto/shared-types";
 import { gameFixture } from "./test/gameFixture.js";
 import { TREE_ANGLES, polar, ringRadius } from "./components/RadialMap.js";
 import { semesterOf, turnInTerm, yearOf } from "./components/TopBar.js";
@@ -21,6 +21,7 @@ class FakeGameServer {
   voteEnd: EndGameResult | null = null;
   delaySavedGet = false;
   delayChosenPreview = false;
+  campaignOptions: CampaignPromise[] = [{ nodeId: "privatizations", gains: [], loses: [] }];
   private resolveSavedGet: ((response: Response) => void) | null = null;
   private resolveChosenPreview: ((response: Response) => void) | null = null;
   completeSavedGet(status: number): void {
@@ -36,7 +37,7 @@ class FakeGameServer {
       return new Promise<Response>((resolve) => { this.resolveSavedGet = resolve; });
     if (path.endsWith("/campaign")) {
       if (this.failCampaign) return this.respond({ code: "network_error" }, 503);
-      return this.respond({ options: [{ nodeId: "privatizations", gains: [], loses: [] }], maxPromises: 3 });
+      return this.respond({ options: this.campaignOptions, maxPromises: 3 });
     }
     if (path.endsWith("/election/preview")) {
       const body = JSON.parse(String(init?.body ?? "{}")) as { promises?: string[] };
@@ -221,6 +222,26 @@ describe("App with API", () => {
     server.completeChosenPreview(40);
     await screen.findByText("40%");
     expect(voteButton).not.toBeDisabled();
+  });
+
+  it("keeps the projection when a fourth promise exceeds the campaign limit", async () => {
+    const server = new FakeGameServer();
+    server.game = { ...server.game, phase: "election", turn: 9 };
+    server.campaignOptions = ["privatizations", "harsher-sentences", "mandatory-registration", "easier-visas"]
+      .map((nodeId) => ({ nodeId, gains: [], loses: [] }));
+    global.fetch = server.fetch;
+    localStorage.setItem("decreto.gameId", "game-1");
+    render(<App />);
+    fireEvent.click(await screen.findByText("Continuar"));
+    await screen.findByText("Escolha até 3 promessas");
+    await waitFor(() => expect(document.querySelectorAll(".cards .card")).toHaveLength(4));
+    const readyCards = document.querySelectorAll(".cards .card");
+    [0, 1, 2].forEach((index) => fireEvent.click(readyCards[index]!));
+    const voteButton = screen.getByText("Ir às urnas · 3 promessas");
+    await waitFor(() => expect(voteButton).not.toBeDisabled());
+    fireEvent.click(readyCards[3]!);
+    expect(voteButton).not.toBeDisabled();
+    expect(screen.getByText("55%")).toBeTruthy();
   });
 
   it("shows campaign and projection errors without sending a vote", async () => {
