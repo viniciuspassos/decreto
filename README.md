@@ -21,6 +21,10 @@ has not been implemented yet — the API only responds to `/health`.
 
 ```bash
 pnpm install        # install dependencies for all workspace packages
+cp .env.example .env  # configure the host database connection
+pnpm dev:db         # start PostgreSQL and wait until it is healthy
+pnpm --filter @decreto/api run db:migrate # apply migrations for a fresh database
+pnpm --filter @decreto/api run db:seed    # populate initial data
 pnpm dev            # start apps/web (Vite, http://localhost:5173) and apps/api (http://localhost:3001) in parallel
 ```
 
@@ -51,7 +55,7 @@ and the CI pipeline are configured — see [`docs/INFRASTRUCTURE.md`](./docs/INF
 ## Docker
 
 The application runs in containers: `web` (static build served by Nginx), `api` (Node), and `db`
-(PostgreSQL).
+(PostgreSQL). A one-shot `migrate` service applies migrations and seeds the database before the API starts.
 
 ```bash
 cp .env.example .env   # adjust variables if needed (for example, to resolve port conflicts)
@@ -60,7 +64,7 @@ docker compose up --build
 
 Exposed services (default ports, configurable via `.env`):
 
-- **web** — http://localhost:8080
+- **web** — http://localhost:8080 (`/api/*` forwards to the API on the same origin)
 - **api** — http://localhost:3001 (`GET /health` returns `{"status":"ok","version":"0.1.0"}`)
 - **db** — `localhost:5432` (PostgreSQL)
 
@@ -70,14 +74,15 @@ To stop the containers and remove volumes (resetting the database):
 docker compose down -v
 ```
 
-The `api` does not apply migrations automatically at startup. Once `db` is running locally or via
-Docker, run these commands once:
+Compose applies migrations and the idempotent seed automatically. For host development, run these
+commands after `pnpm dev:db` when setting up a fresh database:
 
 ```bash
 pnpm --filter @decreto/api run db:migrate
 pnpm --filter @decreto/api run db:seed
 ```
 
+The `.env` file uses `localhost` for host commands; Compose constructs an internal URL using `db`.
 `pnpm test` and the git hooks do not require Postgres or `DATABASE_URL`: `apps/api` tests use a
 PGlite database (Postgres in WASM), isolated per test file — see
 [`docs/INFRASTRUCTURE.md`](./docs/INFRASTRUCTURE.md#postgres-appsapi). `DATABASE_URL` is only

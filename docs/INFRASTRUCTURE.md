@@ -34,8 +34,13 @@ required gate for every PR.
 - `apps/api/Dockerfile` and `apps/web/Dockerfile` use multi-stage builds (install workspace
   dependencies filtered by package, build, and copy only what the final image needs). `apps/web`
   serves the static build via Nginx; `apps/api` runs the compiled `dist/` directly with Node.
-- The root `docker-compose.yml` starts `db` (Postgres), `api`, and `web` together — see the README
-  for commands.
+- The root `docker-compose.yml` starts `db` (Postgres), then a one-shot `migrate` job that also seeds data,
+  then healthy `api` and `web` services. The API image runs as `node`; the web image uses
+  unprivileged Nginx on container port 8080. Nginx forwards `/api/` to the API and removes the
+  prefix. Vite uses the same proxy for local development. See the README for commands.
+- `pnpm dev:db` starts just PostgreSQL and waits for its healthcheck. Copy `.env.example` to `.env`
+  for host development: its `DATABASE_URL` uses `localhost`; Compose builds a separate internal URL
+  from `POSTGRES_*` using host `db`. `pnpm dev`, `db:migrate`, and `db:seed` read the root `.env`.
 
 ## Diff-aware coverage gate (`tools/diff-coverage`)
 
@@ -93,7 +98,7 @@ to all worktrees sharing the same `.git`.
   generated SQL migrations in `apps/api/drizzle/` (never write them by hand), using
   `pnpm --filter @decreto/api run db:generate` whenever the schema changes.
 - Package scripts: `db:generate` (generate a migration from the schema), `db:migrate` (apply pending
-  migrations; reads `DATABASE_URL`), `db:seed` (idempotently populate initial data, e.g.
+  migrations with the compiled Drizzle migrator; reads `DATABASE_URL`), `db:seed` (idempotently populate initial data, e.g.
   `event_images`).
 - **Tests:** `apps/api` tests that touch `src/db/**` (and routes that depend on the database) run
   against **PGlite** (`@electric-sql/pglite`) via `apps/api/src/db/testDb.ts`. This is the Postgres
