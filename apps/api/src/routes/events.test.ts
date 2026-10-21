@@ -1,5 +1,6 @@
+import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import request from "supertest";
 import { createApp } from "../app.js";
 import { createTestDb } from "../db/testDb.js";
@@ -7,18 +8,28 @@ import { seedEventImages } from "../db/seed.js";
 import { eventImages } from "../db/schema.js";
 import type { Db } from "../db/client.js";
 
-const dirname = path.dirname(fileURLToPath(import.meta.url));
-const assetsDir = path.resolve(dirname, "../../../../assets/images");
+let assetsDir: string;
 let db: Db;
 let close: () => Promise<void>;
 
 beforeAll(async () => {
+  assetsDir = await mkdtemp(path.join(os.tmpdir(), "decreto-event-images-"));
+  const imagePath = path.join(assetsDir, "prisao-oposicao", "prisao-oposicao.png");
+  await mkdir(path.dirname(imagePath), { recursive: true });
+  await writeFile(
+    imagePath,
+    Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/pWQAAAAASUVORK5CYII=",
+      "base64",
+    ),
+  );
   ({ db, close } = await createTestDb());
   await seedEventImages(db);
 });
 
 afterAll(async () => {
   await close();
+  await rm(assetsDir, { recursive: true, force: true });
 });
 
 describe("GET /events/:eventName/image", () => {
