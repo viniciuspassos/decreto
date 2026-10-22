@@ -1,34 +1,34 @@
-import { eq } from "drizzle-orm";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createDb, type Db } from "./client.js";
+import { eventImageAliases } from "./eventImageAliases.js";
+import { readEventImageManifest } from "./imageManifest.js";
 import { eventImages } from "./schema.js";
 
-const initialEventImages = [
-  { eventName: "prisao-oposicao", fileLocation: "prisao-oposicao/prisao-oposicao.png" },
-  { eventName: "posse", fileLocation: "posse/juramento.png" },
-  { eventName: "comicio", fileLocation: "comicio/palanque.png" },
-];
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export async function seedEventImages(db: Db): Promise<void> {
-  for (const row of initialEventImages) {
-    const [existing] = await db
-      .select({ id: eventImages.id, fileLocation: eventImages.fileLocation })
-      .from(eventImages)
-      .where(eq(eventImages.eventName, row.eventName))
-      .limit(1);
+export function resolveAssetsDir(): string {
+  const configuredDir = process.env.ASSETS_DIR;
+  return configuredDir ? path.resolve(process.cwd(), configuredDir) : path.resolve(dirname, "../../../assets/images");
+}
 
-    if (!existing) {
-      await db.insert(eventImages).values(row);
-    } else if (existing.fileLocation !== row.fileLocation) {
-      await db
-        .update(eventImages)
-        .set({ fileLocation: row.fileLocation })
-        .where(eq(eventImages.id, existing.id));
-    }
+export async function seedEventImages(db: Db, assetsDir: string): Promise<void> {
+  const manifest = await readEventImageManifest(assetsDir);
+  const manifestLocations = new Set(manifest.map((row) => row.fileLocation));
+  const eventNames = new Set(manifest.map((row) => row.eventName));
+  const aliases = eventImageAliases.filter((alias) => manifestLocations.has(alias.fileLocation) && !eventNames.has(alias.eventName));
+  const imageRows = [...manifest, ...aliases];
+  const existingRows = await db.select({ eventName: eventImages.eventName, fileLocation: eventImages.fileLocation }).from(eventImages);
+  const existingLocations = new Set(existingRows.map((row) => `${row.eventName}/${row.fileLocation}`));
+  const newRows = imageRows.filter((row) => !existingLocations.has(`${row.eventName}/${row.fileLocation}`));
+
+  if (newRows.length > 0) {
+    await db.insert(eventImages).values(newRows);
   }
 }
 
-export async function main(db: Db = createDb()): Promise<void> {
-  await seedEventImages(db);
+export async function main(db: Db = createDb(), assetsDir = resolveAssetsDir()): Promise<void> {
+  await seedEventImages(db, assetsDir);
   console.log("[db] event_images seed applied");
 }
 

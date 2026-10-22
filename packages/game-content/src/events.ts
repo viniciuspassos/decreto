@@ -393,7 +393,7 @@ export const events: GameEventDefinition[] = [
     effects: { allGroups: 2, groups: [{ groupId: "nationalists", delta: 2 }] },
   },
   {
-    id: "infrastructure-collapse", field: "none", tone: "negative", cooldown: 6,
+    id: "infrastructure-collapse", field: "none", tone: "negative", cooldown: 6, milestone: true,
     triggers: [always(0.8), { conditions: [{ type: "indicatorAbove", indicatorId: "debt", threshold: 100 }], weight: 2.5 }, node("minimal-state", 3)],
     effects: { indicators: { health: -1, gdp: -0.2, corruption: 1 }, allGroups: -2, media: -5 },
   },

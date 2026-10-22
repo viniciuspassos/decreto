@@ -7,8 +7,8 @@ export async function findImageForEvent(db: Db, eventName: string): Promise<stri
     .select({ fileLocation: eventImages.fileLocation })
     .from(eventImages)
     .where(eq(eventImages.eventName, eventName))
-    .orderBy(sql`random()`)
-    .limit(1);
+    .orderBy(sql`random()`);
 
-  return rows[0]?.fileLocation ?? null;
+  const directImage = rows.find((row) => row.fileLocation.startsWith(`${eventName}/`));
+  return directImage?.fileLocation ?? rows[0]?.fileLocation ?? null;
 }

@@ -125,13 +125,19 @@ tr.on, tr:hover { background: var(--bg-raised); cursor: pointer; }
 .timeline span.on { background: var(--accent); color: var(--bg); border-style: solid; }
 
 /* Event and end game */
-.event { flex-direction: row; }
-.event-image { display: block; width: 100%; max-height: 58vh; object-fit: cover; border: 1px solid var(--line); margin: 16px 0; }
-.event > :first-child { flex: 1.6; }
-.event > .side { flex: 1; padding: 32px; }
-.photo { margin: 32px; display: grid; place-items: center; border: 1px solid var(--line);
-  background: repeating-linear-gradient(135deg, var(--bg) 0 14px, var(--bg-raised) 14px 28px); }
-.photo span { font-family: monospace; color: var(--accent); }
+.event-layout { flex: 1; width: min(100%, 1600px); margin-inline: auto; padding: clamp(28px, 4vw, 72px);
+  display: grid; grid-template-columns: minmax(0, 720px); grid-template-rows: 1fr auto;
+  grid-template-areas: "copy" "actions"; align-content: center; gap: 24px 64px; }
+.event-layout.has-image { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  grid-template-areas: "copy art" "actions art"; }
+.event-copy { grid-area: copy; max-width: 660px; align-self: center; }
+.event-copy .eyebrow { margin: 0 0 24px; }
+.event-copy h1 { margin: 0 0 20px; font-size: clamp(40px, 4vw, 68px); }
+.event-copy p { max-width: 56ch; margin: 0 0 12px; font-size: 18px; line-height: 1.6; }
+.event-art { grid-area: art; width: 100%; height: min(68vh, 680px); min-height: 320px; margin: 0;
+  overflow: hidden; border: 1px solid var(--line); background: var(--bg-raised); }
+.event-image { display: block; width: 100%; height: 100%; object-fit: cover; }
+.event-actions { grid-area: actions; align-self: start; }
 .hero { font-size: 120px; }
 
 /* Tela inicial (papel) */
@@ -161,6 +167,15 @@ tr.on, tr:hover { background: var(--bg-raised); cursor: pointer; }
 .error-banner button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1.25rem; }
 
 @media (max-width: 760px) {
+  .event-layout, .event-layout.has-image { min-height: 100dvh; padding: 24px 18px;
+    grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto;
+    grid-template-areas: "copy" "art" "actions"; align-content: start; gap: 24px; }
+  .event-layout:not(.has-image) { grid-template-areas: "copy" "actions"; }
+  .event-copy .eyebrow { margin-bottom: 18px; }
+  .event-copy h1 { font-size: clamp(36px, 10vw, 52px); }
+  .event-copy p { font-size: 16px; }
+  .event-art { height: auto; min-height: 0; max-height: 44vh; aspect-ratio: 1.4; }
+  .event-actions .btn { width: 100%; }
   .main-screen > .topbar { flex-wrap: wrap; gap: 8px 12px; padding: 8px 12px; }
   .main-screen .main-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 2fr) minmax(0, 1fr); }
   .main-screen .main-grid > .col:first-child { grid-row: 2; grid-column: 1; }

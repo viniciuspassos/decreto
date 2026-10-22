@@ -1,5 +1,4 @@
 import { createTestDb } from "./testDb.js";
-import { seedEventImages } from "./seed.js";
 import { findImageForEvent } from "./eventImages.js";
 import { eventImages } from "./schema.js";
 import type { Db } from "./client.js";
@@ -9,7 +8,10 @@ let close: () => Promise<void>;
 
 beforeAll(async () => {
   ({ db, close } = await createTestDb());
-  await seedEventImages(db);
+  await db.insert(eventImages).values({
+    eventName: "prisao-oposicao",
+    fileLocation: "prisao-oposicao/prisao-oposicao.png",
+  });
 });
 
 afterAll(async () => {
@@ -38,5 +40,16 @@ describe("findImageForEvent", () => {
     const fileLocation = await findImageForEvent(db, "comicio");
 
     expect(variantes).toContain(fileLocation);
+  });
+
+  it("prefers an event-specific upload over its fallback artwork", async () => {
+    await db.insert(eventImages).values([
+      { eventName: "school-shooting", fileLocation: "porte-livre/porte-livre.png" },
+      { eventName: "school-shooting", fileLocation: "school-shooting/scene.png" },
+    ]);
+
+    const fileLocation = await findImageForEvent(db, "school-shooting");
+
+    expect(fileLocation).toBe("school-shooting/scene.png");
   });
 });
