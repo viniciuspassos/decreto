@@ -18,7 +18,6 @@ interface Props {
 export function Main({ game, pending, onToggleQueue, onEndSemester, onOpen }: Props) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
-  const [allIndicators, setAllIndicators] = useState(false);
 
   return (
     <div className="screen main-screen">
@@ -30,15 +29,12 @@ export function Main({ game, pending, onToggleQueue, onEndSemester, onOpen }: Pr
       <div className="main-grid">
         <aside className="col">
           <small className="eyebrow">{t("main.indicators")}</small>
-          {INDICATORS.slice(0, allIndicators ? 10 : 5).map((id) => (
+          {INDICATORS.map((id) => (
             <div key={id} className="row">
               <span>{t(`indicator.${id}`)}</span>
               <b>{formatIndicator(id, game.indicators[id])}</b>
             </div>
           ))}
-          <button className="link" onClick={() => setAllIndicators(!allIndicators)}>
-            {t(allIndicators ? "main.lessIndicators" : "main.moreIndicators")}
-          </button>
           <small className="eyebrow">{t("main.actors")}</small>
           <div className="row"><span>{t("actor.media")}</span><span>{t(`mood.${game.actors.media}`)}</span></div>
           <div className="row"><span>{t("actor.military")}</span><span>{t(`mood.${game.actors.military}`)}</span></div>

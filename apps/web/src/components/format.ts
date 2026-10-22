@@ -1,8 +1,7 @@
 import type { IndicatorId } from "@decreto/shared-types";
 
 export const INDICATORS: IndicatorId[] = [
-  "gdp", "unemployment", "inflation", "debt", "crime",
-  "health", "education", "pollution", "pressFreedom", "corruption",
+  "gdp", "unemployment", "inflation", "debt",
 ];
 
 const PERCENT: IndicatorId[] = ["unemployment", "inflation"];
