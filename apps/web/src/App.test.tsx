@@ -17,6 +17,7 @@ class FakeGameServer {
   failElectionPreview = false;
   savedStatus: number | null = null;
   events: CountryEvent[] = [];
+  appliedActions = ["privatizations"];
   semesterEnd: EndGameResult | null = null;
   voteWon = true;
   voteEnd: EndGameResult | null = null;
@@ -71,10 +72,11 @@ class FakeGameServer {
       const turn = this.game.turn + 1;
       const phase = turn > this.game.term * 8 ? "campaign" : "playing";
       this.game = { ...this.game, turn, version: this.game.version + 1, phase: this.semesterEnd ? "ended" : phase,
-        end: this.semesterEnd, activeNodes: ["privatizations"], nodes: {
-          ...this.game.nodes, privatizations: { status: "active", cost: null },
-        } };
-      return this.respond({ game: this.game, report: { applied: ["privatizations"], approvalBefore: 50,
+        end: this.semesterEnd, activeNodes: this.appliedActions,
+        nodes: this.appliedActions.includes("privatizations")
+          ? { ...this.game.nodes, privatizations: { status: "active", cost: null } }
+          : this.game.nodes };
+      return this.respond({ game: this.game, report: { applied: this.appliedActions, approvalBefore: 50,
         capitalBefore: 60, indicatorsBefore: this.game.indicators, groupChanges: [],
         risks: { coup: 0, attack: 0, revolution: 0, rebels: 0 }, events: this.events },
         events: this.events, end: this.semesterEnd });
@@ -121,6 +123,19 @@ describe("App with API", () => {
     await screen.findByText("Semestre encerrado");
     expect(server.requests).toContain("/api/games/game-1/preview");
     expect(server.requests).toContain("/api/games/game-1/end-semester");
+  });
+
+  it("skips the action reveal when no actions were applied", async () => {
+    const server = new FakeGameServer();
+    server.appliedActions = [];
+    global.fetch = server.fetch;
+    localStorage.setItem("decreto.gameId", "game-1");
+    render(<App />);
+    fireEvent.click(await screen.findByText("Continuar"));
+    await screen.findByText("Ações deste semestre");
+    fireEvent.click(screen.getByText(/Encerrar semestre/));
+    expect(await screen.findByText("Semestre encerrado")).toBeTruthy();
+    expect(document.querySelector("line.action-pulse")).toBeNull();
   });
 
   it("shows groups and regimes, then returns to the policy map", async () => {

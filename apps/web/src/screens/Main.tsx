@@ -14,7 +14,7 @@ interface Props {
   onToggleQueue: (nodeId: string) => void;
   pending: boolean;
   onEndSemester: () => void;
-  onOpen: (screen: "groups" | "regimes") => void;
+  onOpen?: (screen: "groups" | "regimes") => void;
 }
 
 export function Main({ game, appliedActions, traveledThrough, pending, onToggleQueue, onEndSemester, onOpen }: Props) {
@@ -25,8 +25,8 @@ export function Main({ game, appliedActions, traveledThrough, pending, onToggleQ
     <div className="screen main-screen">
       <TopBar game={game}>
         <Stat label={t("top.actions")} value={`${game.queue.length}/${game.maxActions}`} />
-        <button className="btn" onClick={() => onOpen("groups")}>{t("top.groups")}</button>
-        <button className="btn" onClick={() => onOpen("regimes")}>{t("top.regimes")}</button>
+        <button className="btn" disabled={pending || !onOpen} onClick={() => onOpen?.("groups")}>{t("top.groups")}</button>
+        <button className="btn" disabled={pending || !onOpen} onClick={() => onOpen?.("regimes")}>{t("top.regimes")}</button>
       </TopBar>
       <div className="main-grid">
         <aside className="col">

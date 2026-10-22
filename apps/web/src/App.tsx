@@ -127,7 +127,7 @@ function GameScreens({ game, screen, pending, onBack, onNext, onToggleQueue, onC
     case "regimes": return <Regimes game={game} onBack={onBack} />;
     case "action-reveal": return <Main game={game} appliedActions={screen.report.applied}
       traveledThrough={screen.previouslyActive} pending
-      onToggleQueue={onToggleQueue} onEndSemester={onClose} onOpen={() => undefined} />;
+      onToggleQueue={onToggleQueue} onEndSemester={onClose} />;
     case "summary": return <Summary game={game} report={screen.report} onContinue={() => onNext(screen.events, 0, screen.end, screen.report.applied)} />;
     case "event": return <EventScreen event={screen.events[screen.index]!}
       onContinue={() => onNext(screen.events, screen.index + 1, screen.end, screen.applied)} />;
