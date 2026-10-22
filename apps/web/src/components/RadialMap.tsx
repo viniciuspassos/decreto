@@ -3,6 +3,7 @@ import { historicalFigures, nodeFigures, policyTrees, type FieldId } from "@decr
 import type { NodeStatus } from "@decreto/shared-types";
 import type { PlayableGame } from "../api/gameView.js";
 import { nodeCost, nodeStatus } from "../api/gameView.js";
+import { ACTION_PULSE_STAGGER_MS } from "./actionAnimation.js";
 import { NODE_RADIUS, layoutLabels, type LabelCandidate } from "./labelLayout.js";
 import { CLUSTER_BELOW, MAP_SIZE, useZoom, viewBox } from "./useZoom.js";
 
@@ -39,9 +40,11 @@ interface Props {
   game: PlayableGame;
   selected: string | null;
   onSelect: (nodeId: string) => void;
+  appliedActions?: string[];
+  traveledThrough?: string[];
 }
 
-export function RadialMap({ game, selected, onSelect }: Props) {
+export function RadialMap({ game, selected, onSelect, appliedActions = [], traveledThrough }: Props) {
   const { t } = useTranslation();
   const zoom = useZoom();
   const clustered = zoom.view.scale < CLUSTER_BELOW;
@@ -56,7 +59,7 @@ export function RadialMap({ game, selected, onSelect }: Props) {
       <small className="muted zoom-hint">{t("main.zoomHint")}</small>
       <svg className="radial" viewBox={viewBox(zoom.view)} role="img" aria-label={t("main.mapLabel")} {...zoom.handlers}>
         {Array.from({ length: RINGS }, (_, i) => (
-          <circle key={i} className="ring" cx={C} cy={C} r={ringRadius(i + 1)} />
+          <circle key={i} className="ring" cx={C} cy={C} r={ringRadius(i + 1) - (i === 0 ? 36 : 0)} />
         ))}
         {clustered ? (
           <FieldClusters game={game} onFocus={(x, y) => zoom.focus(x, y, CLUSTER_ZOOM)} />
@@ -66,7 +69,8 @@ export function RadialMap({ game, selected, onSelect }: Props) {
               const { x, y } = polar(fieldAngle(field), ringRadius(RINGS) + 45);
               return <text key={field} className="field-label" x={x} y={y} textAnchor="middle">{t(`field.${field}`)}</text>;
             })}
-            <Network game={game} selected={selected} onSelect={onSelect} scale={zoom.view.scale} />
+            <Network game={game} selected={selected} onSelect={onSelect} scale={zoom.view.scale}
+              appliedActions={appliedActions} traveledThrough={traveledThrough} />
           </>
         )}
         <circle className="center" cx={C} cy={C} r={R0 - 20} />
@@ -123,7 +127,7 @@ export function labelCandidates(nodes: MapNode[], selected: string | null, nameO
     });
 }
 
-function Network({ game, selected, onSelect, scale }: Props & { scale: number }) {
+function Network({ game, selected, onSelect, scale, appliedActions = [], traveledThrough }: Props & { scale: number }) {
   const { t } = useTranslation();
   const nodes = mapNodes(game);
   const nameOf = (n: MapNode) =>
@@ -137,6 +141,22 @@ function Network({ game, selected, onSelect, scale }: Props & { scale: number })
         const start = polar(TREE_ANGLES[i] ?? 0, R0 - 20);
         const end = polar(TREE_ANGLES[i] ?? 0, ringRadius(tree.nodes.length));
         return <line key={tree.id} className="spoke" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />;
+      })}
+      {policyTrees.map((tree, i) => {
+        const deepest = [...tree.nodes].reverse().find((nodeId) => traveledThrough
+          ? traveledThrough.includes(nodeId)
+          : nodeStatus(game, nodeId) === "active");
+        if (!deepest) return null;
+        const depth = tree.nodes.indexOf(deepest) + 1;
+        const start = polar(TREE_ANGLES[i] ?? 0, R0 - 20);
+        const end = polar(TREE_ANGLES[i] ?? 0, ringRadius(depth));
+        return <line key={tree.id} className="action-traveled" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />;
+      })}
+      {nodes.filter((node) => appliedActions.includes(node.nodeId)).map((node, index) => {
+        const start = polar(TREE_ANGLES[policyTrees.findIndex((tree) => tree.nodes.includes(node.nodeId))] ?? 0, R0 - 20);
+        return <line key={`${node.nodeId}-${game.version}`} className="action-pulse"
+          style={{ animationDelay: `${index * ACTION_PULSE_STAGGER_MS}ms` }}
+          pathLength={1} x1={start.x} y1={start.y} x2={node.x} y2={node.y} />;
       })}
       {nodes.map((n) => (
         <g key={n.nodeId} className={`node ${n.status}${selected === n.nodeId ? " selected" : ""}`} onClick={() => onSelect(n.nodeId)}>
