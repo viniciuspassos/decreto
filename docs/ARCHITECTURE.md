@@ -91,7 +91,12 @@ one should not force a rebuild or retest of the other unless a shared package ch
 ## Event image metadata lives in Postgres
 
 `apps/api` stores only the physical locations of generated event images in Postgres (the
-`event_images` table, via Drizzle ORM; `event_name` → `file_location`). Unlike the design content
+`event_images` table, via Drizzle ORM; `event_name` → `file_location`). The seed scans each direct
+subdirectory of `assets/images` and registers supported image files, so adding an image and rerunning
+the seed makes it available without editing a hard-coded list. A small alias catalog connects marked
+game events to the closest existing policy artwork until dedicated event art is added; a direct
+event folder takes precedence. Compose mounts this local directory read-only into both the migration
+job and API container. Unlike the design content
 described above, this is operational metadata about where a binary file is stored, not a game rule
 or balancing data. An `event_name` can have multiple rows (more than one image per event);
 `findImageForEvent` picks one at random (`ORDER BY random()`) per call, which calls for a queryable

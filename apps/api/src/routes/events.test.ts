@@ -23,8 +23,14 @@ beforeAll(async () => {
       "base64",
     ),
   );
+  const aliasImageDir = path.join(assetsDir, "estado-minimo");
+  await mkdir(aliasImageDir);
+  await writeFile(
+    path.join(aliasImageDir, "estado-minimo.png"),
+    Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/pWQAAAAASUVORK5CYII=", "base64"),
+  );
   ({ db, close } = await createTestDb());
-  await seedEventImages(db);
+  await seedEventImages(db, assetsDir);
 });
 
 afterAll(async () => {
@@ -37,6 +43,15 @@ describe("GET /events/:eventName/image", () => {
     const app = createApp({ db, assetsDir });
 
     const response = await request(app).get("/events/prisao-oposicao/image");
+
+    expect(response.status).toBe(200);
+    expect(response.headers["content-type"]).toBe("image/png");
+  });
+
+  it("returns mapped artwork for a milestone without a dedicated event image", async () => {
+    const app = createApp({ db, assetsDir });
+
+    const response = await request(app).get("/events/infrastructure-collapse/image");
 
     expect(response.status).toBe(200);
     expect(response.headers["content-type"]).toBe("image/png");

@@ -77,6 +77,13 @@ describe("drawEvents", () => {
     expect(events.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("marks infrastructure collapse as a milestone with artwork", () => {
+    const content = { ...defaultContent, events: [def("infrastructure-collapse")] };
+    const [event] = drawEvents({ state: game(), content, rng: createRng(9) }, []);
+
+    expect(event).toEqual({ id: "infrastructure-collapse", turn: 1, pending: false, image: true });
+  });
+
   it("cooldown prevents repetition while another event is eligible", () => {
     const content = { ...defaultContent, events: [def("good-harvest"), def("sports-victory")] };
     [1, 2, 3, 4, 5, 6, 7, 8].forEach((seed) => {

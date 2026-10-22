@@ -104,7 +104,10 @@ to all worktrees sharing the same `.git`.
   `pnpm --filter @decreto/api run db:generate` whenever the schema changes.
 - Package scripts: `db:generate` (generate a migration from the schema), `db:migrate` (apply pending
   migrations with the compiled Drizzle migrator; reads `DATABASE_URL`), `db:seed` (idempotently populate initial data, e.g.
-  `event_images`).
+  `event_images` by scanning each event subdirectory under `ASSETS_DIR` for PNG, JPEG, and WebP files).
+- Compose mounts `./assets/images` read-only into both the migration job and API container. For host
+  development, `ASSETS_DIR` defaults to the repository's `assets/images`; rerun `db:seed` after adding
+  images so their relative paths are registered in Postgres.
 - **Tests:** `apps/api` tests that touch `src/db/**` (and routes that depend on the database) run
   against **PGlite** (`@electric-sql/pglite`) via `apps/api/src/db/testDb.ts`. This is the Postgres
   engine compiled to WASM, applying the real migrations in an isolated, disposable database per
