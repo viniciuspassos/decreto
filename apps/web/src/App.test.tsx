@@ -131,6 +131,21 @@ describe("App with API", () => {
     expect(screen.getByText("Utopias")).toBeTruthy();
   });
 
+  it("shows only the four requested economic indicators", async () => {
+    const server = new FakeGameServer();
+    global.fetch = server.fetch;
+    localStorage.setItem("decreto.gameId", "game-1");
+    render(<App />);
+    fireEvent.click(await screen.findByText("Continuar"));
+    await screen.findByText("Ações deste semestre");
+    expect(screen.getByText("PIB")).toBeTruthy();
+    expect(screen.getByText("Desemprego")).toBeTruthy();
+    expect(screen.getByText("Inflação")).toBeTruthy();
+    expect(screen.getByText("Dívida (% PIB)")).toBeTruthy();
+    expect(screen.queryByText("Criminalidade")).toBeNull();
+    expect(screen.queryByText("+5 indicadores ▾")).toBeNull();
+  });
+
   it("shows every server event after the report and then returns to play", async () => {
     const server = new FakeGameServer();
     server.events = [

@@ -40,8 +40,6 @@
     "mapLabel": "Radial policy network",
     "queued": "queued",
     "indicators": "Indicators",
-    "moreIndicators": "+5 indicators ▾",
-    "lessIndicators": "−5 indicators ▴",
     "actors": "Actors",
     "legendFigure": "≈ Figure revealed when the policy is enacted",
     "pick": "Select a policy on the network.",
