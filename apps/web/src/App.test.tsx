@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import i18n from "./i18n/index.js";
 import { App } from "./App.js";
+import { actionRevealDuration } from "./components/actionAnimation.js";
 import type { CampaignPromise, CountryEvent, EndGameResult } from "@decreto/shared-types";
 import { gameFixture } from "./test/gameFixture.js";
 import { TREE_ANGLES, polar, ringRadius } from "./components/RadialMap.js";
@@ -16,6 +17,7 @@ class FakeGameServer {
   failElectionPreview = false;
   savedStatus: number | null = null;
   events: CountryEvent[] = [];
+  appliedActions = ["privatizations"];
   semesterEnd: EndGameResult | null = null;
   voteWon = true;
   voteEnd: EndGameResult | null = null;
@@ -70,8 +72,11 @@ class FakeGameServer {
       const turn = this.game.turn + 1;
       const phase = turn > this.game.term * 8 ? "campaign" : "playing";
       this.game = { ...this.game, turn, version: this.game.version + 1, phase: this.semesterEnd ? "ended" : phase,
-        end: this.semesterEnd, activeNodes: ["privatizations"] };
-      return this.respond({ game: this.game, report: { applied: ["privatizations"], approvalBefore: 50,
+        end: this.semesterEnd, activeNodes: this.appliedActions,
+        nodes: this.appliedActions.includes("privatizations")
+          ? { ...this.game.nodes, privatizations: { status: "active", cost: null } }
+          : this.game.nodes };
+      return this.respond({ game: this.game, report: { applied: this.appliedActions, approvalBefore: 50,
         capitalBefore: 60, indicatorsBefore: this.game.indicators, groupChanges: [],
         risks: { coup: 0, attack: 0, revolution: 0, rebels: 0 }, events: this.events },
         events: this.events, end: this.semesterEnd });
@@ -113,9 +118,24 @@ describe("App with API", () => {
     fireEvent.click(screen.getByText("Adicionar ao turno · 20"));
     await waitFor(() => expect(screen.getByText("1/6")).toBeTruthy());
     fireEvent.click(screen.getByText(/Encerrar semestre/));
+    await waitFor(() => expect(document.querySelector("line.action-pulse")).toBeTruthy());
+    expect(screen.queryByText("Semestre encerrado")).toBeNull();
     await screen.findByText("Semestre encerrado");
     expect(server.requests).toContain("/api/games/game-1/preview");
     expect(server.requests).toContain("/api/games/game-1/end-semester");
+  });
+
+  it("skips the action reveal when no actions were applied", async () => {
+    const server = new FakeGameServer();
+    server.appliedActions = [];
+    global.fetch = server.fetch;
+    localStorage.setItem("decreto.gameId", "game-1");
+    render(<App />);
+    fireEvent.click(await screen.findByText("Continuar"));
+    await screen.findByText("Ações deste semestre");
+    fireEvent.click(screen.getByText(/Encerrar semestre/));
+    expect(await screen.findByText("Semestre encerrado")).toBeTruthy();
+    expect(document.querySelector("line.action-pulse")).toBeNull();
   });
 
   it("shows groups and regimes, then returns to the policy map", async () => {
@@ -169,6 +189,7 @@ describe("App with API", () => {
     expect(screen.getByText("Decisão pendente.")).toBeTruthy();
     fireEvent.click(screen.getByText("Continuar"));
     expect(screen.getByText("Ações deste semestre")).toBeTruthy();
+    expect(document.querySelector("line.action-traveled")).toBeTruthy();
   });
 
   it("shows the API end result after the report and events", async () => {
@@ -396,6 +417,13 @@ describe("App with API", () => {
     fireEvent.click(screen.getByText("Adicionar ao turno · 20"));
     expect(await screen.findByRole("alert")).toHaveTextContent("Esta fila não é válida");
     expect(screen.getByText("0/6")).toBeTruthy();
+  });
+});
+
+describe("actionRevealDuration", () => {
+  it("waits for the last staggered pulse to finish", () => {
+    expect(actionRevealDuration(1)).toBe(800);
+    expect(actionRevealDuration(6)).toBe(1700);
   });
 });
 

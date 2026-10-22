@@ -9,13 +9,15 @@ import { INDICATORS, formatIndicator } from "../components/format.js";
 
 interface Props {
   game: PlayableGame;
+  appliedActions: string[];
+  traveledThrough?: string[];
   onToggleQueue: (nodeId: string) => void;
   pending: boolean;
   onEndSemester: () => void;
-  onOpen: (screen: "groups" | "regimes") => void;
+  onOpen?: (screen: "groups" | "regimes") => void;
 }
 
-export function Main({ game, pending, onToggleQueue, onEndSemester, onOpen }: Props) {
+export function Main({ game, appliedActions, traveledThrough, pending, onToggleQueue, onEndSemester, onOpen }: Props) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -23,8 +25,8 @@ export function Main({ game, pending, onToggleQueue, onEndSemester, onOpen }: Pr
     <div className="screen main-screen">
       <TopBar game={game}>
         <Stat label={t("top.actions")} value={`${game.queue.length}/${game.maxActions}`} />
-        <button className="btn" onClick={() => onOpen("groups")}>{t("top.groups")}</button>
-        <button className="btn" onClick={() => onOpen("regimes")}>{t("top.regimes")}</button>
+        <button className="btn" disabled={pending || !onOpen} onClick={() => onOpen?.("groups")}>{t("top.groups")}</button>
+        <button className="btn" disabled={pending || !onOpen} onClick={() => onOpen?.("regimes")}>{t("top.regimes")}</button>
       </TopBar>
       <div className="main-grid">
         <aside className="col">
@@ -45,7 +47,7 @@ export function Main({ game, pending, onToggleQueue, onEndSemester, onOpen }: Pr
             <small className="muted">{t("main.legendFigure")}</small>
           </div>
         </aside>
-        <RadialMap game={game} selected={selected} onSelect={setSelected} />
+        <RadialMap game={game} selected={selected} onSelect={setSelected} appliedActions={appliedActions} traveledThrough={traveledThrough} />
         <aside className="col side">
           {selected ? <NodePanel game={game} nodeId={selected} pending={pending} onToggleQueue={onToggleQueue} /> : <p className="muted">{t("main.pick")}</p>}
           <div className="spacer" />
